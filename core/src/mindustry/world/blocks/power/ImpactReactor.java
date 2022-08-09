@@ -1,15 +1,17 @@
 package mindustry.world.blocks.power;
 
 import arc.*;
-import arc.audio.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
+<<<<<<< HEAD
 import mindustry.creeper.*;
 import mindustry.entities.*;
+=======
+>>>>>>> flood_v7-pull-v137
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -19,18 +21,16 @@ import mindustry.world.*;
 import mindustry.world.draw.*;
 import mindustry.world.meta.*;
 
+<<<<<<< HEAD
 import static mindustry.Vars.*;
 import static mindustry.creeper.CreeperUtils.*;
 
+=======
+>>>>>>> flood_v7-pull-v137
 public class ImpactReactor extends PowerGenerator{
     public final int timerUse = timers++;
-
     public float warmupSpeed = 0.001f;
     public float itemDuration = 60f;
-    public int explosionRadius = 23;
-    public int explosionDamage = 1900;
-    public Effect explodeEffect = Fx.impactReactorExplosion;
-    public Sound explodeSound = Sounds.explosionbig;
 
     public ImpactReactor(String name){
         super(name);
@@ -45,6 +45,12 @@ public class ImpactReactor extends PowerGenerator{
         envEnabled = Env.any;
 
         drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawPlasma(), new DrawDefault());
+
+        explosionShake = 6f;
+        explosionShakeDuration = 16f;
+        explosionDamage = 1900 * 4;
+        explodeEffect = Fx.impactReactorExplosion;
+        explodeSound = Sounds.explosionbig;
     }
 
     @Override
@@ -170,16 +176,10 @@ public class ImpactReactor extends PowerGenerator{
         }
 
         @Override
-        public void onDestroyed(){
-            super.onDestroyed();
-
-            if(warmup < 0.3f || !state.rules.reactorExplosions) return;
-
-            Damage.damage(x, y, explosionRadius * tilesize, explosionDamage * 4);
-
-            Effect.shake(6f, 16f, x, y);
-            explodeEffect.at(this);
-            explodeSound.at(this);
+        public void createExplosion(){
+            if(warmup >= 0.3f){
+                super.createExplosion();
+            }
         }
 
         @Override

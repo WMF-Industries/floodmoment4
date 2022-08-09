@@ -1,19 +1,24 @@
 package mindustry.world.blocks.power;
 
 import arc.*;
+<<<<<<< HEAD
 import arc.func.Cons;
 import arc.audio.*;
+=======
+>>>>>>> flood_v7-pull-v137
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
-import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
+<<<<<<< HEAD
 import mindustry.creeper.CreeperUtils;
 import mindustry.entities.*;
+=======
+>>>>>>> flood_v7-pull-v137
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -30,13 +35,9 @@ import static mindustry.creeper.CreeperUtils.*;
 public class NuclearReactor extends PowerGenerator{
     public final int timerFuel = timers++;
 
-    public final Vec2 tr = new Vec2();
-
     public Color lightColor = Color.valueOf("7f19ea");
     public Color coolColor = new Color(1, 1, 1, 0f);
     public Color hotColor = Color.valueOf("ff9575a3");
-    public Effect explodeEffect = Fx.reactorExplosion;
-    public Sound explodeSound = Sounds.explosionbig;
     /** ticks to consume 1 fuel */
     public float itemDuration = 120;
     /** heating per frame * fullness */
@@ -45,8 +46,7 @@ public class NuclearReactor extends PowerGenerator{
     public float smokeThreshold = 0.3f;
     /** heat threshold at which lights start flashing */
     public float flashThreshold = 0.46f;
-    public int explosionRadius = 19;
-    public int explosionDamage = 1250;
+
     /** heat removed per unit of coolant */
     public float coolantPower = 0.5f;
     public float smoothLight;
@@ -66,6 +66,15 @@ public class NuclearReactor extends PowerGenerator{
         flags = EnumSet.of(BlockFlag.reactor, BlockFlag.generator);
         schematicPriority = -5;
         envEnabled = Env.any;
+
+        explosionShake = 6f;
+        explosionShakeDuration = 16f;
+
+        explosionRadius = 19;
+        explosionDamage = 1250 * 4;
+
+        explodeEffect = Fx.reactorExplosion;
+        explodeSound = Sounds.explosionbig;
     }
 
     @Override
@@ -154,19 +163,10 @@ public class NuclearReactor extends PowerGenerator{
         }
 
         @Override
-        public void onDestroyed(){
-            super.onDestroyed();
-
-            int fuel = items.get(fuelItem);
-
-            if((fuel < 5 && heat < 0.5f) || !state.rules.reactorExplosions) return;
-
-            Effect.shake(6f, 16f, x, y);
-            // * ((float)fuel / itemCapacity) to scale based on fullness
-            Damage.damage(x, y, explosionRadius * tilesize, explosionDamage * 4);
-
-            explodeEffect.at(this);
-            explodeSound.at(this);
+        public void createExplosion(){
+            if(items.get(fuelItem) >= 5 && heat >= 0.5f){
+                super.createExplosion();
+            }
         }
 
         @Override
