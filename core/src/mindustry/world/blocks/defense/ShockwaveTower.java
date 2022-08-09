@@ -1,12 +1,14 @@
 package mindustry.world.blocks.defense;
 
 import arc.math.*;
+import arc.math.geom.Geometry;
 import arc.util.*;
 import arc.struct.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.audio.*;
 import mindustry.content.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.world.meta.*;
@@ -64,6 +66,9 @@ public class ShockwaveTower extends Block{
         public float heat = 0f;
         public Seq<Bullet> targets = new Seq<>();
 
+        public float fx_interval = 10f;
+        public float fx_iv;
+
         @Override
         public void updateTile(){
             if(potentialEfficiency > 0 && (reloadCounter += Time.delta) >= reload && timer(timerCheck, checkInterval)){
@@ -93,6 +98,33 @@ public class ShockwaveTower extends Block{
             }
 
             heat = Mathf.clamp(heat - Time.delta / reload * cooldownMultiplier);
+
+
+            var target = Units.bestTarget(team, x, y, CreeperUtils.creepTowerRange, e -> false, t -> t.team() != CreeperUtils.creeperTeam, UnitSorts.closest);
+
+            if(team == CreeperUtils.creeperTeam && target != null) {
+
+
+                // deposit creeper
+                var tile = target.tileOn();
+
+                if (tile != null) {
+                    if(fx_iv > fx_interval) {
+                        Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.1f, (fx, fy) -> {
+                            Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
+                        });
+
+                        Call.soundAt(Sounds.mud, target.x(), target.y(), 1f, 1f);
+                        Call.effect(Fx.lancerLaserCharge, x, y, -angleTo(target), Color.blue);
+
+                        fx_iv = 0;
+                    } else {
+                        fx_iv++;
+                    }
+
+                    tile.creep = Math.min(tile.creep+=CreeperUtils.creepTowerDeposit, CreeperUtils.maxTileCreep);
+                }
+            }
         }
 
         @Override

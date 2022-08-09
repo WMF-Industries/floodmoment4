@@ -79,8 +79,9 @@ public class ChargedEmitter implements Position{
     }
 
     public static void init(){
-        chargedEmitterTypes.put(Blocks.launchPad, ChargedEmitterType.launcher);
-        chargedEmitterTypes.put(Blocks.interplanetaryAccelerator, ChargedEmitterType.accelerator);
+        chargedEmitterTypes.put(Blocks.coreBastion, ChargedEmitterType.bastion);
+        chargedEmitterTypes.put(Blocks.coreCitadel, ChargedEmitterType.citadel);
+        chargedEmitterTypes.put(Blocks.coreAcropolis, ChargedEmitterType.acropolis);
     }
 
     @Override
@@ -94,8 +95,9 @@ public class ChargedEmitter implements Position{
     }
 
     enum ChargedEmitterType{
-        launcher(2, 9, 1, 0.4f, 600, Blocks.launchPad),
-        accelerator(1, 10, 2, 0.7f, 1800, Blocks.interplanetaryAccelerator);
+        bastion(2, 9, 1, 0.4f, 600, Blocks.coreBastion),
+        citadel(1, 10, 2, 0.7f, 1800, Blocks.coreCitadel),
+        acropolis(1, 10, 3, 0.99f, 2000, Blocks.coreAcropolis);
 
         public final int amt;
         public final int level;

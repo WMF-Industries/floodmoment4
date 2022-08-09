@@ -59,8 +59,8 @@ public class ForceProjector extends Block{
 
     private static final Cons<Tile> creeperConsumer = tile -> {
         if(((tile.creep >= 1f && creeperableTiles.contains(tile))
-        || (creeperBlocks.containsValue(tile.block()) && tile.team() == creeperTeam))
-        && inForceField(tile)){
+                || (creeperBlocks.containsValue(tile.block()) && tile.team() == creeperTeam))
+                && inForceField(tile)){
             if (paramEntity.team != creeperTeam){
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);
 
@@ -68,12 +68,12 @@ public class ForceProjector extends Block{
                 paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
 
                 if(tile.build != null && tile.build.team == creeperTeam)
-                    tile.build.damage(Blocks.conveyor.health / 2f);
+                    tile.build.damage(Blocks.scrapWall.health);
             }else{
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);
 
                 if(tile.build != null && tile.build.team == creeperTeam)
-                    tile.build.heal(Blocks.conveyor.health / 2f);
+                    tile.build.heal(Blocks.scrapWall.health);
             }
         }
     };
@@ -189,7 +189,7 @@ public class ForceProjector extends Block{
 
             phaseHeat = Mathf.lerpDelta(phaseHeat, Mathf.num(phaseValid), 0.1f);
 
-            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && efficiency > 0){
+            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && consPower.efficiency(tile.build) > 0){
                 consume();
             }
 
@@ -199,7 +199,7 @@ public class ForceProjector extends Block{
                 Fx.reactorsmoke.at(x + Mathf.range(tilesize / 2f), y + Mathf.range(tilesize / 2f));
             }
 
-            warmup = Mathf.lerpDelta(warmup, efficiency, 0.1f);
+            warmup = Mathf.lerpDelta(warmup, consPower.efficiency(tile.build), 0.1f);
 
             if(buildup > 0){
                 float scale = !broken ? cooldownNormal : cooldownBrokenBase;
@@ -246,7 +246,7 @@ public class ForceProjector extends Block{
                 });
             }
 
-            if(coolantConsumer != null && coolantConsumer.efficiency(this) > 0 && efficiency > 0){
+            if(coolantConsumer != null && coolantConsumer.efficiency(this) > 0 && consPower.efficiency(tile.build) > 0){
                 coolantConsumer.update(this);
                 if(liquids.currentAmount() > 0f){
                     liquids.remove(liquids.current(), 0.5f);

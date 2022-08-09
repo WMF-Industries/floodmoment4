@@ -3,10 +3,16 @@ package mindustry.world.blocks.defense;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.math.geom.Geometry;
 import arc.struct.*;
+import arc.util.Timer;
 import arc.util.io.*;
 import mindustry.*;
 import mindustry.annotations.Annotations.*;
+import mindustry.content.Fx;
+import mindustry.creeper.CreeperUtils;
+import mindustry.entities.UnitSorts;
+import mindustry.entities.Units;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.world.*;
@@ -51,6 +57,12 @@ public class Radar extends Block{
         public float smoothEfficiency = 1f;
         public float totalProgress;
 
+        public float shot_warmup = 0f;
+        public float shot_warmup_fx_interval = 35f;
+        public boolean on_cd = false;
+
+        public float warmup_iv;
+
         @Override
         public float fogRadius(){
             return fogRadius * progress * smoothEfficiency;
@@ -69,6 +81,46 @@ public class Radar extends Block{
             progress = Mathf.clamp(progress);
 
             totalProgress += efficiency * edelta();
+
+            // custom creeper behaviour
+            var target = Units.bestEnemy(team, x, y, fogRadius*tilesize, e -> !e.dead(), UnitSorts.strongest);
+
+            if (team() == CreeperUtils.creeperTeam && !on_cd && target != null) {
+                shot_warmup = Mathf.lerp(shot_warmup, 1.0f, 0.01f);
+
+                if (warmup_iv > shot_warmup_fx_interval * (1f - shot_warmup)) {
+                    warmup_iv = 0f;
+
+                    Geometry.iterateLine(0f, tile.worldx(), tile.worldy(), target.x(), target.y(), tile.dst(target) * (1f - shot_warmup), (x, y) -> {
+                        Call.effect(Fx.shootHealYellow, x, y, angleTo(target), Color.blue);
+                    });
+
+                    Call.effect(Fx.placeBlock, target.x(), target.y(), 1, Color.blue);
+                    Call.soundAt(Sounds.lasershoot, target.x(), target.y(), 1f, 1);
+                }
+                warmup_iv += 1f;
+
+                if (shot_warmup > 0.9f) {
+                    Call.soundAt(Sounds.lasercharge2, target.x(), target.y(), 1.5f, 0.8f);
+
+                    Timer.schedule(() -> {
+                        Geometry.iterateLine(0f, tile.worldx(), tile.worldy(), target.x(), target.y(), tile.dst(target) * 0.1f, (x, y) -> {
+                            Call.effect(Fx.shootPayloadDriver, x, y, tile.angleTo(target), Color.blue);
+                        });
+
+                        Call.soundAt(Sounds.laserblast, target.x(), target.y(), 2f, 1.2f);
+                        target.damage(CreeperUtils.radarBeamDamage);
+
+                        on_cd = false;
+                    }, 1);
+
+                    shot_warmup = 0f;
+                    on_cd = true;
+                }
+
+            } else {
+                shot_warmup = Mathf.lerp(shot_warmup, 0f, 0.01f);
+            }
         }
 
         @Override

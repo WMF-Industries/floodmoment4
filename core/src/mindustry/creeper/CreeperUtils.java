@@ -57,6 +57,11 @@ public class CreeperUtils{
 
     public static float nullifierRange = 16 * tilesize;
 
+    public static float radarBeamDamage = 260f; // damage the radar creeper beam deals to units
+
+    public static float creepTowerDeposit = 0.3f; // amount of creep deposited by the creep tower per tick
+    public static float creepTowerRange = 300f; // just slightly bigger than ripple's range
+
 
     public static float nullifyDamage = 1500f; // Damage that needs to be applied for the core to be suspended
     public static float nullifyTimeout = 180f; // The amount of ticks a core remains suspended (resets upon enough damage applied)
@@ -90,6 +95,8 @@ public class CreeperUtils{
     "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building an \uF871 [accent]Impact Reactor[] near them and activating it.",
     "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[]. You can stop the upgrade by suspending them.",
     "[white]\uF872[]", "[accent]Spore Launchers[]\n[accent]Thorium Reactors[] shoot long distance artillery that on impact, releases [accent]a huge amount of flood[], you can defend against this with segments \uF80E.",
+    "[white]\uF682[]", "[accent]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",
+    "[white]\uF6AD[]", "[accent]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
     "[white]\uF898[]", "[accent]Flood Shield[]\n[accent]Force Projectors[] and [accent]unit shields[] actively absorb [#e056f0]the flood[], but [accent]explode[] when they are full.",
     "[white]\uF7FA[]", "[accent]Flood Creep[]\n[accent]Spider-Type units[] explode when in contact of friendly buildings and release tons of [#e056f0]the flood[].",
     "[white]\uF7F5[]", "[accent]Horizons[] are immune to the flood but [orange]do not deal any damage[]. Use them to carry [accent]resources[] over the flood. They are not immune to emitters and spore launchers.",
@@ -136,27 +143,31 @@ public class CreeperUtils{
         sporeType.isCreeper = true;
 
 
+        // old walls since conveyors no longer work :{
         creeperBlocks.put(0, Blocks.air);
-        creeperBlocks.put(1, Blocks.conveyor);
-        creeperBlocks.put(2, Blocks.titaniumConveyor);
-        creeperBlocks.put(3, Blocks.armoredConveyor);
-        creeperBlocks.put(4, Blocks.plastaniumConveyor);
-        creeperBlocks.put(5, Blocks.scrapWall);
-        creeperBlocks.put(6, Blocks.titaniumWall);
-        creeperBlocks.put(7, Blocks.thoriumWall);
-        creeperBlocks.put(8, Blocks.plastaniumWall);
-        creeperBlocks.put(9, Blocks.phaseWall);
-        creeperBlocks.put(10, Blocks.surgeWall);
+        creeperBlocks.put(1, Blocks.scrapWall);
+        creeperBlocks.put(2, Blocks.titaniumWall);
+        creeperBlocks.put(3, Blocks.thoriumWall);
+        creeperBlocks.put(4, Blocks.plastaniumWall);
+
+        // new erekir walls
+        creeperBlocks.put(5, Blocks.phaseWall); // hp 75
+        creeperBlocks.put(6, Blocks.surgeWall); // hp 110
+        creeperBlocks.put(7, Blocks.reinforcedSurgeWall); // hp 150
+        creeperBlocks.put(8, Blocks.berylliumWall); // hp 200
+        creeperBlocks.put(9, Blocks.tungstenWall);
+        creeperBlocks.put(10, Blocks.carbideWall);
 
         // this is purely for damage multiplication
         creeperBlocks.put(12, Blocks.thoriumReactor);
 
         creeperBlocks.put(20, Blocks.coreShard);
-        creeperBlocks.put(35, Blocks.coreFoundation);
-        creeperBlocks.put(50, Blocks.coreNucleus);
+        creeperBlocks.put(25, Blocks.coreFoundation);
+        creeperBlocks.put(30, Blocks.coreNucleus);
 
-        creeperBlocks.put(75, Blocks.launchPad);
-        creeperBlocks.put(100, Blocks.interplanetaryAccelerator);
+        creeperBlocks.put(75, Blocks.coreBastion);
+        creeperBlocks.put(76, Blocks.coreCitadel);
+        creeperBlocks.put(77, Blocks.coreAcropolis);
 
         for(var set : creeperBlocks.entrySet()){
             BlockFlag[] newFlags = new BlockFlag[set.getValue().flags.size + 1];

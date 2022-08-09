@@ -6,6 +6,7 @@ import arc.util.*;
 import mindustry.content.*;
 import mindustry.gen.*;
 import mindustry.world.*;
+import mindustry.world.blocks.storage.CoreBlock;
 
 import java.util.*;
 
@@ -31,15 +32,15 @@ public class Emitter implements Position{
 
     // updates every interval in CreeperUtils
     public boolean update(){
-        if(build == null || build.health <= 1f)
+        if(build == null || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild))
             return false;
 
         nullified = build.nullifyTimeout > 0f;
 
-        if(counter >= type.interval){
+        if(!nullified & counter >= type.interval){
             counter = 0;
             build.tile.getLinkedTiles(t ->
-            t.creep = nullified ? Math.min(t.creep, maxTileCreep) : t.creep + type.amt
+            t.creep = Math.min(t.creep + type.amt, maxTileCreep)
             );
         }
         counter++;

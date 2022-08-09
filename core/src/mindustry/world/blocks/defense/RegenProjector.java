@@ -26,6 +26,8 @@ public class RegenProjector extends Block{
     public int range = 14;
     //per frame
     public float healPercent = 12f / 60f;
+    public float healAmount = 5f;
+
     public float optionalMultiplier = 2f;
     public float optionalUseTime = 60f * 8f;
 
@@ -131,7 +133,8 @@ public class RegenProjector extends Block{
                     optionalTimer = 0f;
                 }
 
-                float healAmount = Mathf.lerp(1f, optionalMultiplier, optionalEfficiency) * healPercent;
+                // float healAmount = Mathf.lerp(1f, optionalMultiplier, optionalEfficiency) * healPercent;
+                float healAmt = Mathf.lerp(1f, optionalMultiplier, optionalEfficiency) * healAmount;
 
                 //use Math.max to prevent stacking
                 for(var build : targets){
@@ -142,7 +145,7 @@ public class RegenProjector extends Block{
                     int pos = build.pos();
                     //TODO periodic effect
                     float value = mendMap.get(pos);
-                    mendMap.put(pos, Math.min(Math.max(value, healAmount * edelta() * build.block.health / 100f), build.block.health - build.health));
+                    mendMap.put(pos, Math.min(Math.max(value, healAmt * edelta() * build.block.health / 100f), build.block.health - build.health));
 
                     if(value <= 0 && Mathf.chanceDelta(effectChance * build.block.size * build.block.size)){
                         effect.at(build.x + Mathf.range(build.block.size * tilesize/2f - 1f), build.y + Mathf.range(build.block.size * tilesize/2f - 1f));
