@@ -115,7 +115,7 @@ public class ShockwaveTower extends Block{
                         });
 
                         Call.soundAt(Sounds.mud, target.x(), target.y(), 1f, 1f);
-                        Call.effect(Fx.lancerLaserCharge, x, y, -angleTo(target), Color.blue);
+                        Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
 
                         fx_iv = 0;
                     } else {
