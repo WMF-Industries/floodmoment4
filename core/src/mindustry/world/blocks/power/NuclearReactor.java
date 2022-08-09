@@ -1,11 +1,8 @@
 package mindustry.world.blocks.power;
 
 import arc.*;
-<<<<<<< HEAD
 import arc.func.Cons;
 import arc.audio.*;
-=======
->>>>>>> flood_v7-pull-v137
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
@@ -14,11 +11,8 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
-<<<<<<< HEAD
 import mindustry.creeper.CreeperUtils;
 import mindustry.entities.*;
-=======
->>>>>>> flood_v7-pull-v137
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
