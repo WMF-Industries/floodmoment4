@@ -1095,7 +1095,7 @@ public class UnitTypes{
 
             @Override
             public void update(Unit unit) {
-                unit.apply(StatusEffects.disarmed, Float.MAX_VALUE);
+                if(unit.team == state.rules.defaultTeam) unit.apply(StatusEffects.disarmed, Float.MAX_VALUE);
                 super.update(unit);
             }
         };
