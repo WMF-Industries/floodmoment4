@@ -1064,7 +1064,6 @@ public class UnitTypes{
             range = 140f;
             faceTarget = false;
             armor = 3f;
-            itemCapacity = 0;
             targetFlags = new BlockFlag[]{BlockFlag.factory, null};
             circleTarget = true;
             creeperResistance = 1f;
