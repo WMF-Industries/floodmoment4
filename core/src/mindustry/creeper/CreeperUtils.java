@@ -32,6 +32,7 @@ public class CreeperUtils{
     public static final float creeperEvaporationUponDamagePercent = 0.96f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
     public static final float maxTileCreep = 10.5f;
+    public static final float creeperBlockDamageMultiplier = 0.75f;
 
     /*
     public static BulletType sporeType = new ArtilleryBulletType(3f, 20, "shell") {{
