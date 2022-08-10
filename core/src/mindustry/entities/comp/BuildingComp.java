@@ -62,8 +62,13 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
     @Import float x, y, health, maxHealth;
     @Import Team team;
 
+
     transient Tile tile;
     transient Block block;
+
+    transient float fakeHealth;
+    transient boolean doFakeHealth;
+
     transient Seq<Building> proximity = new Seq<>(6);
     transient int cdump;
     transient int rotation;
@@ -136,6 +141,9 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
     public Building create(Block block, Team team){
         this.block = block;
         this.team = team;
+
+        fakeHealth = block.floodHealth;
+        doFakeHealth = fakeHealth > 0;
 
         if(block.loopSound != Sounds.none){
             sound = new SoundLoop(block.loopSound, block.loopSoundVolume);
@@ -1552,7 +1560,17 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
     /** Handle a bullet collision.
      * @return whether the bullet should be removed. */
     public boolean collision(Bullet other){
-        damage(other.team, other.damage() * other.type().buildingDamageMultiplier);
+
+        if (doFakeHealth) {
+            fakeHealth -= other.damage() * other.type().buildingDamageMultiplier;
+
+            if (fakeHealth <= 0f) {
+                kill();
+            }
+        } else {
+            damage(other.team, other.damage() * other.type().buildingDamageMultiplier);
+        }
+
         Events.fire(bulletDamageEvent.set(self(), other));
 
         return true;

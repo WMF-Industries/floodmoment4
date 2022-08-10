@@ -151,10 +151,10 @@ public class CreeperUtils{
         creeperBlocks.put(4, Blocks.plastaniumWall);
 
         // new erekir walls
-        creeperBlocks.put(5, Blocks.phaseWall); // hp 75
-        creeperBlocks.put(6, Blocks.surgeWall); // hp 110
-        creeperBlocks.put(7, Blocks.reinforcedSurgeWall); // hp 150
-        creeperBlocks.put(8, Blocks.berylliumWall); // hp 200
+        creeperBlocks.put(5, Blocks.phaseWall);
+        creeperBlocks.put(6, Blocks.surgeWall);
+        creeperBlocks.put(7, Blocks.reinforcedSurgeWall);
+        creeperBlocks.put(8, Blocks.berylliumWall);
         creeperBlocks.put(9, Blocks.tungstenWall);
         creeperBlocks.put(10, Blocks.carbideWall);
 

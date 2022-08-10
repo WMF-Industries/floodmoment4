@@ -123,6 +123,9 @@ public class Wall extends Block{
                 bullet.team = team;
                 bullet.time += 1f;
 
+
+                bullet.damage = 0f;
+
                 //disable bullet collision by returning false
                 return false;
             }

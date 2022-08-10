@@ -1478,7 +1478,10 @@ public class Blocks{
 
         titaniumWall = new Wall("titanium-wall"){{
             requirements(Category.defense, with(Items.titanium, 6));
-            health = 40 * wallHealthMultiplier; // orig 110, adjusted 60
+            health = 110 * wallHealthMultiplier;
+
+            floodHealth = 75;
+
             envDisabled |= Env.scorching;
         }};
 
@@ -1491,7 +1494,10 @@ public class Blocks{
 
         plastaniumWall = new Wall("plastanium-wall"){{
             requirements(Category.defense, with(Items.plastanium, 5, Items.metaglass, 2));
-            health = 70 * wallHealthMultiplier;
+            health = 125 * wallHealthMultiplier;
+
+            floodHealth = 125;
+
             insulated = true;
             absorbLasers = true;
             schematicPriority = 10;
@@ -1510,7 +1516,10 @@ public class Blocks{
 
         thoriumWall = new Wall("thorium-wall"){{
             requirements(Category.defense, with(Items.thorium, 6));
-            health = 50 * wallHealthMultiplier;
+            health = 200 * wallHealthMultiplier;
+
+            floodHealth = 100;
+
             envDisabled |= Env.scorching;
         }};
 
@@ -1523,8 +1532,11 @@ public class Blocks{
 
         phaseWall = new Wall("phase-wall"){{
             requirements(Category.defense, with(Items.phaseFabric, 6));
-            health = 90 * wallHealthMultiplier;
-            chanceDeflect = 0f;
+            health = 150 * wallHealthMultiplier;
+
+            floodHealth = 150;
+
+            chanceDeflect = 10f;
             flashHit = true;
             envDisabled |= Env.scorching;
         }};
@@ -1540,9 +1552,11 @@ public class Blocks{
 
         surgeWall = new Wall("surge-wall"){{
             requirements(Category.defense, with(Items.surgeAlloy, 6));
-            health = 120 * wallHealthMultiplier;
+            health = 230 * wallHealthMultiplier;
+
+            floodHealth = 175;
+
             lightningChance = 0f;
-            envDisabled |= Env.scorching;
             envDisabled |= Env.scorching;
         }};
 
@@ -1550,8 +1564,7 @@ public class Blocks{
             requirements(Category.defense, ItemStack.mult(surgeWall.requirements, 4));
             health = 230 * 4 * wallHealthMultiplier;
             size = 2;
-            lightningChance = 0f;
-            envDisabled |= Env.scorching;
+            lightningChance = 0.05f;
             envDisabled |= Env.scorching;
         }};
 
@@ -1572,9 +1585,11 @@ public class Blocks{
 
         scrapWall = new Wall("scrap-wall"){{
             requirements(Category.defense, BuildVisibility.sandboxOnly, with(Items.scrap, 6));
-            health = 30 * wallHealthMultiplier;
+            health = 60 * wallHealthMultiplier;
+
+            floodHealth = 50;
+
             variants = 5;
-            solid = false;
             envDisabled |= Env.scorching;
         }};
 
@@ -1610,7 +1625,10 @@ public class Blocks{
 
         berylliumWall = new Wall("beryllium-wall"){{
             requirements(Category.defense, with(Items.beryllium, 6));
-            health = 200 * wallHealthMultiplier;
+            health = 130 * wallHealthMultiplier;
+
+            floodHealth = 225;
+
             armor = 2f;
             buildCostMultiplier = 8f;
         }};
@@ -1625,7 +1643,11 @@ public class Blocks{
 
         tungstenWall = new Wall("tungsten-wall"){{
             requirements(Category.defense, with(Items.tungsten, 6));
-            health = 230 * wallHealthMultiplier;
+            health = 180 * wallHealthMultiplier;
+
+            health = 250;
+
+
             armor = 14f;
             buildCostMultiplier = 8f;
         }};
@@ -1647,9 +1669,12 @@ public class Blocks{
 
         reinforcedSurgeWall = new Wall("reinforced-surge-wall"){{
             requirements(Category.defense, with(Items.surgeAlloy, 6, Items.tungsten, 2));
-            health = 150 * wallHealthMultiplier;
+            health = 250 * wallHealthMultiplier;
+
+            floodHealth = 200;
+
             lightningChance = 0f;
-            lightningDamage = 0f;
+            lightningDamage = 30f;
             armor = 20f;
         }};
 
@@ -1665,6 +1690,9 @@ public class Blocks{
         carbideWall = new Wall("carbide-wall"){{
             requirements(Category.defense, with(Items.thorium, 6, Items.carbide, 6));
             health = 270 * wallHealthMultiplier;
+
+            floodHealth = 300;
+
             armor = 16f;
         }};
 
