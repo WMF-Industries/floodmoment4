@@ -28,11 +28,12 @@ import static mindustry.Vars.*;
 public class CreeperUtils{
     public static final float updateInterval = 0.04f; // Base update interval in seconds
     public static final float transferRate = 0.25f; // Base transfer rate NOTE: keep below 0.25f
-    public static final float creeperDamage = 0.1f; // Base creeper damage
-    public static final float damageEvaporationRate = 0.96f; // Creeper percentage that will remain upon damaging something
+    public static final float creeperDamage = 0.2f; // Base creeper damage
+    public static final float creeperEvaporationUponDamagePercent = 0.96f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
     public static final float maxTileCreep = 10.5f;
 
+    /*
     public static BulletType sporeType = new ArtilleryBulletType(3f, 20, "shell") {{
         hitEffect = Fx.flakExplosion;
         knockback = 0.8f;
@@ -42,6 +43,10 @@ public class CreeperUtils{
         splashDamageRadius = 25f * 0.75f;
         splashDamage = 33f;
     }};
+     */
+
+    public static BulletType sporeType = Bullets.placeholder;
+
     public static float sporeMaxRangeMultiplier = 30f;
     public static float sporeAmount = 20f;
     public static float sporeRadius = 5f;
@@ -49,7 +54,7 @@ public class CreeperUtils{
     public static float sporeHealthMultiplier = 10f;
     public static float sporeTargetOffset = 256f;
 
-    public static float unitShieldDamageMultiplier = 1f;
+    public static float unitShieldDamageMultiplier = 1.5f;
     public static float buildShieldDamageMultiplier = 1.5f;
     public static float shieldBoostProtectionMultiplier = 0.5f;
     public static float shieldCreeperDropAmount = 7f;
@@ -57,7 +62,7 @@ public class CreeperUtils{
 
     public static float nullifierRange = 16 * tilesize;
 
-    public static float radarBeamDamage = 260f; // damage the radar creeper beam deals to units
+    public static float radarBeamDamage = 300f; // damage the radar creeper beam deals to units
 
     public static float creepTowerDeposit = 0.3f; // amount of creep deposited by the creep tower per tick
     public static float creepTowerRange = 300f; // just slightly bigger than ripple's range
@@ -110,7 +115,7 @@ public class CreeperUtils{
         float[] ret = null;
         int iterations = 0;
 
-        while(ret == null && iterations < 1000 && Groups.player.size() > 0){
+        while(ret == null && iterations < 10000 && Groups.player.size() > 0){
             iterations++;
             Player player = Groups.player.index(Mathf.random(0, Groups.player.size() - 1));
             if(player.unit() == null || player.x == 0 && player.y == 0)
@@ -120,8 +125,8 @@ public class CreeperUtils{
             ret = new float[]{unit.x + Mathf.random(-sporeTargetOffset, sporeTargetOffset), unit.y + Mathf.random(-sporeTargetOffset, sporeTargetOffset)};
             Tile retTile = world.tileWorld(ret[0], ret[1]);
 
-            // dont target static walls or deep water
-            if(retTile != null && retTile.breakable() && !retTile.floor().isDeep() && retTile.floor().placeableOn){
+            // target creeperableTiles only
+            if(creeperableTiles.contains(retTile)){
                 return ret;
             }
         }
@@ -390,7 +395,7 @@ public class CreeperUtils{
                     Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
                 }
                 tile.build.damage(creeperDamage * tile.creep);
-                tile.creep *= damageEvaporationRate;
+                tile.creep *= creeperEvaporationUponDamagePercent;
             });
         }
     }
