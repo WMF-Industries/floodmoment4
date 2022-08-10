@@ -2949,19 +2949,19 @@ public class Blocks{
             researchCostMultiplier = 0.2f;
         }};
 
-        vault = new StorageBlock("vault"){{
-            requirements(Category.effect, with(Items.titanium, 250, Items.thorium, 125));
-            size = 3;
-            itemCapacity = 1000;
+        container = new StorageBlock("container"){{
+            requirements(Category.effect, with(Items.titanium, 100));
+            size = 2;
+            itemCapacity = 300;
             flags = EnumSet.of(BlockFlag.storage);
             group = BlockGroup.transportation;
             scaledHealth = 55;
         }};
 
-        container = new StorageBlock("container"){{
-            requirements(Category.effect, with(Items.titanium, 100));
-            size = 2;
-            itemCapacity = 300;
+        vault = new StorageBlock("vault"){{
+            requirements(Category.effect, with(Items.titanium, 250, Items.thorium, 125));
+            size = 3;
+            itemCapacity = 1000;
             flags = EnumSet.of(BlockFlag.storage);
             group = BlockGroup.transportation;
             scaledHealth = 55;
