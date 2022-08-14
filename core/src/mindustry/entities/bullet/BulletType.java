@@ -12,6 +12,7 @@ import mindustry.*;
 import mindustry.ai.types.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
@@ -28,6 +29,10 @@ import static mindustry.Vars.*;
 public class BulletType extends Content implements Cloneable{
     /** If the bullet contains creep */
     public boolean isCreeper = false;
+    /** Radius of anticreep bubble this bullet spawns, if > 0 */
+    public int anticreepBubble = 0;
+    /** How long the anticreep bubble lasts */
+    public float anticreepBubbleTime = 0;
     /** Lifetime in ticks. */
     public float lifetime = 40f;
     /** Speed in units/tick. */
@@ -393,6 +398,10 @@ public class BulletType extends Content implements Cloneable{
         for(int i = 0; i < lightning; i++){
             Lightning.create(b, lightningColor, lightningDamage < 0 ? damage : lightningDamage, b.x, b.y, b.rotation() + Mathf.range(lightningCone/2) + lightningAngle, lightningLength + Mathf.random(lightningLengthRand));
         }
+
+        if (!killShooter && anticreepBubble > 0 && b.team != CreeperUtils.creeperTeam) {
+            spawnBubble(b);
+        }
     }
 
     public void createIncend(Bullet b, float x, float y){
@@ -497,6 +506,10 @@ public class BulletType extends Content implements Cloneable{
 
         if(killShooter && b.owner() instanceof Healthc h){
             h.kill();
+
+            if (anticreepBubble > 0 && b.team != CreeperUtils.creeperTeam) {
+                spawnBubble(b);
+            }
         }
 
         if(instantDisappear){
@@ -508,6 +521,32 @@ public class BulletType extends Content implements Cloneable{
                 bullet.create(b, b.x, b.y, b.rotation());
             }
         }
+    }
+
+    private void spawnBubble(Bullet b){
+        Seq<Tile> tiles = new Seq<>();
+        Geometry.circle(b.tileX(), b.tileY(), anticreepBubble, (cx, cy) -> {
+            Tile t = world.tile(cx, cy);
+            if (t != null) {
+                if (CreeperUtils.creeperableTiles.remove(t)) {
+                    tiles.add(t);
+                }
+            }
+        });
+
+        var fxRunner = Timer.schedule(() -> {
+            // play effects around the circle
+            tiles.forEach((t) -> {
+                Call.effect(Fx.shieldApply, t.getX(), t.getY(), 1, b.team().color);
+            });
+        }, 0, 0.66f);
+
+        Timer.schedule(() -> {
+            fxRunner.cancel();
+            tiles.forEach((t) -> {
+                CreeperUtils.creeperableTiles.add(t);
+            });
+        }, anticreepBubbleTime);
     }
 
     public void update(Bullet b){
