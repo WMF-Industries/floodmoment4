@@ -231,9 +231,9 @@ public class CreeperUtils{
 
             for(Building build : Groups.build){
                 if(build.team != creeperTeam) continue;
-                if(build instanceof CoreBuild){
+                if(Emitter.emitterTypes.containsKey(build.block)){
                     creeperEmitters.add(new Emitter(build));
-                }else if(build instanceof LaunchPadBuild || build instanceof AcceleratorBuild){
+                } else if (ChargedEmitter.chargedEmitterTypes.containsKey(build.block)) {
                     chargedEmitters.add(new ChargedEmitter(build));
                 }
             }

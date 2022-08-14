@@ -638,6 +638,7 @@ public class UnitTypes{
                 mirror = false;
 //                bullet = new BulletType(){{
                 bullet = new ArtilleryBulletType(25f, 0f, "clear"){{
+                    isCreeper = true;
                     anticreepBubble = 4; // radius
                     anticreepBubbleTime = 10f; // time in seconds
 
