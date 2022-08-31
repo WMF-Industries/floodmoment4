@@ -230,10 +230,8 @@ public class CreeperUtils{
                 if(build.team != creeperTeam) continue;
                 if(Emitter.emitterTypes.containsKey(build.block)){
                     creeperEmitters.add(new Emitter(build));
-                    resetDistanceCache();
                 } else if (ChargedEmitter.chargedEmitterTypes.containsKey(build.block)) {
                     chargedEmitters.add(new ChargedEmitter(build));
-                    resetDistanceCache();
                 }
             }
 
@@ -323,12 +321,14 @@ public class CreeperUtils{
 
         // update emitters
         for(Emitter emitter : creeperEmitters){
-            if(!emitter.update())
+            if(!emitter.update()){
                 creeperEmitters.remove(emitter);
+            }
         }
         for(ChargedEmitter emitter : chargedEmitters){
             if(!emitter.update()){
                 chargedEmitters.remove(emitter);
+                resetDistanceCache();
             }
         }
 
