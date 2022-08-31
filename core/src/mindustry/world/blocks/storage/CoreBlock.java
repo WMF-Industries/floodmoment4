@@ -305,6 +305,7 @@ public class CoreBlock extends StorageBlock{
             super.add();
             if(team == CreeperUtils.creeperTeam){
                 CreeperUtils.creeperEmitters.add(new Emitter(this));
+                CreeperUtils.resetDistanceCache();
             }
         }
 
@@ -312,6 +313,7 @@ public class CoreBlock extends StorageBlock{
         public void onDestroyed(){
             if(team == CreeperUtils.creeperTeam){
                 CreeperUtils.creeperEmitters.remove(e -> e.build == this);
+                CreeperUtils.resetDistanceCache();
             }
             if(state.rules.coreCapture){
                 //just create an explosion, no fire. this prevents immediate recapture
