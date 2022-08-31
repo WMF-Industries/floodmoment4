@@ -14,11 +14,8 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.world.*;
-import mindustry.world.blocks.campaign.Accelerator.*;
-import mindustry.world.blocks.campaign.LaunchPad.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
-import mindustry.world.blocks.storage.CoreBlock.*;
 import mindustry.world.meta.*;
 
 import java.util.*;
@@ -242,6 +239,9 @@ public class CreeperUtils{
             Log.info(creeperEmitters.size + " emitters");
             Log.info(chargedEmitters.size + " charged emitters");
 
+            emitterDst = new int[world.width()][world.height()];
+            resetDistanceCache();
+
             runner = Timer.schedule(CreeperUtils::updateCreeper, 0, updateInterval);
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
         });
@@ -321,12 +321,14 @@ public class CreeperUtils{
 
         // update emitters
         for(Emitter emitter : creeperEmitters){
-            if(!emitter.update())
+            if(!emitter.update()){
                 creeperEmitters.remove(emitter);
+            }
         }
         for(ChargedEmitter emitter : chargedEmitters){
             if(!emitter.update()){
                 chargedEmitters.remove(emitter);
+                resetDistanceCache();
             }
         }
 
@@ -354,16 +356,28 @@ public class CreeperUtils{
         }
     }
 
-    public static int closestEmitterDist(Tile tile){
-        Emitter ce = closestEmitter(tile);
-        ChargedEmitter cce = closestChargedEmitter(tile);
-        if(ce == null){
-            if(cce == null) return -1;
-            return (int)cce.dst(tile);
-        }else{
-            if(cce == null) return (int)ce.dst(tile);
-            return (int)Math.min(ce.dst(tile), cce.dst(tile));
+    public static int[][] emitterDst = new int[0][0];
+
+    public static void resetDistanceCache(){
+        for(int i = 0; i < emitterDst.length; i++){ // Don't use enhanced for as that allocates
+            for (int j = 0; j < emitterDst[i].length; j++) {
+                var tile = world.tile(i, j);
+                var dst = -1;
+                Emitter ce = closestEmitter(tile);
+                ChargedEmitter cce = closestChargedEmitter(tile);
+                if(ce == null){
+                    if(cce != null) dst = (int)cce.dst(tile);
+                }else{
+                    dst = (int)ce.dst(tile);
+                    if(cce != null) dst = (int)Math.min(ce.dst(tile), cce.dst(tile));
+                }
+                emitterDst[i][j] = dst;
+            }
         }
+    }
+
+    public static int closestEmitterDist(Tile tile){
+        return emitterDst[tile.x][tile.y];
     }
 
     public static Emitter closestEmitter(Tile tile){
