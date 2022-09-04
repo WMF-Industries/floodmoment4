@@ -24,6 +24,8 @@ import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.Wall.*;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static mindustry.Vars.*;
 
 public class BulletType extends Content implements Cloneable{
@@ -541,12 +543,16 @@ public class BulletType extends Content implements Cloneable{
             }
         });
 
+        var start_time = Time.millis();
+
         var fxRunner = Timer.schedule(() -> {
             // play effects around the circle
             tiles.forEach((t) -> {
                 // more erratic shield effect
                 Timer.schedule(() -> {
-                    Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.1f, 1.5f), b.team().color);
+                    var size_multiplier = (anticreepBubbleTime - (Time.millis() - start_time) / 1000) / anticreepBubbleTime;
+
+                    Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.01f, 1.5f * size_multiplier), b.team().color);
                 }, Mathf.random(0f, 0.5f));
             });
         }, 0, 0.5f);
