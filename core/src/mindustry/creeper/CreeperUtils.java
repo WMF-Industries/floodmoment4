@@ -4,7 +4,6 @@ import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.struct.EnumSet;
 import arc.struct.*;
 import arc.util.Timer;
 import arc.util.*;
@@ -16,20 +15,20 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
-import mindustry.world.meta.*;
 
 import java.util.*;
 
 import static mindustry.Vars.*;
 
 public class CreeperUtils{
-    public static final float updateInterval = 0.03f; // Base update interval in seconds
+    public static final float updateInterval = 2/60f; // Base update interval in seconds
     public static final float transferRate = 0.25f; // Base transfer rate NOTE: keep below 0.25f
     public static final float creeperDamage = 0.2f; // Base creeper damage
     public static final float creeperEvaporationUponDamagePercent = 0.98f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
     public static final float maxTileCreep = 10.5f;
     public static final float creeperBlockDamageMultiplier = 0.75f;
+
 
     /*
     public static BulletType sporeType = new ArtilleryBulletType(3f, 20, "shell") {{
@@ -74,7 +73,7 @@ public class CreeperUtils{
     private static int nullifiedCount = 0;
     private static int pulseOffset = 0;
 
-    public static Team creeperTeam = Team.blue;
+    public static final Team creeperTeam = Team.blue;
 
     public static HashMap<Integer, Block> creeperBlocks = new HashMap<>();
     public static HashMap<Block, Integer> creeperLevels = new HashMap<>();
@@ -104,6 +103,8 @@ public class CreeperUtils{
     "[white]\uF7FA[]", "[accent]Flood Creep[]\n[accent]Spider-Type units[] explode when in contact of friendly buildings and release tons of [#e056f0]the flood[].",
     "[white]\uF7F5[]", "[accent]Horizons[] are immune to the flood but [orange]do not deal any damage[]. Use them to carry [accent]resources[] over the flood. They are not immune to emitters and spore launchers.",
     };
+
+    private static float updateTimer;
 
     public static String getTrafficlightColor(double value){
         return "#" + Integer.toHexString(java.awt.Color.HSBtoRGB((float)value / 3f, 1f, 1f)).substring(2);
@@ -172,16 +173,16 @@ public class CreeperUtils{
         creeperBlocks.put(76, Blocks.coreCitadel);
         creeperBlocks.put(77, Blocks.coreAcropolis);
 
-        for(var set : creeperBlocks.entrySet()){
-            BlockFlag[] newFlags = new BlockFlag[set.getValue().flags.size + 1];
-            int i = 0;
-            for(BlockFlag flag : set.getValue().flags.array){
-                newFlags[i++] = flag;
-            }
-            newFlags[i] = BlockFlag.generator;
-            set.getValue().flags = EnumSet.of(newFlags);
-            creeperLevels.put(set.getValue(), set.getKey());
-        }
+//        for(var set : creeperBlocks.entrySet()){
+//            BlockFlag[] newFlags = new BlockFlag[set.getValue().flags.size + 1];
+//            int i = 0;
+//            for(BlockFlag flag : set.getValue().flags.array){
+//                newFlags[i++] = flag;
+//            }
+//            newFlags[i] = BlockFlag.generator;
+//            set.getValue().flags = EnumSet.of(newFlags);
+//            creeperLevels.put(set.getValue(), set.getKey());
+//        }
 
         Emitter.init();
         ChargedEmitter.init();
@@ -242,7 +243,7 @@ public class CreeperUtils{
             emitterDst = new int[world.width()][world.height()];
             resetDistanceCache();
 
-            runner = Timer.schedule(CreeperUtils::updateCreeper, 0, updateInterval);
+//            runner = Timer.schedule(CreeperUtils::updateCreeper, 0, updateInterval);
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
         });
 
@@ -316,8 +317,9 @@ public class CreeperUtils{
     }
 
     public static void updateCreeper(){
-        // dont update anything if game is paused
-        if(!state.isPlaying() || state.serverPaused) return;
+        updateTimer += Time.delta;
+        if (updateTimer < updateInterval) return; // 30 fps flood updating
+        updateTimer = 0;
 
         // update emitters
         for(Emitter emitter : creeperEmitters){
@@ -389,7 +391,7 @@ public class CreeperUtils{
     }
 
     public static void drawCreeper(Tile tile){
-        Core.app.post(() -> {
+//        Core.app.post(() -> {
             if(tile.creep < 1f){
                 return;
             }
@@ -398,12 +400,12 @@ public class CreeperUtils{
             if((tile.build == null || tile.block().alwaysReplace || (tile.build.team == creeperTeam && currentLvl <= 10)) && (currentLvl < (int)tile.creep || currentLvl > (int)tile.creep + 0.1f)){
                 tile.setNet(creeperBlocks.get(Mathf.clamp((int)tile.creep, 0, 10)), creeperTeam, Mathf.random(0, 3));
             }
-        });
+//        });
     }
 
     public static void applyDamage(Tile tile){
         if(tile.build != null && tile.build.team != creeperTeam && tile.creep > 1f){
-            Core.app.post(() -> {
+//            Core.app.post(() -> {
                 if(tile.build == null) return;
 
                 if(Mathf.chance(0.02d)){
@@ -411,7 +413,7 @@ public class CreeperUtils{
                 }
                 tile.build.damage(creeperDamage * tile.creep);
                 tile.creep *= creeperEvaporationUponDamagePercent;
-            });
+//            });
         }
     }
 

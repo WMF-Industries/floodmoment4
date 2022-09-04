@@ -298,9 +298,13 @@ public class LExecutor{
                             }
                         }
                         case building -> {
-                            Building b = Geometry.findClosest(unit.x, unit.y, exec.bool(enemy) ? indexer.getEnemy(unit.team, flag) : indexer.getFlagged(unit.team, flag));
-                            res = b == null ? null : b.tile;
-                            build = true;
+                            if (flag == BlockFlag.generator && exec.bool(enemy)) { // FINISHME: This ignores the existence of other enemy teams
+                                indexer.findClosestCreeper(unit.x, unit.y);
+                            } else {
+                                Building b = Geometry.findClosest(unit.x, unit.y, exec.bool(enemy) ? indexer.getEnemy(unit.team, flag) : indexer.getFlagged(unit.team, flag));
+                                res = b == null ? null : b.tile;
+                                build = true;
+                            }
                         }
                         case spawn -> {
                             res = Geometry.findClosest(unit.x, unit.y, Vars.spawner.getSpawns());

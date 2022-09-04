@@ -44,15 +44,18 @@ public class FlyingAI extends AIController{
             return core;
         }
 
-        for(var flag : unit.type.targetFlags){
-            if(flag == null){
-                Teamc result = target(x, y, range, air, ground);
-                if(result != null) return result;
-            }else if(ground){
-                Teamc result = targetFlag(x, y, flag, true);
-                if(result != null) return result;
-            }
-        }
+//        for(var flag : unit.type.targetFlags){
+//            if(flag == null){
+//                Teamc result = target(x, y, range, air, ground);
+//                if(result != null) return result;
+//            }else if(ground){
+//                Teamc result = targetFlag(x, y, flag, true);
+//                if(result != null) return result;
+//            }
+//        }
+
+        // The code above was replaced with the code below as it is extremely laggy in flood otherwise.
+        indexer.findClosestCreeper(x, y);
 
         return core;
     }

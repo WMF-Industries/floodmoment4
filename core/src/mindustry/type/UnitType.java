@@ -166,7 +166,7 @@ public class UnitType extends UnlockableContent{
     /** if false, logic processors cannot control this unit */
     logicControllable = true,
     /** if false, players cannot control this unit */
-    playerControllable = true,
+    playerControllable = false,
     /** if false, this unit cannot be moved into payloads */
     allowedInPayloads = true,
     /** if false, this unit cannot be hit by bullets or explosions*/
