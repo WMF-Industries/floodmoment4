@@ -87,11 +87,12 @@ public class ImpactReactor extends PowerGenerator{
                 if(targetEmitter != null && targetEmitter.build != null){
                     Geometry.iterateLine(0f, x, y, targetEmitter.getX(), targetEmitter.getY(), 1f - warmup, (x, y) -> {
                         Timer.schedule(() -> {
-                            Call.effect(Fx.missileTrailShort, x, y, Mathf.random(0.1f, warmup), Pal.accent);
+                            Call.effect(Fx.missileTrailShort, x, y, warmup * 3f, Pal.accent);
                         }, dst(x, y) / tilesize / nullifierRange);
                     });
 
-                    Call.effect(Fx.dynamicSpikes, x, y, warmup * 1.5f, team.color);
+                    Call.soundAt(Sounds.dullExplosion, x, y, 1, 1);
+                    Call.effect(Fx.dynamicSpikes, x, y, warmup * 3f, team.color);
                 }
             }else{
                 lastFx += 1;
