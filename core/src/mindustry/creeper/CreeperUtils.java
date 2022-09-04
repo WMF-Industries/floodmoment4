@@ -27,7 +27,9 @@ public class CreeperUtils{
     public static final float creeperEvaporationUponDamagePercent = 0.98f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
     public static final float maxTileCreep = 10.5f;
-    public static final float creeperBlockDamageMultiplier = 0.75f;
+    public static final float creeperBlockDamageMultiplier = 1f;
+
+    public static final boolean useAiController = true; // Whether to use unit AI controller instead of RTS ai
 
 
     /*
@@ -59,7 +61,7 @@ public class CreeperUtils{
 
     public static float nullifierRange = 16 * tilesize;
 
-    public static float radarBeamDamage = 300f; // damage the radar creeper beam deals to units
+    public static float radarBeamDamage = 600f; // damage the radar creeper beam deals to units
 
     public static float creepTowerDeposit = 0.3f; // amount of creep deposited by the creep tower per tick
     public static float creepTowerRange = 300f; // just slightly bigger than ripple's range
@@ -143,6 +145,16 @@ public class CreeperUtils{
         depositCreeper(tile, sporeRadius, sporeAmount);
     }
 
+    public static void tryAddEmitter(Building build) {
+        if(build.team != creeperTeam) return;
+
+        if(Emitter.emitterTypes.containsKey(build.block)){
+            creeperEmitters.add(new Emitter(build));
+        } else if (ChargedEmitter.chargedEmitterTypes.containsKey(build.block)) {
+            chargedEmitters.add(new ChargedEmitter(build));
+        }
+    }
+
     public static void init(){
         sporeType.isCreeper = true;
 
@@ -176,16 +188,10 @@ public class CreeperUtils{
         creeperBlocks.put(76, Blocks.coreCitadel);
         creeperBlocks.put(77, Blocks.coreAcropolis);
 
-//        for(var set : creeperBlocks.entrySet()){
-//            BlockFlag[] newFlags = new BlockFlag[set.getValue().flags.size + 1];
-//            int i = 0;
-//            for(BlockFlag flag : set.getValue().flags.array){
-//                newFlags[i++] = flag;
-//            }
-//            newFlags[i] = BlockFlag.generator;
-//            set.getValue().flags = EnumSet.of(newFlags);
-//            creeperLevels.put(set.getValue(), set.getKey());
-//        }
+
+        for(var set : creeperBlocks.entrySet()){
+           creeperLevels.put(set.getValue(), set.getKey());
+        }
 
         Emitter.init();
         ChargedEmitter.init();
@@ -231,12 +237,7 @@ public class CreeperUtils{
             }
 
             for(Building build : Groups.build){
-                if(build.team != creeperTeam) continue;
-                if(Emitter.emitterTypes.containsKey(build.block)){
-                    creeperEmitters.add(new Emitter(build));
-                } else if (ChargedEmitter.chargedEmitterTypes.containsKey(build.block)) {
-                    chargedEmitters.add(new ChargedEmitter(build));
-                }
+                tryAddEmitter(build);
             }
 
             Log.info(creeperableTiles.size + " creeperable tiles");
@@ -246,7 +247,7 @@ public class CreeperUtils{
             emitterDst = new int[world.width()][world.height()];
             resetDistanceCache();
 
-//            runner = Timer.schedule(CreeperUtils::updateCreeper, 0, updateInterval);
+            // runner = Timer.schedule(CreeperUtils::updateCreeper, 0, updateInterval);
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
         });
 
@@ -355,6 +356,7 @@ public class CreeperUtils{
             transferCreeper(tile);
             applyDamage(tile);
 
+
             if((closestEmitterDist(tile) - pulseOffset) % 64 == 0){
                 drawCreeper(tile);
             }
@@ -394,29 +396,27 @@ public class CreeperUtils{
     }
 
     public static void drawCreeper(Tile tile){
-//        Core.app.post(() -> {
+        Core.app.post(() -> {
             if(tile.creep < 1f){
                 return;
             }
+
             int currentLvl = creeperLevels.getOrDefault(tile.block(), 11);
 
             if((tile.build == null || tile.block().alwaysReplace || (tile.build.team == creeperTeam && currentLvl <= 10)) && (currentLvl < (int)tile.creep || currentLvl > (int)tile.creep + 0.1f)){
                 tile.setNet(creeperBlocks.get(Mathf.clamp((int)tile.creep, 0, 10)), creeperTeam, Mathf.random(0, 3));
             }
-//        });
+        });
     }
 
     public static void applyDamage(Tile tile){
         if(tile.build != null && tile.build.team != creeperTeam && tile.creep > 1f){
-//            Core.app.post(() -> {
-                if(tile.build == null) return;
+            if(Mathf.chance(0.02d)){
+                Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
+            }
 
-                if(Mathf.chance(0.02d)){
-                    Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
-                }
-                tile.build.damage(creeperDamage * tile.creep);
-                tile.creep *= creeperEvaporationUponDamagePercent;
-//            });
+            tile.build.damage(creeperDamage * tile.creep);
+            tile.creep *= creeperEvaporationUponDamagePercent;
         }
     }
 
@@ -428,8 +428,8 @@ public class CreeperUtils{
         if(source.build == null || source.creep < 1f) return;
 
         float total = 0f;
-        for(int i = source.build.id; i < source.build.id + 4; i++){
-            Tile target = source.nearby(i % 4);
+        for(int i = 0; i <= 3; i++){
+            Tile target = source.nearby(i);
             if(cannotTransfer(source, target)) continue;
 
             // creeper delta, cannot transfer more than 1/4 source creep or less than 0.001f. Target creep cannot exceed max creep

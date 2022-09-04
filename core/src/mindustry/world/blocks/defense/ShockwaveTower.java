@@ -101,28 +101,28 @@ public class ShockwaveTower extends Block{
 
 
             var target = Units.bestTarget(team, x, y, CreeperUtils.creepTowerRange, e -> false, t -> t.team() != CreeperUtils.creeperTeam, UnitSorts.closest);
-
             if(team == CreeperUtils.creeperTeam && target != null) {
-
-
-                // deposit creeper
                 var tile = target.tileOn();
 
                 if (tile != null) {
                     if(fx_iv > fx_interval) {
-                        Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.1f, (fx, fy) -> {
+                        Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.2f, (fx, fy) -> {
                             Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
                         });
 
                         Call.soundAt(Sounds.mud, target.x(), target.y(), 1f, 1f);
+
                         Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
+                        Call.effect(Fx.shieldApply, target.x(), target.y(), target.blockOn() == null ? 1 : target.blockOn().size, Color.blue);
 
                         fx_iv = 0;
                     } else {
                         fx_iv++;
                     }
 
-                    tile.creep = Math.min(tile.creep+=CreeperUtils.creepTowerDeposit, CreeperUtils.maxTileCreep);
+                    tile.getLinkedTiles((t) -> {
+                        t.creep = Math.min(t.creep+=CreeperUtils.creepTowerDeposit, CreeperUtils.maxTileCreep);
+                    });
                 }
             }
         }

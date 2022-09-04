@@ -303,10 +303,6 @@ public class CoreBlock extends StorageBlock{
         @Override
         public void add(){
             super.add();
-            if(team == CreeperUtils.creeperTeam){
-                CreeperUtils.creeperEmitters.add(new Emitter(this));
-                CreeperUtils.resetDistanceCache();
-            }
         }
 
         @Override

@@ -85,11 +85,13 @@ public class ImpactReactor extends PowerGenerator{
                 }
 
                 if(targetEmitter != null && targetEmitter.build != null){
-                    Geometry.iterateLine(0f, x, y, targetEmitter.getX(), targetEmitter.getY(), Math.max((1f - warmup) * 16f, 4f), (x, y) -> {
+                    Geometry.iterateLine(0f, x, y, targetEmitter.getX(), targetEmitter.getY(), 1f - warmup, (x, y) -> {
                         Timer.schedule(() -> {
-                            Call.effect(Fx.lancerLaserChargeBegin, x, y, 1, Pal.accent);
+                            Call.effect(Fx.missileTrailShort, x, y, Mathf.random(0.1f, warmup), Pal.accent);
                         }, dst(x, y) / tilesize / nullifierRange);
                     });
+
+                    Call.effect(Fx.dynamicSpikes, x, y, warmup * 1.5f, team.color);
                 }
             }else{
                 lastFx += 1;
@@ -117,18 +119,22 @@ public class ImpactReactor extends PowerGenerator{
                 }else{
                     finFx += 1;
                 }
-                if(targetEmitter != null && Mathf.equal(warmup, 1f, 0.01f)){
+                if(targetEmitter != null && Mathf.equal(warmup, 1f, 0.1f)){
                     Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
 
                     creeperEmitters.remove(targetEmitter);
 
                     Call.effect(Fx.shockwave, x, y, 16f, Pal.accent);
-                    Call.soundAt(Sounds.corexplode, x, y, 0.8f, 1.5f);
+                    Call.soundAt(Sounds.corexplode, x, y, 1.2f, 1f);
 
                     Tile target = targetEmitter.build.tile;
                     tile.setNet(Blocks.air); // We dont want polys rebuilding this
-                    target.setNet(Blocks.coreShard, state.rules.defaultTeam, 0);
-                    Call.effect(Fx.placeBlock, target.getX(), target.getY(), Blocks.coreShard.size, state.rules.defaultTeam.color);
+
+                    if(state.rules.coreCapture) {
+                        target.setNet(Blocks.coreShard, state.rules.defaultTeam, 0);
+                        Call.effect(Fx.placeBlock, target.getX(), target.getY(), Blocks.coreShard.size, state.rules.defaultTeam.color);
+                    }
+
                     targetEmitter = null;
                 }
 

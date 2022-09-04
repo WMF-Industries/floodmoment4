@@ -20,6 +20,7 @@ import mindustry.audio.*;
 import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.creeper.CreeperUtils;
+import mindustry.creeper.Emitter;
 import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
@@ -170,6 +171,7 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
         if(power != null){
             power.graph.checkAdd();
         }
+        CreeperUtils.tryAddEmitter(self());
     }
 
     @Override

@@ -40,7 +40,7 @@ public class Emitter implements Position{
         if(!nullified & counter >= type.interval){
             counter = 0;
             build.tile.getLinkedTiles(t ->
-            t.creep = Math.min(t.creep + type.amt, maxTileCreep)
+                    t.creep = Math.min(t.creep + type.amt, maxTileCreep)
             );
         }
         counter++;
