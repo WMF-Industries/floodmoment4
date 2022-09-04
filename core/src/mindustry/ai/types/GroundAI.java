@@ -2,6 +2,7 @@ package mindustry.ai.types;
 
 import arc.math.*;
 import mindustry.ai.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.world.*;
@@ -13,7 +14,7 @@ public class GroundAI extends AIController{
     @Override
     public void updateMovement(){
 
-        Building core = unit.closestEnemyCore();
+        Building core = unit.team() == CreeperUtils.creeperTeam ? unit.closestEnemyCore() : indexer.findClosestCreeper(unit.x, unit.y).build;
 
         if(core != null && unit.within(core, unit.range() / 1.3f + core.block.size * tilesize / 2f)){
             target = core;

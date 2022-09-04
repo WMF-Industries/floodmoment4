@@ -1,6 +1,7 @@
 package mindustry.ai.types;
 
 import arc.math.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.world.meta.*;
@@ -40,23 +41,22 @@ public class FlyingAI extends AIController{
     public Teamc findMainTarget(float x, float y, float range, boolean air, boolean ground){
         var core = targetFlag(x, y, BlockFlag.core, true);
 
-        if(core != null && Mathf.within(x, y, core.getX(), core.getY(), range)){
+        // vanilla targetting for creeper units (crawler, etc.)
+        if(unit.team == CreeperUtils.creeperTeam) {
+            for(var flag : unit.type.targetFlags){
+                if(flag == null) {
+                    Teamc result = target(x, y, range, air, ground);
+                    if (result != null) return result;
+                }else if(ground){
+                    Teamc result = targetFlag(x, y, flag, true);
+                    if(result != null) return result;
+                }
+            }
             return core;
         }
 
-//        for(var flag : unit.type.targetFlags){
-//            if(flag == null){
-//                Teamc result = target(x, y, range, air, ground);
-//                if(result != null) return result;
-//            }else if(ground){
-//                Teamc result = targetFlag(x, y, flag, true);
-//                if(result != null) return result;
-//            }
-//        }
-
         // The code above was replaced with the code below as it is extremely laggy in flood otherwise.
-        indexer.findClosestCreeper(x, y);
-
-        return core;
+        var creep = indexer.findClosestCreeper(x, y).build;
+        return creep != null ? creep : core;
     }
 }

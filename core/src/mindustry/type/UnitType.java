@@ -19,6 +19,7 @@ import mindustry.ai.types.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
 import mindustry.core.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.entities.abilities.*;
@@ -166,7 +167,7 @@ public class UnitType extends UnlockableContent{
     /** if false, logic processors cannot control this unit */
     logicControllable = true,
     /** if false, players cannot control this unit */
-    playerControllable = false,
+    playerControllable = true,
     /** if false, this unit cannot be moved into payloads */
     allowedInPayloads = true,
     /** if false, this unit cannot be hit by bullets or explosions*/
@@ -240,7 +241,7 @@ public class UnitType extends UnlockableContent{
     /** The default AI controller to assign on creation. */
     public Prov<? extends UnitController> aiController = () -> !flying ? new GroundAI() : new FlyingAI();
     /** Function that chooses AI controller based on unit entity. */
-    public Func<Unit, ? extends UnitController> controller = u -> !playerControllable || (u.team.isAI() && !u.team.rules().rtsAi) ? aiController.get() : new CommandAI();
+    public Func<Unit, ? extends UnitController> controller = u -> !playerControllable || CreeperUtils.useAiController || (u.team.isAI() && !u.team.rules().rtsAi) ? aiController.get() : new CommandAI();
     /** Creates a new instance of this unit class. */
     public Prov<? extends Unit> constructor;
 
