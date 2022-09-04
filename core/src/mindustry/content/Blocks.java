@@ -1658,10 +1658,6 @@ public class Blocks{
         tungstenWall = new Wall("tungsten-wall"){{
             requirements(Category.defense, with(Items.tungsten, 6));
             health = 180 * wallHealthMultiplier;
-
-            health = 250;
-
-
             armor = 14f;
             buildCostMultiplier = 8f;
         }};
