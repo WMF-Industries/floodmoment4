@@ -639,7 +639,7 @@ public class UnitTypes{
 //                bullet = new BulletType(){{
                 bullet = new ArtilleryBulletType(25f, 0f, "clear"){{
                     isCreeper = true;
-                    anticreepBubble = 4; // radius
+                    anticreepBubble = 8; // radius
                     anticreepBubbleTime = 10f; // time in seconds
 
                     hitEffect = Fx.pulverize;
