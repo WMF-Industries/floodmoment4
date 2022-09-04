@@ -7,6 +7,7 @@ import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.content.*;
+import mindustry.creeper.*;
 import mindustry.game.EventType.*;
 import mindustry.game.*;
 import mindustry.game.Teams.*;
@@ -29,6 +30,7 @@ public class BlockIndexer{
 
     /** Stores all ore quadrants on the map. Maps ID to qX to qY to a list of tiles with that ore. */
     private IntSeq[][][] ores;
+    private IntSeq[][] flood;
     /** Stores all damaged tile entities by team. */
     private Seq<Building>[] damagedTiles = new Seq[Team.all.length];
     /** All ores available on this map. */
@@ -64,6 +66,13 @@ public class BlockIndexer{
             ores = new IntSeq[content.items().size][][];
             quadWidth = Mathf.ceil(world.width() / (float)quadrantSize);
             quadHeight = Mathf.ceil(world.height() / (float)quadrantSize);
+            flood = new IntSeq[quadWidth][quadHeight];
+
+            for (int i = 0; i < flood.length; i++) { // Flood tracking array
+                for (int j = 0; j < flood[i].length; j++) {
+                    flood[i][j] = new IntSeq();
+                }
+            }
             blocksPresent = new boolean[content.blocks().size];
 
             //so WorldLoadEvent gets called twice sometimes... ugh
@@ -103,6 +112,12 @@ public class BlockIndexer{
     public void removeIndex(Tile tile){
         var team = tile.team();
         if(tile.build != null && tile.isCenter()){
+            if (team == CreeperUtils.creeperTeam) {
+                int qx = tile.x / quadrantSize;
+                int qy = tile.y / quadrantSize;
+                flood[qx][qy].removeValue(tile.pos());
+            }
+
             var build = tile.build;
             var flags = tile.block().flags;
             var data = team.data();
@@ -406,7 +421,7 @@ public class BlockIndexer{
     }
 
     /** Find the closest ore block relative to a position. */
-    public Tile findClosestOre(float xp, float yp, Item item){
+    public @Nullable Tile findClosestOre(float xp, float yp, Item item){
         if(ores[item.id] != null){
             float minDst = 0f;
             Tile closest = null;
@@ -421,7 +436,7 @@ public class BlockIndexer{
                                 closest = tile;
                                 minDst = dst;
                             }
-                        }
+                        } else arr.removeIndex(0); // This may fix the bug where the miner ai ceases to work randomly
                     }
                 }
             }
@@ -429,6 +444,46 @@ public class BlockIndexer{
         }
 
         return null;
+    }
+
+    /** This should be pretty much as fast as it can get; premature optimization all the way! */
+    public @Nullable Tile findClosestCreeper(float xp, float yp) {
+        xp /= 8; // Should be faster than multiplying all tile coordinates by 8
+        yp /= 8;
+        float minDst = 0;
+        IntSeq closestQuad = null;
+        for (int qx = 0; qx < quadWidth; qx++) {
+            for (int qy = 0; qy < quadHeight; qy++) {
+                var arr = flood[qx][qy];
+                if (arr.size > 0) {
+                    var t = arr.items[0];
+                    float dst = Mathf.dst2(xp, yp, Point2.x(t), Point2.y(t));
+                    if (minDst == 0 || dst < minDst) {
+                        closestQuad = arr;
+                        minDst = dst;
+                    }
+                }
+            }
+        }
+
+        int closeX = -1, closeY = -1;
+        if (closestQuad != null) { // Find the closest block within the closest chunk. (This isn't perfect, but hopefully it's good enough)
+            var size = closestQuad.size;
+            var tiles = closestQuad.items;
+            minDst = Float.MAX_VALUE;
+            for (int i = 0; i < size; i++) {
+                var t = tiles[i];
+                int tx = Point2.x(t), ty = Point2.y(t);
+                float dst = Mathf.dst2(xp, yp, tx, ty);
+                if (dst < minDst) {
+                    closeX = tx;
+                    closeY = ty;
+                    minDst = dst;
+                }
+            }
+        }
+
+        return world.tiles.get(closeX,closeY);
     }
 
     /** Find the closest ore block relative to a position. */
@@ -440,6 +495,12 @@ public class BlockIndexer{
         var team = tile.team();
         //only process entity changes with centered tiles
         if(tile.isCenter() && tile.build != null){
+            if (team == CreeperUtils.creeperTeam) {
+                int qx = tile.x / quadrantSize;
+                int qy = tile.y / quadrantSize;
+                flood[qx][qy].add(tile.pos());
+            }
+
             var data = team.data();
 
             if(tile.block().flags.size > 0 && tile.isCenter()){

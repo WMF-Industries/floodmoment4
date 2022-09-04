@@ -1026,11 +1026,10 @@ public class UnitTypes{
 //            engineOffset = 5.75f;
             engineOffset = 5.5f;
             range = 140f;
-            targetAir = false;
             //as default AI, flares are not very useful in core rushes, they attack nothing in the way
-            //targetAir = false;
+            targetAir = false;
             targetFlags = new BlockFlag[]{BlockFlag.generator, null};
-            circleTarget = true;
+            circleTarget = false;
             creeperResistance = 0.2f;
             
             // new stuff
