@@ -4542,8 +4542,6 @@ public class Blocks{
                         reload = 1f;
                         deathExplosionEffect = Fx.massiveExplosion;
                         shootOnDeath = true;
-                        anticreepBubble = 16;
-                        anticreepBubbleTime = 8f;
                         shake = 10f;
                         bullet = new ExplosionBulletType(500f, 65f){{
                             hitColor = Pal.redLight;
@@ -4554,6 +4552,9 @@ public class Blocks{
                             }});
 
                             collidesAir = false;
+
+                            anticreepBubble = 16;
+                            anticreepBubbleTime = 20f;
 
                             ammoMultiplier = 1f;
                             fragLifeMin = 0.1f;
