@@ -31,7 +31,7 @@ public class BulletType extends Content implements Cloneable{
     public boolean isCreeper = false;
     /** Radius of anticreep bubble this bullet spawns, if > 0 */
     public int anticreepBubble = 0;
-    /** How long the anticreep bubble lasts */
+    /** How long the anticreep bubble lasts in seconds */
     public float anticreepBubbleTime = 0;
     /** Lifetime in ticks. */
     public float lifetime = 40f;
@@ -544,9 +544,12 @@ public class BulletType extends Content implements Cloneable{
         var fxRunner = Timer.schedule(() -> {
             // play effects around the circle
             tiles.forEach((t) -> {
-                Call.effect(Fx.shieldApply, t.getX(), t.getY(), 1, b.team().color);
+                // more erratic shield effect
+                Timer.schedule(() -> {
+                    Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.1f, 1.5f), b.team().color);
+                }, Mathf.random(0f, 0.5f));
             });
-        }, 0, 0.66f);
+        }, 0, 0.5f);
 
         Timer.schedule(() -> {
             fxRunner.cancel();
