@@ -169,6 +169,9 @@ public class CreeperUtils{
         creeperBlocks.put(25, Blocks.coreFoundation);
         creeperBlocks.put(30, Blocks.coreNucleus);
 
+        creeperBlocks.put(31, Blocks.launchPad);
+        creeperBlocks.put(32, Blocks.interplanetaryAccelerator);
+
         creeperBlocks.put(75, Blocks.coreBastion);
         creeperBlocks.put(76, Blocks.coreCitadel);
         creeperBlocks.put(77, Blocks.coreAcropolis);
