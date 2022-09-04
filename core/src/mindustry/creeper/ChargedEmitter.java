@@ -99,12 +99,12 @@ public class ChargedEmitter implements Position{
     }
 
     enum ChargedEmitterType{
-        launchPad(5, 7, 1, 0.1f, 600, Blocks.launchPad),
-        interplanetaryAccelerator(4, 10, 2, 0.2f, 1200, Blocks.interplanetaryAccelerator),
+        launchPad(5, 5, 1, 0.2f, 600, Blocks.launchPad),
+        interplanetaryAccelerator(4, 6, 2, 0.22f, 1200, Blocks.interplanetaryAccelerator),
 
-        bastion(3, 9, 3, 0.3f, 1800, Blocks.coreBastion),
-        citadel(2, 10, 4, 0.4f, 2400, Blocks.coreCitadel),
-        acropolis(1, 10, 5, 0.5f, 5000, Blocks.coreAcropolis);
+        bastion(3, 7, 3, 0.25f, 1800, Blocks.coreBastion),
+        citadel(2, 8, 4, 0.3f, 2400, Blocks.coreCitadel),
+        acropolis(1, 9, 5, 0.35f, 5000, Blocks.coreAcropolis);
 
         public final int amt;
         public final int level;
