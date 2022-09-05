@@ -3580,14 +3580,16 @@ public class Blocks{
             ammo(
             Items.titanium, new ShrapnelBulletType(){{
                 length = brange;
-                damage = 20f;
+                        pierce = false;
+                damage = 10f;
                 ammoMultiplier = 4f;
                 width = 17f;
                 reloadMultiplier = 1.3f;
             }},
             Items.thorium, new ShrapnelBulletType(){{
                 length = brange;
-                damage = 40f;
+                pierce = false;
+                damage = 20f;
                 ammoMultiplier = 5f;
                 toColor = Pal.thoriumPink;
                 shootEffect = smokeEffect = Fx.thoriumShoot;
