@@ -29,7 +29,7 @@ public class CreeperUtils{
     public static final float maxTileCreep = 10.5f;
     public static final float creeperBlockDamageMultiplier = 1f;
 
-    public static final boolean useAiController = true; // Whether to use unit AI controller instead of RTS ai
+    public static final boolean useAiController = false; // Whether to use unit AI controller instead of RTS ai
 
 
     /*
