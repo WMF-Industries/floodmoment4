@@ -3814,6 +3814,9 @@ public class Blocks{
 
                         lifetime = 65f;
 
+                        anticreepBubble = 3;
+                        anticreepBubbleTime = 20f;
+
                         lightningSpacing = 35f;
                         lightningLength = 5;
                         lightningDelay = 1.1f;
