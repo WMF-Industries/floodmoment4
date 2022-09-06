@@ -66,9 +66,8 @@ public class ChargedEmitter implements Position{
         if(type.upgradable() && type.chargeCap > 0 && build != null && build.tile != null && overflow >= type.chargeCap){
             ChargedEmitterType next = type.getNext();
             if(next != null){
-                this.type = next;
                 build.tile.setNet(next.block, creeperTeam, 0);
-                this.build = build.tile.build;
+                chargedEmitters.remove(this);
             }
         }
     }

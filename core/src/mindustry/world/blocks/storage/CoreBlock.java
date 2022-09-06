@@ -309,6 +309,8 @@ public class CoreBlock extends StorageBlock{
         public void onDestroyed(){
             if(team == CreeperUtils.creeperTeam){
                 CreeperUtils.creeperEmitters.remove(e -> e.build == this);
+                CreeperUtils.chargedEmitters.remove(e -> e.build == this);
+
                 CreeperUtils.resetDistanceCache();
             }
             if(state.rules.coreCapture){

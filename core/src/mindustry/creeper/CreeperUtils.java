@@ -54,7 +54,7 @@ public class CreeperUtils{
     public static float sporeTargetOffset = 256f;
 
     public static float unitShieldDamageMultiplier = 1.5f;
-    public static float buildShieldDamageMultiplier = 1.5f;
+    public static float buildShieldDamageMultiplier = 0.75f;
     public static float shieldBoostProtectionMultiplier = 0.5f;
     public static float shieldCreeperDropAmount = 7f;
     public static float shieldCreeperDropRadius = 4f;
@@ -67,8 +67,8 @@ public class CreeperUtils{
     public static float creepTowerRange = 300f; // just slightly bigger than ripple's range
 
 
-    public static float nullifyDamage = 1500f; // Damage that needs to be applied for the core to be suspended
-    public static float nullifyTimeout = 180f; // The amount of ticks a core remains suspended (resets upon enough damage applied)
+    public static float suspendDamage = 1500f; // Damage that needs to be applied for the core to be suspended
+    public static float suspendTimeout = 180f; // The amount of ticks a core remains suspended (resets upon enough damage applied)
 
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static int tutorialID;

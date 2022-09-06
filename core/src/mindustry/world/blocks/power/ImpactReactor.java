@@ -75,7 +75,7 @@ public class ImpactReactor extends PowerGenerator{
 
         @Override
         public void updateTile(){
-            if(lastFx > (2f - warmup) * 50){
+            if(lastFx > (2f - warmup) * 25){
                 lastFx = 0;
                 if (targetEmitter == null){
                     Emitter core = CreeperUtils.closestEmitter(tile);
@@ -88,7 +88,7 @@ public class ImpactReactor extends PowerGenerator{
                     Geometry.iterateLine(0f, x, y, targetEmitter.getX(), targetEmitter.getY(), 1f - warmup, (x, y) -> {
                         Timer.schedule(() -> {
                             Call.effect(Fx.missileTrailShort, x, y, warmup * 3f, Pal.accent);
-                        }, dst(x, y) / tilesize / nullifierRange);
+                        }, dst(x, y) / tilesize / 2);
                     });
 
                     Call.soundAt(Sounds.dullExplosion, x, y, 1, 1);
@@ -109,10 +109,11 @@ public class ImpactReactor extends PowerGenerator{
                 if(finFx > (1.1f - warmup) * 50){
                     finFx = 0;
                     if(targetEmitter != null){
-                        targetEmitter.build.tile.getLinkedTiles(t -> {
-                            Call.effect(Fx.mineHuge, t.getX(), t.getY(), 0, Pal.health);
-                        });
                         if(Mathf.chance(warmup * 0.1f)){
+                            targetEmitter.build.tile.getLinkedTiles(t -> {
+                                Call.effect(Fx.mineHuge, t.getX(), t.getY(), warmup, Pal.health);
+                            });
+
                             Call.effect(Fx.smokeCloud, x + Mathf.range(0, 36), y + Mathf.range(0, 36), 1f, Pal.gray);
                             Call.soundAt(Mathf.chance(0.7f) ? Sounds.flame2 : Sounds.flame, x, y, 0.8f, Mathf.range(0.8f, 1.5f));
                         }
@@ -120,7 +121,7 @@ public class ImpactReactor extends PowerGenerator{
                 }else{
                     finFx += 1;
                 }
-                if(targetEmitter != null && Mathf.equal(warmup, 1f, 0.1f)){
+                if(targetEmitter != null && Mathf.equal(warmup, 1f, 0.01f)){
                     Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
 
                     creeperEmitters.remove(targetEmitter);
@@ -128,15 +129,19 @@ public class ImpactReactor extends PowerGenerator{
                     Call.effect(Fx.shockwave, x, y, 16f, Pal.accent);
                     Call.soundAt(Sounds.corexplode, x, y, 1.2f, 1f);
 
-                    Tile target = targetEmitter.build.tile;
-                    tile.setNet(Blocks.air); // We dont want polys rebuilding this
+                    Building build = targetEmitter.build;
+                    Block block = build.block;
+                    Tile target = build.tile;
+
+                    build.kill();
 
                     if(state.rules.coreCapture) {
-                        target.setNet(Blocks.coreShard, state.rules.defaultTeam, 0);
-                        Call.effect(Fx.placeBlock, target.getX(), target.getY(), Blocks.coreShard.size, state.rules.defaultTeam.color);
+                        target.setNet(block, team(), 0);
+                        Call.effect(Fx.placeBlock, target.getX(), target.getY(), block.size, team().color);
                     }
 
                     targetEmitter = null;
+                    Core.app.post(this::kill);
                 }
 
                 if(!prevOut && (getPowerProduction() > consPower.requestedPower(this))){

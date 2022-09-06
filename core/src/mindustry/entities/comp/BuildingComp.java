@@ -1830,12 +1830,12 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
     public void damage(float damage){
         if(dead()) return;
 
-        // nullify
-        if(block instanceof CoreBlock && team == CreeperUtils.creeperTeam){
+        // suspend
+        if(Emitter.emitterTypes.containsKey(block) && team == CreeperUtils.creeperTeam){
             nullifyDamage += damage;
-            if(nullifyDamage >= CreeperUtils.nullifyDamage){
+            if(nullifyDamage >= CreeperUtils.suspendDamage){
                 nullifyDamage = 0;
-                nullifyTimeout = CreeperUtils.nullifyTimeout;
+                nullifyTimeout = CreeperUtils.suspendTimeout;
             }
 
             return;
