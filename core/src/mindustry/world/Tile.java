@@ -36,6 +36,7 @@ public class Tile implements Position, QuadTreeObject, Displayable{
     protected boolean changing = false;
 
     public float creep;
+    public boolean creeperable;
 
     public Tile(int x, int y){
         this.x = (short)x;

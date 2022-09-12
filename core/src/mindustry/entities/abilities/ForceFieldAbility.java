@@ -8,14 +8,13 @@ import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mindustry.*;
-import mindustry.Vars;
 import mindustry.content.*;
-import mindustry.creeper.CreeperUtils;
+import mindustry.creeper.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
-import mindustry.world.Tile;
-import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.ui.*;
+import mindustry.world.*;
+import mindustry.world.blocks.storage.*;
 
 public class ForceFieldAbility extends Ability{
     /** Shield radius. */
@@ -51,9 +50,9 @@ public class ForceFieldAbility extends Ability{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(((tile.creep >= 1f && !tile.block().isStatic()) || (CreeperUtils.creeperBlocks.containsValue(tile.block()) && tile.team() == CreeperUtils.creeperTeam)) && Intersector.isInsideHexagon(paramUnit.x, paramUnit.y, realRad * 2f, tile.worldx(), tile.worldy()) && paramUnit.shield > 0){
+        if(((tile.creep >= 1f && !tile.block().isStatic()) || (CreeperUtils.creeperLevels.containsKey(tile.block()) && tile.team() == CreeperUtils.creeperTeam)) && Intersector.isInsideHexagon(paramUnit.x, paramUnit.y, realRad * 2f, tile.worldx(), tile.worldy()) && paramUnit.shield > 0){
 
-            if(paramUnit.shield <= CreeperUtils.creeperDamage * CreeperUtils.creeperLevels.getOrDefault(tile.block(), 1)){
+            if(paramUnit.shield <= CreeperUtils.creeperDamage * CreeperUtils.creeperLevels.get(tile.block(), 1)){
                 paramUnit.shield -= paramField.cooldown * paramField.regen;
 
                 Call.effect(Fx.shieldBreak, paramUnit.x, paramUnit.y, paramField.radius, paramUnit.team.color);

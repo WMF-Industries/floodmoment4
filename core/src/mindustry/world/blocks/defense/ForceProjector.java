@@ -58,8 +58,8 @@ public class ForceProjector extends Block{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(((tile.creep >= 1f && creeperableTiles.contains(tile))
-                || (creeperBlocks.containsValue(tile.block()) && tile.team() == creeperTeam))
+        if(((tile.creep >= 1f && tile.creeperable)
+                || (creeperLevels.containsKey(tile.block()) && tile.team() == creeperTeam))
                 && inForceField(tile)){
             if (paramEntity.team != creeperTeam){
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);

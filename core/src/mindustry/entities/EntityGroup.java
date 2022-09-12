@@ -5,7 +5,6 @@ import arc.func.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
-import mindustry.creeper.*;
 import mindustry.gen.*;
 
 import java.util.*;
@@ -81,6 +80,11 @@ public class EntityGroup<T extends Entityc> implements Iterable<T>{
     public Seq<T> copy(Seq<T> arr){
         arr.addAll(array);
         return arr;
+    }
+
+    @Nullable
+    public T random(){
+        return array.random();
     }
 
     public void each(Cons<T> cons){

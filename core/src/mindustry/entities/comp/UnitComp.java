@@ -1,9 +1,6 @@
 package mindustry.entities.comp;
 
-// FINISHME: Clean up unused imports
 import arc.*;
-import arc.graphics.*;
-import arc.graphics.Color;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
@@ -558,10 +555,10 @@ abstract class UnitComp implements Healthc, Physicsc, Hitboxc, Statusc, Teamc, I
         }
 
         //damage if on creeper
-        if(team != creeperTeam && tileOn() != null && tileOn().team() == creeperTeam){
-            damageContinuous((1f - type.creeperResistance) * creeperUnitDamage * creeperLevels.getOrDefault(tileOn().block(), 1));
+        if(team != creeperTeam && tile != null && tile.team() == creeperTeam){
+            damageContinuous((1f - type.creeperResistance) * creeperUnitDamage * creeperLevels.get(tile.block(), 1));
 
-            if(Mathf.chance(0.1f))
+            if(type.creeperResistance < .99f && Mathf.chance(0.1f))
                 Call.effect(Fx.bubble, x, y, 0, Color.blue);
         }
     }

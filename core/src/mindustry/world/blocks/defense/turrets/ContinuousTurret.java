@@ -135,7 +135,7 @@ public class ContinuousTurret extends Turret{
         }
 
         @Override
-        protected void handleBullet(@Nullable Bullet bullet, float offsetX, float offsetY, float angleOffset){
+        public void handleBullet(@Nullable Bullet bullet, float offsetX, float offsetY, float angleOffset){
             if(bullet != null){
                 bullets.add(new BulletEntry(bullet, offsetX, offsetY, angleOffset, 0f));
 

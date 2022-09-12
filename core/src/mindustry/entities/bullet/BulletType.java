@@ -12,7 +12,7 @@ import mindustry.*;
 import mindustry.ai.types.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
-import mindustry.creeper.CreeperUtils;
+import mindustry.creeper.*;
 import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
@@ -23,8 +23,6 @@ import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.Wall.*;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static mindustry.Vars.*;
 
@@ -532,14 +530,14 @@ public class BulletType extends Content implements Cloneable{
         }
     }
 
-    private void spawnBubble(Bullet b){
+    private void spawnBubble(Bullet b){ // FINISHME: This method is a garbage allocation monster
+        var color = b.team().color;
         Seq<Tile> tiles = new Seq<>();
         Geometry.circle(b.tileX(), b.tileY(), anticreepBubble, (cx, cy) -> {
             Tile t = world.tile(cx, cy);
-            if (t != null) {
-                if (CreeperUtils.creeperableTiles.remove(t)) {
-                    tiles.add(t);
-                }
+            if (t != null && t.creeperable) {
+                t.creeperable = false;
+                tiles.add(t);
             }
         });
 
@@ -547,21 +545,18 @@ public class BulletType extends Content implements Cloneable{
 
         var fxRunner = Timer.schedule(() -> {
             // play effects around the circle
-            tiles.forEach((t) -> {
+            tiles.each(t -> {
                 // more erratic shield effect
                 Timer.schedule(() -> {
-                    var size_multiplier = (anticreepBubbleTime - (Time.millis() - start_time) / 1000) / anticreepBubbleTime;
-
-                    Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.01f, 1.5f * size_multiplier), b.team().color);
+                    var size_multiplier = 1 - (Time.millis() - start_time) / 1000f / anticreepBubbleTime; // Moves from 1 to 0 with time
+                    Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.01f, 1.5f * size_multiplier), color);
                 }, Mathf.random(0f, 0.5f));
             });
         }, 0, 0.5f);
 
         Timer.schedule(() -> {
             fxRunner.cancel();
-            tiles.forEach((t) -> {
-                CreeperUtils.creeperableTiles.add(t);
-            });
+            tiles.forEach((t) -> t.creeperable = true);
         }, anticreepBubbleTime);
     }
 

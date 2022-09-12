@@ -620,7 +620,6 @@ public class UnitTypes{
             hitSize = 6f;
             targetAir = false;
             engineOffset = 7.8f;
-            range = 140f;
             faceTarget = false;
             circleTarget = true;
             creeperDeposit = 4f;
@@ -636,18 +635,12 @@ public class UnitTypes{
                 shootSound = Sounds.explosion;
                 x = shootY = 0f;
                 mirror = false;
-//                bullet = new BulletType(){{
                 bullet = new ArtilleryBulletType(25f, 0f, "clear"){{
                     isCreeper = true;
                     anticreepBubble = 8; // radius
                     anticreepBubbleTime = 10f; // time in seconds
 
-                    hitEffect = Fx.pulverize;
                     lifetime = 10f;
-                    speed = 0.1f;
-                    splashDamageRadius = 70f;
-                    instantDisappear = false;
-                    splashDamage = 80f;
                     collidesTiles = false;
                     collides = false;
                     hitSound = Sounds.explosion;

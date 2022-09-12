@@ -3,6 +3,7 @@ package mindustry.content;
 import arc.graphics.*;
 import arc.math.*;
 import arc.struct.*;
+import arc.util.*;
 import mindustry.*;
 import mindustry.entities.*;
 import mindustry.entities.abilities.*;
@@ -3787,52 +3788,33 @@ public class Blocks{
 
             requirements(Category.turret, with(Items.copper, 1000, Items.metaglass, 600, Items.surgeAlloy, 300, Items.plastanium, 200, Items.silicon, 600));
 
-            /*
             ammo(
-            Items.surgeAlloy, new PointBulletType(){{
-                shootEffect = Fx.instShoot;
-                hitEffect = Fx.instHit;
-                smokeEffect = Fx.smokeCloud;
-                trailEffect = Fx.instTrail;
-                despawnEffect = Fx.instBomb;
-                trailSpacing = 20f;
-                damage = 1350;
-                buildingDamageMultiplier = 0.3f;
-                speed = brange;
-                hitShake = 6f;
-                ammoMultiplier = 1f;
-                pierce = true;
-            }}
-            );
-            */
+                Items.surgeAlloy, new LaserBulletType(){{
+                    length = brange;
+                    damage = 560f;
+                    width = 75f;
 
-            ammo(
-                    Items.surgeAlloy, new LaserBulletType(){{
-                        length = 460f;
-                        damage = 560f;
-                        width = 75f;
+                    lifetime = 65f;
 
-                        lifetime = 65f;
+                    anticreepBubble = 3;
+                    anticreepBubbleTime = 20f;
 
-                        anticreepBubble = 3;
-                        anticreepBubbleTime = 20f;
+                    lightningSpacing = 35f;
+                    lightningLength = 5;
+                    lightningDelay = 1.1f;
+                    lightningLengthRand = 15;
+                    lightningDamage = 50;
+                    lightningAngleRand = 40f;
+                    largeHit = true;
+                    lightColor = lightningColor = Pal.heal;
 
-                        lightningSpacing = 35f;
-                        lightningLength = 5;
-                        lightningDelay = 1.1f;
-                        lightningLengthRand = 15;
-                        lightningDamage = 50;
-                        lightningAngleRand = 40f;
-                        largeHit = true;
-                        lightColor = lightningColor = Pal.heal;
+                    shootEffect = Fx.greenLaserCharge;
 
-                        shootEffect = Fx.greenLaserCharge;
-
-                        sideAngle = 15f;
-                        sideWidth = 0f;
-                        sideLength = 0f;
-                        colors = new Color[]{Pal.heal.cpy().a(0.4f), Pal.heal, Color.white};
-                    }}
+                    sideAngle = 15f;
+                    sideWidth = 0f;
+                    sideLength = 0f;
+                    colors = new Color[]{Pal.heal.cpy().a(0.4f), Pal.heal, Color.white};
+                }}
             );
 
             maxAmmo = 40;
@@ -3854,6 +3836,23 @@ public class Blocks{
 
             coolant = consumeCoolant(1f);
             consumePower(10f);
+            buildType = ForeshadowTurretBuild::new;
+        }
+
+        class ForeshadowTurretBuild extends ItemTurretBuild {
+            @Override
+            public void handleBullet(@Nullable Bullet bullet, float offsetX, float offsetY, float angleOffset) {
+                CreateBulletCallPacket packet = new CreateBulletCallPacket(); // CreateNet spawns one on the server too which we don't want
+                packet.type = UnitTypes.corvus.weapons.first().bullet;
+                packet.team = bullet.team;
+                packet.x = bullet.x;
+                packet.y = bullet.y;
+                packet.angle = bullet.rotation();
+                packet.damage = 0f;
+                packet.velocityScl = 1f;
+                packet.lifetimeScl = 1f;
+                mindustry.Vars.net.send(packet, false);
+            }
         }};
 
         spectre = new ItemTurret("spectre"){{

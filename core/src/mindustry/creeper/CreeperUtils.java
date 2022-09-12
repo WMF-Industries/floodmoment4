@@ -5,7 +5,6 @@ import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
-import arc.util.Timer;
 import arc.util.*;
 import mindustry.content.*;
 import mindustry.entities.bullet.*;
@@ -15,8 +14,6 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
-
-import java.util.*;
 
 import static mindustry.Vars.*;
 
@@ -77,15 +74,13 @@ public class CreeperUtils{
 
     public static final Team creeperTeam = Team.blue;
 
-    public static HashMap<Integer, Block> creeperBlocks = new HashMap<>();
-    public static HashMap<Block, Integer> creeperLevels = new HashMap<>();
+    public static final IntMap<Block> creeperBlocks = new IntMap<>();
+    public static final ObjectIntMap<Block> creeperLevels = new ObjectIntMap<>();
 
     public static Seq<Emitter> creeperEmitters = new Seq<>();
     public static Seq<ChargedEmitter> chargedEmitters = new Seq<>();
-    public static Seq<Tile> creeperableTiles = new Seq<>();
     public static Seq<ForceProjector.ForceBuild> shields = new Seq<>();
 
-    public static Timer.Task runner;
     public static Timer.Task fixedRunner;
 
     public static final String[][] tutContinue = {{"[#49e87c]\uE829 Continue[]"}};
@@ -113,26 +108,22 @@ public class CreeperUtils{
     }
 
     public static float[] targetSpore(){
-        float[] ret = null;
+        float[] ret = {0, 0};
         int iterations = 0;
+        Player player;
 
-        while(ret == null && iterations < 10000 && Groups.player.size() > 0){
-            iterations++;
-            Player player = Groups.player.index(Mathf.random(0, Groups.player.size() - 1));
-            if(player.unit() == null || player.x == 0 && player.y == 0)
-                continue;
+        while(iterations++ < 10_000 && (player = Groups.player.random()) != null){
+            if(player.unit() == null || player.x == 0 && player.y == 0) continue;
 
             Unit unit = player.unit();
-            ret = new float[]{unit.x + Mathf.random(-sporeTargetOffset, sporeTargetOffset), unit.y + Mathf.random(-sporeTargetOffset, sporeTargetOffset)};
+            ret[0] = unit.x + Mathf.range(sporeTargetOffset);
+            ret[1] = unit.y + Mathf.range(sporeTargetOffset);
             Tile retTile = world.tileWorld(ret[0], ret[1]);
 
-            // target creeperableTiles only
-            if(creeperableTiles.contains(retTile)){
-                return ret;
-            }
+            if(retTile != null && retTile.creeperable) break;
         }
 
-        return (ret != null ? ret : new float[]{0, 0});
+        return world.tileWorld(ret[0], ret[1]) == null ? new float[]{0, 0} : ret;
     }
 
     public static void sporeCollision(Bullet bullet, float x, float y){
@@ -189,8 +180,8 @@ public class CreeperUtils{
         creeperBlocks.put(77, Blocks.coreAcropolis);
 
 
-        for(var set : creeperBlocks.entrySet()){
-           creeperLevels.put(set.getValue(), set.getKey());
+        for(var set : creeperBlocks.entries()){
+           creeperLevels.put(set.value, set.key);
         }
 
         Emitter.init();
@@ -214,25 +205,23 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.GameOverEvent.class, e -> {
-            if(runner != null)
-                runner.cancel();
             if(fixedRunner != null)
                 fixedRunner.cancel();
 
-            creeperableTiles.clear();
+            for(Tile t : world.tiles.array) t.creeperable = false;
             creeperEmitters.clear();
             chargedEmitters.clear();
             shields.clear();
         });
 
         Events.on(EventType.PlayEvent.class, e -> {
-            creeperableTiles.clear();
+            for(Tile t : world.tiles.array) t.creeperable = false;
             chargedEmitters.clear();
             creeperEmitters.clear();
 
             for(Tile tile : world.tiles){
                 if(!tile.floor().isDeep() && tile.floor().placeableOn && (tile.breakable() || tile.block() == Blocks.air || tile.block() instanceof TreeBlock)){
-                    creeperableTiles.add(tile);
+                    tile.creeperable = true;
                 }
             }
 
@@ -240,19 +229,18 @@ public class CreeperUtils{
                 tryAddEmitter(build);
             }
 
-            Log.info(creeperableTiles.size + " creeperable tiles");
+            Log.info(Structs.count(world.tiles.array, t -> t.creeperable) + " creeperable tiles");
             Log.info(creeperEmitters.size + " emitters");
             Log.info(chargedEmitters.size + " charged emitters");
 
             emitterDst = new int[world.width()][world.height()];
             resetDistanceCache();
 
-            // runner = Timer.schedule(CreeperUtils::updateCreeper, 0, updateInterval);
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
         });
 
         Events.on(EventType.BlockDestroyEvent.class, e -> {
-            if(creeperBlocks.containsValue(e.tile.block())){
+            if(creeperLevels.containsKey(e.tile.block())){
                 e.tile.creep = 0;
             }
         });
@@ -336,17 +324,19 @@ public class CreeperUtils{
         updateTimer = 0;
 
         // update emitters
-        for(Emitter emitter : creeperEmitters){
-            if(!emitter.update()){
-                creeperEmitters.remove(emitter);
+        var eI = creeperEmitters.iterator();
+        while(eI.hasNext()){
+            if(!eI.next().update()) eI.remove(); // Removing from a seq while iterating is bad hence the use of an iterator
+        }
+        var ceI = chargedEmitters.iterator();
+        boolean resetCache = false;
+        while(ceI.hasNext()){
+            if(!ceI.next().update()){
+                ceI.remove();
+                resetCache = true;
             }
         }
-        for(ChargedEmitter emitter : chargedEmitters){
-            if(!emitter.update()){
-                chargedEmitters.remove(emitter);
-                resetDistanceCache();
-            }
-        }
+        if(resetCache) resetDistanceCache();
 
         // no emitters so game over
         if(creeperEmitters.size == 0
@@ -356,11 +346,11 @@ public class CreeperUtils{
 
         // update creeper flow
         if(++pulseOffset == 64) pulseOffset = 0;
-        for(Tile tile : creeperableTiles){
-            if(tile == null){
-                creeperableTiles.remove((Tile)null);
-                continue;
-            }
+        Tile[] arr = world.tiles.array;
+        int l = arr.length;
+        for (int i = 0; i < l; i++) { // Enhanced for allocates a lot of garbage here
+            Tile tile = arr[i];
+            if(!tile.creeperable) continue;
 
             // spread creep and apply damage
             transferCreeper(tile);
@@ -406,17 +396,15 @@ public class CreeperUtils{
     }
 
     public static void drawCreeper(Tile tile){
-        Core.app.post(() -> {
             if(tile.creep < 1f){
                 return;
             }
 
-            int currentLvl = creeperLevels.getOrDefault(tile.block(), 11);
+            int currentLvl = creeperLevels.get(tile.block(), 11);
 
             if((tile.build == null || tile.block().alwaysReplace || (tile.build.team == creeperTeam && currentLvl <= 10)) && (currentLvl < (int)tile.creep || currentLvl > (int)tile.creep + 0.1f)){
                 tile.setNet(creeperBlocks.get(Mathf.clamp((int)tile.creep, 0, 10)), creeperTeam, Mathf.random(0, 3));
             }
-        });
     }
 
     public static void applyDamage(Tile tile){

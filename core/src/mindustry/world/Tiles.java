@@ -11,7 +11,7 @@ import java.util.*;
 public class Tiles implements Iterable<Tile>{
     public final int width, height;
 
-    final Tile[] array;
+    public final Tile[] array;
 
     public Tiles(int width, int height){
         this.array = new Tile[width * height];
