@@ -189,7 +189,7 @@ public class ForceProjector extends Block{
 
             phaseHeat = Mathf.lerpDelta(phaseHeat, Mathf.num(phaseValid), 0.1f);
 
-            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && consPower.efficiency(tile.build) > 0){
+            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && efficiency > 0){
                 consume();
             }
 
@@ -199,7 +199,7 @@ public class ForceProjector extends Block{
                 Fx.reactorsmoke.at(x + Mathf.range(tilesize / 2f), y + Mathf.range(tilesize / 2f));
             }
 
-            warmup = Mathf.lerpDelta(warmup, consPower.efficiency(tile.build), 0.1f);
+            warmup = Mathf.lerpDelta(warmup, efficiency, 0.1f);
 
             if(buildup > 0){
                 float scale = !broken ? cooldownNormal : cooldownBrokenBase;
