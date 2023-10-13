@@ -109,9 +109,15 @@ public class DesktopInput extends InputHandler{
             drawBreakSelection(selectX, selectY, cursorX, cursorY, !Core.input.keyDown(Binding.schematic_select) ? maxLength : Vars.maxSchematicSize);
         }
 
-        if(Core.input.keyDown(Binding.schematic_select) && !Core.scene.hasKeyboard() && mode != breaking){
-            drawSelection(schemX, schemY, cursorX, cursorY, Vars.maxSchematicSize);
+        if(!Core.scene.hasKeyboard() && mode != breaking){
+
+            if(Core.input.keyDown(Binding.schematic_select)){
+                drawSelection(schemX, schemY, cursorX, cursorY, Vars.maxSchematicSize);
+            }else if(Core.input.keyDown(Binding.rebuild_select)){
+                drawRebuildSelection(schemX, schemY, cursorX, cursorY);
+            }
         }
+
 
         drawCommanded();
 
@@ -126,7 +132,7 @@ public class DesktopInput extends InputHandler{
         //draw plan being moved
         if(splan != null){
             boolean valid = validPlace(splan.x, splan.y, splan.block, splan.rotation, splan);
-            if(splan.block.rotate){
+            if(splan.block.rotate && splan.block.drawArrow){
                 drawArrow(splan.block, splan.x, splan.y, splan.rotation, valid);
             }
 
@@ -165,24 +171,25 @@ public class DesktopInput extends InputHandler{
             if(mode == placing && block != null){
                 for(int i = 0; i < linePlans.size; i++){
                     var plan = linePlans.get(i);
-                    if(i == linePlans.size - 1 && plan.block.rotate){
+                    if(i == linePlans.size - 1 && plan.block.rotate && plan.block.drawArrow){
                         drawArrow(block, plan.x, plan.y, plan.rotation);
                     }
                     drawPlan(linePlans.get(i));
                 }
                 linePlans.each(this::drawOverPlan);
             }else if(isPlacing()){
+                int rot = block == null ? rotation : block.planRotation(rotation);
                 if(block.rotate && block.drawArrow){
-                    drawArrow(block, cursorX, cursorY, rotation);
+                    drawArrow(block, cursorX, cursorY, rot);
                 }
                 Draw.color();
-                boolean valid = validPlace(cursorX, cursorY, block, rotation);
-                drawPlan(cursorX, cursorY, block, rotation);
-                block.drawPlace(cursorX, cursorY, rotation, valid);
+                boolean valid = validPlace(cursorX, cursorY, block, rot);
+                drawPlan(cursorX, cursorY, block, rot);
+                block.drawPlace(cursorX, cursorY, rot, valid);
 
                 if(block.saveConfig){
                     Draw.mixcol(!valid ? Pal.breakInvalid : Color.white, (!valid ? 0.4f : 0.24f) + Mathf.absin(Time.globalTime, 6f, 0.28f));
-                    bplan.set(cursorX, cursorY, rotation, block);
+                    bplan.set(cursorX, cursorY, rot, block);
                     bplan.config = block.lastConfig;
                     block.drawPlanConfig(bplan, allPlans());
                     bplan.config = null;
@@ -239,7 +246,7 @@ public class DesktopInput extends InputHandler{
 
         shouldShoot = !scene.hasMouse() && !locked;
 
-        if(!locked && block == null && !scene.hasField() &&
+        if(!locked && block == null && !scene.hasField() && !scene.hasDialog() &&
                 //disable command mode when player unit can boost and command mode binding is the same
                 !(!player.dead() && player.unit().type.canBoost && keybinds.get(Binding.command_mode).key == keybinds.get(Binding.boost).key)){
             if(settings.getBool("commandmodehold")){
@@ -253,6 +260,26 @@ public class DesktopInput extends InputHandler{
 
         //validate commanding units
         selectedUnits.removeAll(u -> !u.isCommandable() || !u.isValid());
+
+        if(commandMode && input.keyTap(Binding.select_all_units) && !scene.hasField() && !scene.hasDialog()){
+            selectedUnits.clear();
+            commandBuildings.clear();
+            for(var unit : player.team().data().units){
+                if(unit.isCommandable()){
+                    selectedUnits.add(unit);
+                }
+            }
+        }
+
+        if(commandMode && input.keyTap(Binding.select_all_unit_factories) && !scene.hasField() && !scene.hasDialog()){
+            selectedUnits.clear();
+            commandBuildings.clear();
+            for(var build : player.team().data().buildings){
+                if(build.block.commandable){
+                    commandBuildings.add(build);
+                }
+            }
+        }
 
         if(!scene.hasMouse() && !locked && state.rules.possessionAllowed){
             if(Core.input.keyDown(Binding.control) && Core.input.keyTap(Binding.select)){
@@ -450,7 +477,7 @@ public class DesktopInput extends InputHandler{
             schematicY += shiftY;
         }
 
-        if(Core.input.keyTap(Binding.deselect) && !isPlacing()){
+        if(Core.input.keyTap(Binding.deselect) && !isPlacing() && player.unit().plans.isEmpty() && !commandMode){
             player.unit().mineTile = null;
         }
 
@@ -458,7 +485,7 @@ public class DesktopInput extends InputHandler{
             player.unit().clearBuilding();
         }
 
-        if(Core.input.keyTap(Binding.schematic_select) && !Core.scene.hasKeyboard() && mode != breaking){
+        if((Core.input.keyTap(Binding.schematic_select) || Core.input.keyTap(Binding.rebuild_select)) && !Core.scene.hasKeyboard() && mode != breaking){
             schemX = rawCursorX;
             schemY = rawCursorY;
         }
@@ -476,14 +503,21 @@ public class DesktopInput extends InputHandler{
             selectPlans.clear();
         }
 
-        if(Core.input.keyRelease(Binding.schematic_select) && !Core.scene.hasKeyboard() && selectX == -1 && selectY == -1 && schemX != -1 && schemY != -1){
-            lastSchematic = schematics.create(schemX, schemY, rawCursorX, rawCursorY);
-            useSchematic(lastSchematic);
-            if(selectPlans.isEmpty()){
-                lastSchematic = null;
+        if( !Core.scene.hasKeyboard() && selectX == -1 && selectY == -1 && schemX != -1 && schemY != -1){
+            if(Core.input.keyRelease(Binding.schematic_select)){
+                lastSchematic = schematics.create(schemX, schemY, rawCursorX, rawCursorY);
+                useSchematic(lastSchematic);
+                if(selectPlans.isEmpty()){
+                    lastSchematic = null;
+                }
+                schemX = -1;
+                schemY = -1;
+            }else if(input.keyRelease(Binding.rebuild_select)){
+
+                rebuildArea(schemX, schemY, rawCursorX, rawCursorY);
+                schemX = -1;
+                schemY = -1;
             }
-            schemX = -1;
-            schemY = -1;
         }
 
         if(!selectPlans.isEmpty()){
@@ -705,6 +739,14 @@ public class DesktopInput extends InputHandler{
             block = null;
             splan = null;
             selectPlans.clear();
+        }
+    }
+
+    @Override
+    public void panCamera(Vec2 position){
+        if(!locked()){
+            panning = true;
+            camera.position.set(position);
         }
     }
 

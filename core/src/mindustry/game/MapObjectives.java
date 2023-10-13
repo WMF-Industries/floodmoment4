@@ -139,6 +139,11 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
         return all.count(MapObjective::qualified) > 0;
     }
 
+    public void clear(){
+        if(all.size > 0) changed = true;
+        all.clear();
+    }
+
     /** Iterates over all qualified in-map objectives. */
     public void eachRunning(Cons<MapObjective> cons){
         all.each(MapObjective::qualified, cons);
@@ -188,8 +193,7 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
         /** Called once after {@link #update()} returns true, before this objective is removed. */
         public void done(){
             changed();
-            state.rules.objectiveFlags.removeAll(flagsRemoved);
-            state.rules.objectiveFlags.addAll(flagsAdded);
+            Call.objectiveCompleted(flagsRemoved, flagsAdded);
         }
 
         /** Notifies the executor that map rules should be synced. */
@@ -201,12 +205,11 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
         public final boolean dependencyFinished(){
             if(depFinished) return true;
 
-            boolean f = true;
             for(var parent : parents){
                 if(!parent.isCompleted()) return false;
             }
 
-            return f && (depFinished = true);
+            return depFinished = true;
         }
 
         /** @return True if this objective is done (practically, has been removed from the executor). */
@@ -380,7 +383,7 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
 
         @Override
         public String text(){
-            return Core.bundle.format("objective.build", count, block.emoji(), block.localizedName);
+            return Core.bundle.format("objective.build", count - state.stats.placedBlockCount.get(block, 0), block.emoji(), block.localizedName);
         }
     }
 
@@ -403,7 +406,7 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
 
         @Override
         public String text(){
-            return Core.bundle.format("objective.buildunit", count, unit.emoji(), unit.localizedName);
+            return Core.bundle.format("objective.buildunit", count - state.rules.defaultTeam.data().countType(unit), unit.emoji(), unit.localizedName);
         }
     }
 
@@ -424,7 +427,7 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
 
         @Override
         public String text(){
-            return Core.bundle.format("objective.destroyunits", count);
+            return Core.bundle.format("objective.destroyunits", count - state.stats.enemyUnitsDestroyed);
         }
     }
 
@@ -473,7 +476,13 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
                 if(text.startsWith("@")){
                     return Core.bundle.format(text.substring(1), timeString.toString());
                 }else{
-                    return Core.bundle.formatString(text, timeString.toString());
+                    try{
+                        return Core.bundle.formatString(text, timeString.toString());
+                    }catch(IllegalArgumentException e){
+                        //illegal text.
+                        text = "";
+                    }
+
                 }
             }
 
@@ -674,7 +683,7 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
                 fetchedText = fetchText(text);
             }
 
-            WorldLabel.drawAt(text, pos.x, pos.y + radius + textHeight, Draw.z(), flags, fontSize);
+            WorldLabel.drawAt(fetchedText, pos.x, pos.y + radius + textHeight, Draw.z(), flags, fontSize);
         }
     }
 
@@ -750,7 +759,7 @@ public class MapObjectives implements Iterable<MapObjective>, Eachable<MapObject
                 Lines.poly(pos.x, pos.y, sides, radius + 1f, rotation);
             }else{
                 Draw.color(color);
-                Fill.poly(pos.x, pos.y, sides, radius);
+                Fill.poly(pos.x, pos.y, sides, radius, rotation);
             }
 
             Draw.reset();

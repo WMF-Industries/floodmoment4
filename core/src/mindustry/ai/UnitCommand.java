@@ -2,6 +2,7 @@ package mindustry.ai;
 
 import arc.*;
 import arc.func.*;
+import arc.scene.style.*;
 import arc.struct.*;
 import mindustry.ai.types.*;
 import mindustry.entities.units.*;
@@ -14,8 +15,10 @@ public class UnitCommand{
 
     public static final UnitCommand
 
-    //TODO they do not use the command "interface" or designation at all
-    moveCommand = new UnitCommand("move", "right", u -> null),
+    moveCommand = new UnitCommand("move", "right", u -> null){{
+        drawTarget = true;
+        resetTarget = false;
+    }},
     repairCommand = new UnitCommand("repair", "modeSurvival", u -> new RepairAI()),
     rebuildCommand = new UnitCommand("rebuild", "hammer", u -> new BuilderAI()),
     assistCommand = new UnitCommand("assist", "players", u -> {
@@ -23,10 +26,12 @@ public class UnitCommand{
         ai.onlyAssist = true;
         return ai;
     }),
-    mineCommand = new UnitCommand("mine", "production", u -> new MinerAI());
-
-    /** Default set of specified commands. */
-    public static final UnitCommand[] defaultCommands = {moveCommand};
+    mineCommand = new UnitCommand("mine", "production", u -> new MinerAI()),
+    boostCommand = new UnitCommand("boost", "up", u -> new BoostAI()){{
+        switchToMove = false;
+        drawTarget = true;
+        resetTarget = false;
+    }};
 
     /** Unique ID number. */
     public final int id;
@@ -36,6 +41,12 @@ public class UnitCommand{
     public final String icon;
     /** Controller that this unit will use when this command is used. Return null for "default" behavior. */
     public final Func<Unit, AIController> controller;
+    /** If true, this unit will automatically switch away to the move command when given a position. */
+    public boolean switchToMove = true;
+    /** Whether to draw the movement/attack target. */
+    public boolean drawTarget = false;
+    /** Whether to reset targets when switching to or from this command. */
+    public boolean resetTarget = true;
 
     public UnitCommand(String name, String icon, Func<Unit, AIController> controller){
         this.name = name;
@@ -48,5 +59,18 @@ public class UnitCommand{
 
     public String localized(){
         return Core.bundle.get("command." + name);
+    }
+
+    public TextureRegionDrawable getIcon(){
+        return Icon.icons.get(icon, Icon.cancel);
+    }
+
+    public char getEmoji() {
+        return (char) Iconc.codes.get(icon, Iconc.cancel);
+    }
+
+    @Override
+    public String toString(){
+        return "UnitCommand:" + name;
     }
 }

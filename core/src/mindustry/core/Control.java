@@ -49,6 +49,7 @@ public class Control implements ApplicationListener, Loadable{
     public Saves saves;
     public SoundControl sound;
     public InputHandler input;
+    public AttackIndicators indicators;
 
     private Interval timer = new Interval(2);
     private boolean hiscore = false;
@@ -58,6 +59,13 @@ public class Control implements ApplicationListener, Loadable{
     public Control(){
         saves = new Saves();
         sound = new SoundControl();
+        indicators = new AttackIndicators();
+
+        Events.on(BuildDamageEvent.class, e -> {
+            if(e.build.team == Vars.player.team()){
+                indicators.add(e.build.tileX(), e.build.tileY());
+            }
+        });
 
         //show dialog saying that mod loading was skipped.
         Events.on(ClientLoadEvent.class, e -> {
@@ -100,6 +108,7 @@ public class Control implements ApplicationListener, Loadable{
         Events.on(ResetEvent.class, event -> {
             player.reset();
             toBePlaced.clear();
+            indicators.clear();
 
             hiscore = false;
             saves.resetSave();
@@ -161,6 +170,12 @@ public class Control implements ApplicationListener, Loadable{
 
         Events.on(SectorCaptureEvent.class, e -> {
             app.post(this::checkAutoUnlocks);
+
+            if(!net.client() && e.sector.preset != null && e.sector.preset.isLastSector && e.initialCapture){
+                Time.run(60f * 2f, () -> {
+                    ui.campaignComplete.show(e.sector.planet);
+                });
+            }
         });
 
         //delete save on campaign game over
@@ -187,7 +202,7 @@ public class Control implements ApplicationListener, Loadable{
             if(!settings.getBool("skipcoreanimation") && !state.rules.pvp){
                 coreDelay = coreLandDuration;
                 //delay player respawn so animation can play.
-                player.deathTimer = -80f;
+                player.deathTimer = Player.deathDelay - coreLandDuration;
                 //TODO this sounds pretty bad due to conflict
                 if(settings.getInt("musicvol") > 0){
                     Musics.land.stop();
@@ -244,7 +259,7 @@ public class Control implements ApplicationListener, Loadable{
                                 }else{
                                     //when already hosting, instantly build everything. this looks bad but it's better than a desync
                                     Fx.coreBuildBlock.at(build.x, build.y, 0f, build.block);
-                                    Fx.placeBlock.at(build.x, build.y, build.block.size);
+                                    build.block.placeEffect.at(build.x, build.y, build.block.size);
                                 }
                             }
                         }
@@ -263,6 +278,9 @@ public class Control implements ApplicationListener, Loadable{
 
         Events.on(SaveWriteEvent.class, e -> forcePlaceAll());
         Events.on(HostEvent.class, e -> forcePlaceAll());
+        Events.on(HostEvent.class, e -> {
+            state.set(State.playing);
+        });
     }
 
     private void forcePlaceAll(){
@@ -279,7 +297,7 @@ public class Control implements ApplicationListener, Loadable{
         build.dropped();
 
         Fx.coreBuildBlock.at(build.x, build.y, 0f, build.block);
-        Fx.placeBlock.at(build.x, build.y, build.block.size);
+        build.block.placeEffect.at(build.x, build.y, build.block.size);
     }
 
     @Override
@@ -619,6 +637,9 @@ public class Control implements ApplicationListener, Loadable{
 
         if(state.isGame()){
             input.update();
+            if(!state.isPaused()){
+                indicators.update();
+            }
 
             //auto-update rpc every 5 seconds
             if(timer.get(0, 60 * 5)){
@@ -632,12 +653,12 @@ public class Control implements ApplicationListener, Loadable{
             }
 
             //cannot launch while paused
-            if(state.is(State.paused) && renderer.isCutscene()){
+            if(state.isPaused() && renderer.isCutscene()){
                 state.set(State.playing);
             }
 
-            if(Core.input.keyTap(Binding.pause) && !renderer.isCutscene() && !scene.hasDialog() && !scene.hasKeyboard() && !ui.restart.isShown() && (state.is(State.paused) || state.is(State.playing))){
-                state.set(state.is(State.playing) ? State.paused : State.playing);
+            if(!net.client() && Core.input.keyTap(Binding.pause) && !renderer.isCutscene() && !scene.hasDialog() && !scene.hasKeyboard() && !ui.restart.isShown() && (state.is(State.paused) || state.is(State.playing))){
+                state.set(state.isPaused() ? State.playing : State.paused);
             }
 
             if(Core.input.keyTap(Binding.menu) && !ui.restart.isShown() && !ui.minimapfrag.shown()){
@@ -645,7 +666,9 @@ public class Control implements ApplicationListener, Loadable{
                     ui.chatfrag.hide();
                 }else if(!ui.paused.isShown() && !scene.hasDialog()){
                     ui.paused.show();
-                    state.set(State.paused);
+                    if(!net.active()){
+                        state.set(State.paused);
+                    }
                 }
             }
 

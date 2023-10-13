@@ -11,8 +11,10 @@ import mindustry.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.ctype.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.logic.LCanvas.*;
 import mindustry.logic.LExecutor.*;
+import mindustry.logic.LogicFx.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.meta.*;
@@ -218,6 +220,14 @@ public class LStatements{
                         row(s);
                         fields(s, "rotation", p3, v -> p3 = v);
                     }
+                    //TODO
+                    /*
+                    case character -> {
+                        fields(s, "x", x, v -> x = v);
+                        fields(s, "y", y, v -> y = v);
+                        row(s);
+                        fields(s, "char", p1, v -> p1 = v);
+                    }*/
                 }
             }).expand().left();
         }
@@ -643,7 +653,7 @@ public class LStatements{
                 b.clicked(() -> showSelect(b, LogicOp.all, op, o -> {
                     op = o;
                     rebuild(parent);
-                }));
+                }, 4, c -> c.width(64f)));
             }, Styles.logict, () -> {}).size(64f, 40f).pad(4f).color(table.color);
         }
 
@@ -675,7 +685,25 @@ public class LStatements{
 
         @Override
         public LCategory category(){
-            return LCategory.operation;
+            return LCategory.control;
+        }
+    }
+
+    @RegisterStatement("stop")
+    public static class StopStatement extends LStatement{
+
+        @Override
+        public void build(Table table){
+        }
+
+        @Override
+        public LInstruction build(LAssembler builder){
+            return new StopI();
+        }
+
+        @Override
+        public LCategory category(){
+            return LCategory.control;
         }
     }
 
@@ -686,7 +714,7 @@ public class LStatements{
 
         @Override
         public void build(Table table){
-            fields(table, result, str -> result = str);
+            fields(table, result, str -> result = str).width(120f);
 
             table.add(" = lookup ");
 
@@ -1187,7 +1215,7 @@ public class LStatements{
             fields(table, result, str -> result = str);
 
             table.add(" = spawn ");
-            field(table, type, str -> type = str);
+            field(table, type, str -> type = str).colspan(!LCanvas.useRows() ? 1 : 2);
 
             row(table);
 
@@ -1199,7 +1227,9 @@ public class LStatements{
 
             table.row();
 
-            table.add();
+            if(!LCanvas.useRows()){
+                table.add();
+            }
 
             table.add("team ");
             field(table, team, str -> team = str);
@@ -1291,16 +1321,18 @@ public class LStatements{
 
     @RegisterStatement("spawnwave")
     public static class SpawnWaveStatement extends LStatement{
-        public String x = "10", y = "10";
+        public String x = "10", y = "10", natural = "false";
 
         @Override
         public void build(Table table){
+            table.add("natural ");
+            fields(table, natural, str -> natural = str);
 
-            table.add("x ");
-            fields(table, x, str -> x = str);
+            table.add("x ").visible(() -> natural.equals("false"));
+            fields(table, x, str -> x = str).visible(() -> natural.equals("false"));
 
-            table.add(" y ");
-            fields(table, y, str -> y = str);
+            table.add(" y ").visible(() -> natural.equals("false"));
+            fields(table, y, str -> y = str).visible(() -> natural.equals("false"));
         }
 
         @Override
@@ -1310,7 +1342,7 @@ public class LStatements{
 
         @Override
         public LInstruction build(LAssembler builder){
-            return new SpawnWaveI(builder.var(x), builder.var(y));
+            return new SpawnWaveI(builder.var(natural), builder.var(x), builder.var(y));
         }
 
         @Override
@@ -1350,7 +1382,7 @@ public class LStatements{
                     fields(table, "w", p3, s -> p3 = s);
                     fields(table, "h", p4, s -> p4 = s);
                 }
-                case buildSpeed, unitBuildSpeed, unitDamage, blockHealth, blockDamage, rtsMinSquad, rtsMinWeight -> {
+                case buildSpeed, unitHealth, unitBuildSpeed, unitCost, unitDamage, blockHealth, blockDamage, rtsMinSquad, rtsMinWeight -> {
                     if(p1.equals("0")){
                         p1 = "@sharded";
                     }
@@ -1433,7 +1465,7 @@ public class LStatements{
     @RegisterStatement("cutscene")
     public static class CutsceneStatement extends LStatement{
         public CutsceneAction action = CutsceneAction.pan;
-        public String p1 = "100", p2 = "100", p3 = " 0.06", p4 = "0";
+        public String p1 = "100", p2 = "100", p3 = "0.06", p4 = "0";
 
         @Override
         public void build(Table table){
@@ -1478,6 +1510,80 @@ public class LStatements{
         @Override
         public LInstruction build(LAssembler builder){
             return new CutsceneI(action, builder.var(p1), builder.var(p2), builder.var(p3), builder.var(p4));
+        }
+
+        @Override
+        public LCategory category(){
+            return LCategory.world;
+        }
+    }
+
+    @RegisterStatement("effect")
+    public static class EffectStatement extends LStatement{
+        public String type = "warn", x = "0", y = "0", sizerot = "2", color = "%ffaaff", data = "";
+
+        @Override
+        public void build(Table table){
+            table.clearChildren();
+
+            table.button(b -> {
+                b.label(() -> type).growX().wrap().labelAlign(Align.center);
+                b.clicked(() -> ui.effects.show(entry -> {
+                    type = entry.name;
+                    build(table);
+                }));
+            }, Styles.logict, () -> {}).size(150f, 40f).margin(5f).pad(4f).color(table.color).colspan(2);
+
+            EffectEntry entry = LogicFx.get(type);
+
+            row(table);
+
+            fields(table, "x", x, str -> x = str);
+            fields(table, "y", y, str -> y = str);
+            row(table);
+
+            if(entry != null){
+                if(entry.color){
+                    fields(table, "color", color, str -> color = str).width(120f);
+
+                    table.button(b -> {
+                        b.image(Icon.pencilSmall);
+                        b.clicked(() -> {
+                            Color current = Pal.accent.cpy();
+                            if(color.startsWith("%")){
+                                try{
+                                    current = Color.valueOf(color.substring(1));
+                                }catch(Exception ignored){}
+                            }
+
+                            ui.picker.show(current, result -> {
+                                color = "%" + result.toString().substring(0, result.a >= 1f ? 6 : 8);
+                                build(table);
+                            });
+                        });
+                    }, Styles.logict, () -> {}).size(40f).padLeft(-11).color(table.color);
+                }
+
+                row(table);
+
+                if(entry.size || entry.rotate){
+                    fields(table, entry.size ? "size" : "rotation", sizerot, str -> sizerot = str);
+                }
+
+                if(entry.data != null){
+                    fields(table, "data", data, str -> data = str);
+                }
+            }
+        }
+
+        @Override
+        public boolean privileged(){
+            return true;
+        }
+
+        @Override
+        public LInstruction build(LAssembler b){
+            return new EffectI(LogicFx.get(type), b.var(x), b.var(y), b.var(sizerot), b.var(color), b.var(data));
         }
 
         @Override
@@ -1606,17 +1712,45 @@ public class LStatements{
         }
     }
 
+    //TODO: test this first
+    @RegisterStatement("sync")
+    public static class SyncStatement extends LStatement{
+        public String variable = "var";
+
+        @Override
+        public void build(Table table){
+            fields(table, variable, str -> variable = str).width(190f);
+        }
+
+        @Override
+        public boolean privileged(){
+            return true;
+        }
+
+        @Override
+        public LInstruction build(LAssembler builder){
+            return new SyncI(builder.var(variable));
+        }
+
+        @Override
+        public LCategory category(){
+            return LCategory.world;
+        }
+    }
+
     @RegisterStatement("getflag")
     public static class GetFlagStatement extends LStatement{
         public String result = "result", flag = "\"flag\"";
 
         @Override
         public void build(Table table){
-            fields(table, result, str -> result = str);
+            float width = LCanvas.useRows() ? 100f : 190f;
+
+            fields(table, result, str -> result = str).width(width);
 
             table.add(" = flag ");
 
-            fields(table, flag, str -> flag = str);
+            fields(table, flag, str -> flag = str).width(width);
         }
 
         @Override
@@ -1641,11 +1775,13 @@ public class LStatements{
 
         @Override
         public void build(Table table){
-            fields(table, flag, str -> flag = str);
+            float width = LCanvas.useRows() ? 100f : 190f;
+
+            fields(table, flag, str -> flag = str).width(width);
 
             table.add(" = ");
 
-            fields(table, value, str -> value = str);
+            fields(table, value, str -> value = str).width(width);
         }
 
         @Override
@@ -1656,6 +1792,119 @@ public class LStatements{
         @Override
         public LInstruction build(LAssembler builder){
             return new SetFlagI(builder.var(flag), builder.var(value));
+        }
+
+        @Override
+        public LCategory category(){
+            return LCategory.world;
+        }
+    }
+
+    @RegisterStatement("setprop")
+    public static class SetPropStatement extends LStatement{
+        public String type = "@copper", of = "block1", value = "0";
+
+        private transient int selected = 0;
+        private transient TextField tfield;
+
+        @Override
+        public void build(Table table){
+            table.add(" set ");
+
+            tfield = field(table, type, str -> type = str).padRight(0f).get();
+
+            table.button(b -> {
+                b.image(Icon.pencilSmall);
+                //240
+                b.clicked(() -> showSelectTable(b, (t, hide) -> {
+                    Table[] tables = {
+                    //items
+                    new Table(i -> {
+                        i.left();
+                        int c = 0;
+                        for(Item item : Vars.content.items()){
+                            if(item.hidden) continue;
+                            i.button(new TextureRegionDrawable(item.uiIcon), Styles.flati, iconSmall, () -> {
+                                stype("@" + item.name);
+                                hide.run();
+                            }).size(40f);
+
+                            if(++c % 6 == 0) i.row();
+                        }
+                    }),
+                    //liquids
+                    new Table(i -> {
+                        i.left();
+                        int c = 0;
+                        for(Liquid item : Vars.content.liquids()){
+                            if(!item.unlockedNow() || item.hidden) continue;
+                            i.button(new TextureRegionDrawable(item.uiIcon), Styles.flati, iconSmall, () -> {
+                                stype("@" + item.name);
+                                hide.run();
+                            }).size(40f);
+
+                            if(++c % 6 == 0) i.row();
+                        }
+                    }),
+                    //sensors
+                    new Table(i -> {
+                        for(LAccess property : LAccess.settable){
+                            i.button(property.name(), Styles.flatt, () -> {
+                                stype("@" + property.name());
+                                hide.run();
+                            }).size(240f, 40f).self(c -> tooltip(c, property)).row();
+                        }
+                    })
+                    };
+
+                    Drawable[] icons = {Icon.box, Icon.liquid, Icon.tree};
+                    Stack stack = new Stack(tables[selected]);
+                    ButtonGroup<Button> group = new ButtonGroup<>();
+
+                    for(int i = 0; i < tables.length; i++){
+                        int fi = i;
+
+                        t.button(icons[i], Styles.squareTogglei, () -> {
+                            selected = fi;
+
+                            stack.clearChildren();
+                            stack.addChild(tables[selected]);
+
+                            t.parent.parent.pack();
+                            t.parent.parent.invalidateHierarchy();
+                        }).height(50f).growX().checked(selected == fi).group(group);
+                    }
+                    t.row();
+                    t.add(stack).colspan(3).width(240f).left();
+                }));
+            }, Styles.logict, () -> {}).size(40f).padLeft(-1).color(table.color);
+
+            row(table);
+
+            table.add(" of ").self(this::param);
+
+            field(table, of, str -> of = str).colspan(2);
+
+            row(table);
+
+            table.add(" to ");
+
+            field(table, value, str -> value = str).colspan(2);
+        }
+
+        private void stype(String text){
+            tfield.setText(text);
+            this.type = text;
+        }
+
+        @Override
+        public boolean privileged(){
+            return true;
+        }
+
+        @Override
+        public LInstruction build(LAssembler builder){
+            return new SetPropI(builder.var(type), builder.var(of), builder.var(value));
         }
 
         @Override

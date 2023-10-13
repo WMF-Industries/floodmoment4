@@ -119,6 +119,18 @@ public class TypeIO{
         }else if(object instanceof Team t){
             write.b((byte)20);
             write.b(t.id);
+        }else if(object instanceof int[] i){
+            write.b((byte)21);
+            writeInts(write, i);
+        }else if(object instanceof Object[] objs){
+            write.b((byte)22);
+            write.i(objs.length);
+            for(Object obj : objs){
+                writeObject(write, obj);
+            }
+        }else if(object instanceof UnitCommand command){
+            write.b(23);
+            write.s(command.id);
         }else{
             throw new IllegalArgumentException("Unknown object type: " + object.getClass());
         }
@@ -142,7 +154,8 @@ public class TypeIO{
             case 5 -> content.getByID(ContentType.all[read.b()], read.s());
             case 6 -> {
                 short length = read.s();
-                IntSeq arr = new IntSeq(); for(int i = 0; i < length; i ++) arr.add(read.i());
+                IntSeq arr = new IntSeq(length);
+                for(int i = 0; i < length; i ++) arr.add(read.i());
                 yield arr;
             }
             case 7 -> new Point2(read.i(), read.i());
@@ -183,6 +196,14 @@ public class TypeIO{
             }
             case 19 -> new Vec2(read.f(), read.f());
             case 20 -> Team.all[read.ub()];
+            case 21 -> readInts(read);
+            case 22 -> {
+                int objlen = read.i();
+                Object[] objs = new Object[objlen];
+                for(int i = 0; i < objlen; i++) objs[i] = readObjectBoxed(read, box);
+                yield objs;
+            }
+            case 23 -> UnitCommand.all.get(read.us());
             default -> throw new IllegalArgumentException("Unknown object type: " + type);
         };
     }
@@ -284,12 +305,13 @@ public class TypeIO{
         return Nulls.unit;
     }
 
-    public static void writeCommand(Writes write, UnitCommand command){
-        write.b(command.id);
+    public static void writeCommand(Writes write, @Nullable UnitCommand command){
+        write.b(command == null ? 255 : command.id);
     }
 
-    public static UnitCommand readCommand(Reads read){
-        return UnitCommand.all.get(read.ub());
+    public static @Nullable UnitCommand readCommand(Reads read){
+        int val = read.ub();
+        return val == 255 ? null : UnitCommand.all.get(val);
     }
 
     public static void writeEntity(Writes write, Entityc entity){
@@ -630,8 +652,8 @@ public class TypeIO{
         return new ItemStack(readItem(read), read.i());
     }
 
-    public static void writeTeam(Writes write, Team reason){
-        write.b(reason.id);
+    public static void writeTeam(Writes write, Team team){
+        write.b(team == null ? 0 : team.id);
     }
 
     public static Team readTeam(Reads read){
@@ -817,13 +839,40 @@ public class TypeIO{
         write.b(trace.mobile ? (byte)1 : 0);
         write.i(trace.timesJoined);
         write.i(trace.timesKicked);
+        //there is a cap to prevent TCP packet size overrun
+        writeStrings(write, trace.ips, 12);
+        writeStrings(write, trace.names, 12);
     }
 
     public static TraceInfo readTraceInfo(Reads read){
-        return new TraceInfo(readString(read), readString(read), read.b() == 1, read.b() == 1, read.i(), read.i());
+        return new TraceInfo(readString(read), readString(read), read.b() == 1, read.b() == 1, read.i(), read.i(), readStrings(read), readStrings(read));
     }
 
-    public static void writeStrings(Writes write, String[][] strings){
+    public static void writeStrings(Writes write, String[] strings, int maxLen){
+        write.b(Math.min(strings.length, maxLen));
+        for(int i = 0; i < Math.min(strings.length, maxLen); i++){
+            writeString(write, strings[i]);
+        }
+    }
+
+    public static void writeStrings(Writes write, String[] strings){
+        write.b(strings.length);
+        for(String s : strings){
+            writeString(write, s);
+        }
+    }
+
+    public static String[] readStrings(Reads read){
+        int length = read.ub();
+        var result = new String[length];
+        for(int j = 0; j < length; j++){
+            result[j] = readString(read);
+        }
+        return result;
+    }
+
+
+    public static void writeStringArray(Writes write, String[][] strings){
         write.b(strings.length);
         for(String[] string : strings){
             write.b(string.length);
@@ -833,7 +882,7 @@ public class TypeIO{
         }
     }
 
-    public static String[][] readStrings(Reads read){
+    public static String[][] readStringArray(Reads read){
         int rows = read.ub();
 
         String[][] strings = new String[rows][];

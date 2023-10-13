@@ -20,6 +20,7 @@ import mindustry.graphics.*;
 import mindustry.logic.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.environment.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 import mindustry.world.modules.*;
 
@@ -72,7 +73,15 @@ public class ConstructBlock extends Block{
         float healthf = tile.build == null ? 1f : tile.build.healthf();
         Seq<Building> prev = tile.build instanceof ConstructBuild co ? co.prevBuild : null;
 
-        tile.setBlock(block, team, rotation);
+        if(block instanceof OverlayFloor overlay){
+            tile.setOverlay(overlay);
+            tile.setBlock(Blocks.air);
+        }else if(block instanceof Floor floor){
+            tile.setFloorUnder(floor);
+            tile.setBlock(Blocks.air);
+        }else{
+            tile.setBlock(block, team, rotation);
+        }
 
         if(tile.build != null){
             tile.build.health = block.health * healthf;
@@ -99,7 +108,7 @@ public class ConstructBlock extends Block{
         }
 
         if(fogControl.isVisibleTile(team, tile.x, tile.y)){
-            Fx.placeBlock.at(tile.drawx(), tile.drawy(), block.size);
+            block.placeEffect.at(tile.drawx(), tile.drawy(), block.size);
             if(shouldPlay()) block.placeSound.at(tile, block.placePitchChange ? calcPitch(true) : 1f);
         }
 
@@ -331,6 +340,7 @@ public class ConstructBlock extends Block{
 
         private float checkRequired(ItemModule inventory, float amount, boolean remove){
             float maxProgress = amount;
+            boolean infinite = team.rules().infiniteResources || state.rules.infiniteResources;
 
             for(int i = 0; i < current.requirements.length; i++){
                 int sclamount = Math.round(state.rules.buildCostMultiplier * current.requirements[i].amount);
@@ -350,7 +360,7 @@ public class ConstructBlock extends Block{
                     accumulator[i] -= maxUse;
 
                     //remove stuff that is actually used
-                    if(remove){
+                    if(remove && !infinite){
                         inventory.remove(current.requirements[i].item, maxUse);
                     }
                 }

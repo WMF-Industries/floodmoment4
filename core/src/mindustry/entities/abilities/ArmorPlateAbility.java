@@ -4,9 +4,11 @@ import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.scene.ui.layout.Table;
 import arc.util.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.world.meta.*;
 
 public class ArmorPlateAbility extends Ability{
     public TextureRegion plateRegion;
@@ -26,6 +28,11 @@ public class ArmorPlateAbility extends Ability{
     }
 
     @Override
+    public void addStats(Table t){
+        t.add("[lightgray]" + Stat.healthMultiplier.localized() + ": [white]" + Math.round(healthMultiplier * 100f) + 100 + "%");
+    }
+
+    @Override
     public void draw(Unit unit){
         if(warmup > 0.001f){
             if(plateRegion == null){
@@ -37,6 +44,7 @@ public class ArmorPlateAbility extends Ability{
                 Shaders.armor.progress = warmup;
                 Shaders.armor.time = -Time.time / 20f;
 
+                Draw.rect(Shaders.armor.region, unit.x, unit.y, unit.rotation - 90f);
                 Draw.color(color);
                 Draw.shader(Shaders.armor);
                 Draw.rect(Shaders.armor.region, unit.x, unit.y, unit.rotation - 90f);

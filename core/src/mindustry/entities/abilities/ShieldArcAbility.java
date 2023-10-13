@@ -13,6 +13,7 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
+import mindustry.world.meta.*;
 
 public class ShieldArcAbility extends Ability{
     private static Unit paramUnit;
@@ -67,6 +68,16 @@ public class ShieldArcAbility extends Ability{
     protected float widthScale, alpha;
 
     @Override
+    public void addStats(Table t){
+        t.add("[lightgray]" + Stat.health.localized() + ": [white]" + Math.round(max));
+        t.row();
+        t.add("[lightgray]" + Stat.repairSpeed.localized() + ": [white]" + Strings.autoFixed(regen * 60f, 2) + StatUnit.perSecond.localized());
+        t.row();
+        t.add("[lightgray]" + Stat.cooldownTime.localized() + ": [white]" + Strings.autoFixed(cooldown / 60f, 2) + " " + StatUnit.seconds.localized());
+        t.row();
+    }
+
+    @Override
     public void update(Unit unit){
         if(data < max){
             data += Time.delta * regen;
@@ -101,25 +112,20 @@ public class ShieldArcAbility extends Ability{
             Draw.color(unit.team.color, Color.white, Mathf.clamp(alpha));
             var pos = paramPos.set(x, y).rotate(unit.rotation - 90f).add(unit);
 
-            if(Vars.renderer.animateShields){
-                if(region != null){
-                    Vec2 rp = offsetRegion ? pos : Tmp.v1.set(unit);
-                    Draw.yscl = widthScale;
-                    Draw.rect(region, rp.x, rp.y, unit.rotation - 90);
-                    Draw.yscl = 1f;
-                }
+            if(!Vars.renderer.animateShields){
+                Draw.alpha(0.4f);
+            }
 
-                if(drawArc){
-                    Lines.stroke(width * widthScale);
-                    Lines.arc(pos.x, pos.y, radius, angle / 360f, unit.rotation + angleOffset - angle / 2f);
-                }
-            }else{
-                //TODO
-                Lines.stroke(1.5f);
-                Draw.alpha(0.09f);
-                Fill.poly(pos.x, pos.y, 6, radius);
-                Draw.alpha(1f);
-                Lines.poly(pos.x, pos.y, 6, radius);
+            if(region != null){
+                Vec2 rp = offsetRegion ? pos : Tmp.v1.set(unit);
+                Draw.yscl = widthScale;
+                Draw.rect(region, rp.x, rp.y, unit.rotation - 90);
+                Draw.yscl = 1f;
+            }
+
+            if(drawArc){
+                Lines.stroke(width * widthScale);
+                Lines.arc(pos.x, pos.y, radius, angle / 360f, unit.rotation + angleOffset - angle / 2f);
             }
             Draw.reset();
         }

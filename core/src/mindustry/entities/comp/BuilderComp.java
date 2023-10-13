@@ -47,13 +47,23 @@ abstract class BuilderComp implements Posc, Statusc, Teamc, Rotc{
         updateBuildLogic();
     }
 
+    @Override
+    public void afterRead(){
+        //why would this happen?
+        if(plans == null){
+            plans = new Queue<>(1);
+        }
+    }
+
     public void validatePlans(){
         if(plans.size > 0){
             Iterator<BuildPlan> it = plans.iterator();
             while(it.hasNext()){
                 BuildPlan plan = it.next();
                 Tile tile = world.tile(plan.x, plan.y);
-                if(tile == null || (plan.breaking && tile.block() == Blocks.air) || (!plan.breaking && ((tile.build != null && tile.build.rotation == plan.rotation) || !plan.block.rotate) && tile.block() == plan.block)){
+                if(tile == null || (plan.breaking && tile.block() == Blocks.air) || (!plan.breaking && ((tile.build != null && tile.build.rotation == plan.rotation) || !plan.block.rotate) &&
+                    (tile.block() == plan.block || (plan.block != null && (plan.block.isOverlay() && plan.block == tile.overlay() || (plan.block.isFloor() && plan.block == tile.floor())))))){
+
                     it.remove();
                 }
             }
@@ -85,7 +95,10 @@ abstract class BuilderComp implements Posc, Statusc, Teamc, Rotc{
         if(Float.isNaN(buildCounter) || Float.isInfinite(buildCounter)) buildCounter = 0f;
         buildCounter = Math.min(buildCounter, 10f);
 
-        while(buildCounter >= 1){
+        //random attempt to fix a freeze that only occurs on Android
+        int maxPerFrame = 10, count = 0;
+
+        while(buildCounter >= 1 && count++ < maxPerFrame){
             buildCounter -= 1f;
 
             validatePlans();
@@ -93,7 +106,7 @@ abstract class BuilderComp implements Posc, Statusc, Teamc, Rotc{
             var core = core();
 
             //nothing to build.
-            if(buildPlan() == null) continue;
+            if(buildPlan() == null) return;
 
             //find the next build plan
             if(plans.size > 1){
@@ -117,7 +130,7 @@ abstract class BuilderComp implements Posc, Statusc, Teamc, Rotc{
             if(!within(tile, finalPlaceDst)) continue;
 
             if(!headless){
-                Vars.control.sound.loop(Sounds.build, tile, 0.51f);
+                Vars.control.sound.loop(Sounds.build, tile, 0.15f);
             }
 
             if(!(tile.build instanceof ConstructBuild cb)){
@@ -141,7 +154,7 @@ abstract class BuilderComp implements Posc, Statusc, Teamc, Rotc{
             }
 
             if(tile.build instanceof ConstructBuild && !current.initialized){
-                Core.app.post(() -> Events.fire(new BuildSelectEvent(tile, team, self(), current.breaking)));
+                Events.fire(new BuildSelectEvent(tile, team, self(), current.breaking));
                 current.initialized = true;
             }
 

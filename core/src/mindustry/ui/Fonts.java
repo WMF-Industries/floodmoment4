@@ -140,6 +140,8 @@ public class Fonts{
             }
         }
 
+        stringIcons.put("alphachan", stringIcons.get("alphaaaa"));
+
         iconTable = new TextureRegion[512];
         iconTable[0] = Core.atlas.find("error");
         lastCid = 1;
@@ -154,9 +156,28 @@ public class Fonts{
         });
 
         for(Team team : Team.baseTeams){
-            if(Core.atlas.has("team-" + team.name)){
-                team.emoji = stringIcons.get(team.name, "");
+            team.emoji = stringIcons.get(team.name, "");
+        }
+    }
+    
+    public static void loadContentIconsHeadless(){
+        try(Scanner scan = new Scanner(Core.files.internal("icons/icons.properties").read(512))){
+            while(scan.hasNextLine()){
+                String line = scan.nextLine();
+                String[] split = line.split("=");
+                String[] nametex = split[1].split("\\|");
+                String character = split[0];
+                int ch = Integer.parseInt(character);
+
+                unicodeIcons.put(nametex[0], ch);
+                stringIcons.put(nametex[0], ((char)ch) + "");
             }
+        }
+
+        stringIcons.put("alphachan", stringIcons.get("alphaaaa"));
+
+        for(Team team : Team.baseTeams){
+            team.emoji = stringIcons.get(team.name, "");
         }
     }
 
@@ -267,7 +288,7 @@ public class Fonts{
                 cy = (int)cy;
                 originX = g.width/2f;
                 originY = g.height/2f;
-                Draw.rect(region, cx + g.width/2f, cy + g.height/2f, g.width, g.height, originX, originY, rotation);
+                Draw.rect(region, cx + g.width/2f, cy + g.height/2f, g.width * scaleX, g.height * scaleY, originX, originY, rotation);
             }
 
             @Override

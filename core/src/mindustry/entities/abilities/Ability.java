@@ -15,6 +15,8 @@ public abstract class Ability implements Cloneable{
     public void draw(Unit unit){}
     public void death(Unit unit){}
     public void init(UnitType type){}
+    public void displayBars(Unit unit, Table bars){}
+    public void addStats(Table t){}
 
     public Ability copy(){
         try{
@@ -25,12 +27,9 @@ public abstract class Ability implements Cloneable{
         }
     }
 
-    public void displayBars(Unit unit, Table bars){
-
-    }
-
     /** @return localized ability name; mods should override this. */
     public String localized(){
-        return Core.bundle.get("ability." + getClass().getSimpleName().replace("Ability", "").toLowerCase());
+        var type = getClass();
+        return Core.bundle.get("ability." + (type.isAnonymousClass() ? type.getSuperclass() : type).getSimpleName().replace("Ability", "").toLowerCase());
     }
 }

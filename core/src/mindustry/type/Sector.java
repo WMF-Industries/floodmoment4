@@ -80,6 +80,14 @@ public class Sector{
         return hasBase() || (preset != null && preset.alwaysUnlocked);
     }
 
+    public boolean allowLaunchSchematics(){
+        return (preset != null && preset.overrideLaunchDefaults) ? preset.allowLaunchSchematics : planet.allowLaunchSchematics;
+    }
+
+    public boolean allowLaunchLoadout(){
+        return (preset != null && preset.overrideLaunchDefaults) ? preset.allowLaunchLoadout : planet.allowLaunchLoadout;
+    }
+
     public void saveInfo(){
         Core.settings.putJson(planet.name + "-s-" + id + "-info", info);
     }
@@ -113,7 +121,7 @@ public class Sector{
         return save != null && (info.waves || info.attack) && info.hasCore;
     }
 
-    /** @return whether the player has a base here. */
+    /** @return whether the player has a base (active save with a core) here. */
     public boolean hasBase(){
         return save != null && info.hasCore && !(Vars.state.isGame() && Vars.state.rules.sector == this && state.gameOver);
     }

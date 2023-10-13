@@ -12,6 +12,7 @@ import mindustry.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
 import mindustry.entities.*;
+import mindustry.game.EventType.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -31,6 +32,8 @@ public class ForceProjector extends Block{
     public float phaseRadiusBoost = 80f;
     public float phaseShieldBoost = 400f;
     public float radius = 101.7f;
+    public int sides = 6;
+    public float shieldRotation = 0f;
     public float shieldHealth = 700f;
     public float regen = 1.8f;
     public float cooldownNormal = 1.75f;
@@ -49,7 +52,7 @@ public class ForceProjector extends Block{
     protected static ForceBuild paramEntity;
     protected static Effect paramEffect;
     protected static final Cons<Bullet> shieldConsumer = bullet -> {
-        if(bullet.team != paramEntity.team && bullet.type.absorbable && inForceField(bullet)){
+        if(bullet.team != paramEntity.team && bullet.type.absorbable && Intersector.isInRegularPolygon(((ForceProjector)(paramEntity.block)).sides, paramEntity.x, paramEntity.y, paramEntity.realRadius(), ((ForceProjector)(paramEntity.block)).shieldRotation, bullet.x, bullet.y)){
             bullet.absorb();
             paramEffect.at(bullet);
             paramEntity.hit = 1f;
@@ -59,8 +62,8 @@ public class ForceProjector extends Block{
 
     private static final Cons<Tile> creeperConsumer = tile -> {
         if(((tile.creep >= 1f && tile.creeperable)
-                || (creeperLevels.containsKey(tile.block()) && tile.team() == creeperTeam))
-                && inForceField(tile)){
+                || (creeperLevels.containsKey(tile.block()) && tile.team() == creeperTeam)) && !paramEntity.broken
+                && Intersector.isInRegularPolygon(((ForceProjector)(paramEntity.block)).sides, paramEntity.x, paramEntity.y, paramEntity.realRadius(), ((ForceProjector)(paramEntity.block)).shieldRotation, tile.x, tile.y)){
             if (paramEntity.team != creeperTeam){
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);
 
@@ -125,9 +128,10 @@ public class ForceProjector extends Block{
         stats.add(Stat.shieldHealth, shieldHealth, StatUnit.none);
         stats.add(Stat.cooldownTime, (int) (shieldHealth / cooldownBrokenBase / 60f), StatUnit.seconds);
 
-        if(consItems){
-            stats.add(Stat.boostEffect, phaseRadiusBoost / tilesize, StatUnit.blocks);
-            stats.add(Stat.boostEffect, phaseShieldBoost, StatUnit.shieldHealth);
+        if(consItems && itemConsumer instanceof ConsumeItems coni){
+            stats.remove(Stat.booster);
+            stats.add(Stat.booster, StatValues.itemBoosters("+{0} " + StatUnit.shieldHealth.localized(), stats.timePeriod, phaseShieldBoost, phaseRadiusBoost, coni.items, this::consumesItem));
+            stats.add(Stat.booster, StatValues.speedBoosters("", coolantConsumption, Float.MAX_VALUE, true, this::consumesLiquid));
         }
     }
 
@@ -137,10 +141,10 @@ public class ForceProjector extends Block{
 
         Draw.color(Pal.gray);
         Lines.stroke(3f);
-        Lines.poly(x * tilesize + offset, y * tilesize + offset, 6, radius);
+        Lines.poly(x * tilesize + offset, y * tilesize + offset, sides, radius, shieldRotation);
         Draw.color(player.team().color);
         Lines.stroke(1f);
-        Lines.poly(x * tilesize + offset, y * tilesize + offset, 6, radius);
+        Lines.poly(x * tilesize + offset, y * tilesize + offset, sides, radius, shieldRotation);
         Draw.color();
     }
 
@@ -223,6 +227,9 @@ public class ForceProjector extends Block{
                 broken = true;
                 buildup = shieldHealth;
                 shieldBreakEffect.at(x, y, realRadius(), team.color);
+                if(team != state.rules.defaultTeam){
+                    Events.fire(Trigger.forceProjectorBreak);
+                }
             }
 
             if(hit > 0f){
@@ -254,7 +261,7 @@ public class ForceProjector extends Block{
                 }
             }
 
-            if(broken || healthLeft <= 0f){
+            if(healthLeft <= 0f){
                 Core.app.post(this::kill);
             }
 
@@ -267,6 +274,7 @@ public class ForceProjector extends Block{
         @Override
         public double sense(LAccess sensor){
             if(sensor == LAccess.heat) return healthLeft / buildup;
+            if(sensor == LAccess.shield) return broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - buildup, 0);
             return super.sense(sensor);
         }
 
@@ -291,19 +299,21 @@ public class ForceProjector extends Block{
             if(!broken){
                 float radius = realRadius();
 
-                Draw.z(Layer.shields);
+                if(radius > 0.001f){
+                    Draw.color(team.color, Color.white, Mathf.clamp(hit));
 
-                Draw.color(team.color, Color.white, Mathf.clamp(hit));
-
-                if(renderer.animateShields){
-                    Fill.poly(x, y, 6, radius);
-                }else{
-                    Lines.stroke(1.5f);
-                    Draw.alpha(0.09f + Mathf.clamp(0.08f * hit));
-                    Fill.poly(x, y, 6, radius);
-                    Draw.alpha(1f);
-                    Lines.poly(x, y, 6, radius);
-                    Draw.reset();
+                    if(renderer.animateShields){
+                        Draw.z(Layer.shields + 0.001f * hit);
+                        Fill.poly(x, y, sides, radius, shieldRotation);
+                    }else{
+                        Draw.z(Layer.shields);
+                        Lines.stroke(1.5f);
+                        Draw.alpha(0.09f + Mathf.clamp(0.08f * hit));
+                        Fill.poly(x, y, sides, radius, shieldRotation);
+                        Draw.alpha(1f);
+                        Lines.poly(x, y, sides, radius, shieldRotation);
+                        Draw.reset();
+                    }
                 }
             }
 

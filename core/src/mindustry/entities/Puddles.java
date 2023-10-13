@@ -69,14 +69,17 @@ public class Puddles{
         if(tile.floor().solid) return;
 
         Puddle p = map.get(tile.pos());
-        if(p == null){
-            Puddle puddle = Puddle.create();
-            puddle.tile = tile;
-            puddle.liquid = liquid;
-            puddle.amount = amount;
-            puddle.set(ax, ay);
-            map.put(tile.pos(), puddle);
-            puddle.add();
+        if(p == null || p.liquid == null){
+            if(!Vars.net.client()){
+                //do not create puddles clientside as that destroys syncing
+                Puddle puddle = Puddle.create();
+                puddle.tile = tile;
+                puddle.liquid = liquid;
+                puddle.amount = amount;
+                puddle.set(ax, ay);
+                map.put(tile.pos(), puddle);
+                puddle.add();
+            }
         }else if(p.liquid == liquid){
             p.accepting = Math.max(amount, p.accepting);
 
@@ -107,6 +110,8 @@ public class Puddles{
 
     /** Reacts two liquids together at a location. */
     private static float reactPuddle(Liquid dest, Liquid liquid, float amount, Tile tile, float x, float y){
+        if(dest == null) return 0f;
+
         if((dest.flammability > 0.3f && liquid.temperature > 0.7f) ||
         (liquid.flammability > 0.3f && dest.temperature > 0.7f)){ //flammable liquid + hot liquid
             Fires.create(tile);

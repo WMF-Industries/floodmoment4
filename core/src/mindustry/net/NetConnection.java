@@ -1,5 +1,6 @@
 package mindustry.net;
 
+import arc.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.entities.units.*;
@@ -28,12 +29,21 @@ public abstract class NetConnection{
     public long lastReceivedClientTime;
     /** Build requests that have been recently rejected. This is cleared every snapshot. */
     public Seq<BuildPlan> rejectedRequests = new Seq<>();
+    /** Handles chat spam rate limits. */
+    public Ratekeeper chatRate = new Ratekeeper();
+    /** Handles packet spam rate limits. */
+    public Ratekeeper packetRate = new Ratekeeper();
 
     public boolean hasConnected, hasBegunConnecting, hasDisconnected;
     public float viewWidth, viewHeight, viewX, viewY;
 
     public NetConnection(String address){
         this.address = address;
+    }
+
+    /** Kick with the standard kick reason. */
+    public void kick(){
+        kick(KickReason.kick);
     }
 
     /** Kick with a special, localized reason. Use this if possible. */
@@ -72,7 +82,12 @@ public abstract class NetConnection{
             Call.kick(this, reason);
         }
 
-        close();
+        if(uuid.startsWith("steam:")){
+            //run with a 2-frame delay so there is time to send the kick packet, steam handles this weirdly
+            Core.app.post(() -> Core.app.post(this::close));
+        }else{
+            close();
+        }
 
         netServer.admins.save();
         kicked = true;

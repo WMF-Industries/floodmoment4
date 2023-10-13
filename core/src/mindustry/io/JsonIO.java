@@ -182,6 +182,7 @@ public class JsonIO{
             @Override
             public Block read(Json json, JsonValue jsonData, Class type){
                 Block block = Vars.content.getByName(ContentType.block, jsonData.asString());
+                if(block == null) block = Vars.content.getByName(ContentType.block, SaveVersion.fallback.get(jsonData.asString(), ""));
                 return block == null ? Blocks.air : block;
             }
         });
@@ -194,6 +195,9 @@ public class JsonIO{
 
             @Override
             public Planet read(Json json, JsonValue jsonData, Class type){
+                if(jsonData.asString() == null){
+                    return null;
+                }
                 Planet block = Vars.content.getByName(ContentType.planet, jsonData.asString());
                 return block == null ? Planets.serpulo : block;
             }
@@ -318,8 +322,6 @@ public class JsonIO{
                 return exec;
             }
         });
-
-        
 
         //use short names for all filter types
         for(var filter : Maps.allFilterTypes){

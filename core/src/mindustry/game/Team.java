@@ -35,13 +35,18 @@ public class Team implements Comparable<Team>{
 
         //TODO temporarily no palettes for these teams.
         green = new Team(4, "green", Color.valueOf("54d67d")),//Color.valueOf("96f58c"), Color.valueOf("54d67d"), Color.valueOf("28785c")),
-        blue = new Team(5, "blue", Color.valueOf("6c87fd")); //Color.valueOf("85caf9"), Color.valueOf("6c87fd"), Color.valueOf("3b3392")
+        blue = new Team(5, "blue", Color.valueOf("6c87fd")), //Color.valueOf("85caf9"), Color.valueOf("6c87fd"), Color.valueOf("3b3392")
+        neoplastic = new Team(6, "neoplastic", Color.valueOf("e05438")); //yes, it looks very similar to crux, you're not supposed to use this team for block regions anyway
 
     static{
         Mathf.rand.setSeed(8);
+        //fix random seed shift caused by new team
+        for(int i = 0; i < 3; i++){
+            Mathf.random();
+        }
         //create the whole 256 placeholder teams
-        for(int i = 6; i < all.length; i++){
-            new Team(i, "team#" + i, Color.HSVtoRGB(360f * Mathf.random(), 100f * Mathf.random(0.6f, 1f), 100f * Mathf.random(0.8f, 1f), 1f));
+        for(int i = 7; i < all.length; i++){
+            new Team(i, "team#" + i, Color.HSVtoRGB(360f * Mathf.random(), 100f * Mathf.random(0.4f, 1f), 100f * Mathf.random(0.6f, 1f), 1f));
         }
         Mathf.rand.setSeed(new Rand().nextLong());
     }
@@ -107,7 +112,7 @@ public class Team implements Comparable<Team>{
 
     /** @return whether this team is supposed to be AI-controlled. */
     public boolean isAI(){
-        return (state.rules.waves || state.rules.attackMode) && this == state.rules.waveTeam && !state.rules.pvp;
+        return (state.rules.waves || state.rules.attackMode) && this != state.rules.defaultTeam && !state.rules.pvp;
     }
 
     /** @return whether this team is solely comprised of AI (with no players possible). */
@@ -120,6 +125,8 @@ public class Team implements Comparable<Team>{
         return isAI() && !rules().rtsAi;
     }
 
+    /** @deprecated There is absolutely no reason to use this. */
+    @Deprecated
     public boolean isEnemy(Team other){
         return this != other;
     }
@@ -130,6 +137,10 @@ public class Team implements Comparable<Team>{
 
     public String localized(){
         return Core.bundle.get("team." + name + ".name", name);
+    }
+    
+    public String coloredName(){
+        return emoji + "[#" + color + "]" + localized() + "[]";
     }
 
     @Override

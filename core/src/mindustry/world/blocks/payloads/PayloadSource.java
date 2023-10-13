@@ -1,5 +1,6 @@
 package mindustry.world.blocks.payloads;
 
+import arc.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -9,6 +10,7 @@ import arc.util.io.*;
 import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.entities.units.*;
+import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -29,6 +31,7 @@ public class PayloadSource extends PayloadBlock{
         hasPower = false;
         rotate = true;
         configurable = true;
+        selectionRows = selectionColumns = 8;
         //make sure to display large units.
         clipSize = 120;
         noUpdateDisabled = true;
@@ -37,8 +40,8 @@ public class PayloadSource extends PayloadBlock{
         commandable = true;
 
         config(Block.class, (PayloadSourceBuild build, Block block) -> {
-            if(canProduce(block) && build.block != block){
-                build.block = block;
+            if(canProduce(block) && build.configBlock != block){
+                build.configBlock = block;
                 build.unit = null;
                 build.payload = null;
                 build.scl = 0f;
@@ -48,14 +51,14 @@ public class PayloadSource extends PayloadBlock{
         config(UnitType.class, (PayloadSourceBuild build, UnitType unit) -> {
             if(canProduce(unit) && build.unit != unit){
                 build.unit = unit;
-                build.block = null;
+                build.configBlock = null;
                 build.payload = null;
                 build.scl = 0f;
             }
         });
 
         configClear((PayloadSourceBuild build) -> {
-            build.block = null;
+            build.configBlock = null;
             build.unit = null;
             build.payload = null;
             build.scl = 0f;
@@ -75,16 +78,16 @@ public class PayloadSource extends PayloadBlock{
     }
 
     public boolean canProduce(Block b){
-        return b.isVisible() && b.size < size && !(b instanceof CoreBlock) && !state.rules.bannedBlocks.contains(b) && b.environmentBuildable();
+        return b.isVisible() && b.size < size && !(b instanceof CoreBlock) && !state.rules.isBanned(b) && b.environmentBuildable();
     }
 
     public boolean canProduce(UnitType t){
         return !t.isHidden() && !t.isBanned() && t.supportsEnv(state.rules.env);
     }
-    
+
     public class PayloadSourceBuild extends PayloadBlockBuild<Payload>{
         public UnitType unit;
-        public Block block;
+        public Block configBlock;
         public @Nullable Vec2 commandPos;
         public float scl;
 
@@ -103,12 +106,12 @@ public class PayloadSource extends PayloadBlock{
             ItemSelection.buildTable(PayloadSource.this, table,
                 content.blocks().select(PayloadSource.this::canProduce).<UnlockableContent>as()
                 .add(content.units().select(PayloadSource.this::canProduce).as()),
-            () -> (UnlockableContent)config(), this::configure);
+            () -> (UnlockableContent)config(), this::configure, selectionRows, selectionColumns);
         }
 
         @Override
         public Object config(){
-            return unit == null ? block : unit;
+            return unit == null ? configBlock : unit;
         }
 
         @Override
@@ -128,8 +131,10 @@ public class PayloadSource extends PayloadBlock{
                     if(commandPos != null && p.isCommandable()){
                         p.command().commandPosition(commandPos);
                     }
-                }else if(block != null){
-                    payload = new BuildPayload(block, team);
+
+                    Events.fire(new UnitCreateEvent(p, this));
+                }else if(configBlock != null){
+                    payload = new BuildPayload(configBlock, team);
                 }
                 payVector.setZero();
                 payRotation = rotdeg();
@@ -154,14 +159,14 @@ public class PayloadSource extends PayloadBlock{
         public void write(Writes write){
             super.write(write);
             write.s(unit == null ? -1 : unit.id);
-            write.s(block == null ? -1 : block.id);
+            write.s(configBlock == null ? -1 : configBlock.id);
         }
 
         @Override
         public void read(Reads read, byte revision){
             super.read(read, revision);
             unit = Vars.content.unit(read.s());
-            block = Vars.content.block(read.s());
+            configBlock = Vars.content.block(read.s());
         }
     }
 }

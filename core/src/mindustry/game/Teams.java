@@ -39,7 +39,7 @@ public class Teams{
     public CoreBuild closestEnemyCore(float x, float y, Team team){
         CoreBuild closest = null;
         float closestDst = Float.MAX_VALUE;
-        
+
         for(Team enemy : team.data().coreEnemies){
             for(CoreBuild core : enemy.cores()){
                 float dst = Mathf.dst2(x, y, core.getX(), core.getY());
@@ -243,6 +243,8 @@ public class Teams{
     public static class TeamData{
         public final Team team;
 
+        /** Handles building ""bases"". */
+        public @Nullable BaseBuilderAI buildAi;
         /** Handles RTS unit control. */
         public @Nullable RtsAI rtsAi;
 
@@ -286,6 +288,11 @@ public class Teams{
 
         public Seq<Building> getBuildings(Block block){
             return buildingTypes.get(block, () -> new Seq<>(false));
+        }
+
+        public int getCount(Block block){
+            var res = buildingTypes.get(block);
+            return res == null ? 0 : res.size;
         }
 
         /** Destroys this team's presence on the map, killing part of its buildings and converting everything to 'derelict'. */
@@ -357,6 +364,12 @@ public class Teams{
             }
         }
 
+        //this is just an alias for consistency
+        @Nullable
+        public Seq<Unit> getUnits(UnitType type){
+            return unitCache(type);
+        }
+
         @Nullable
         public Seq<Unit> unitCache(UnitType type){
             if(unitsByType == null || unitsByType.length <= type.id || unitsByType[type.id] == null) return null;
@@ -400,7 +413,7 @@ public class Teams{
 
         /** @return whether this team is controlled by the AI and builds bases. */
         public boolean hasAI(){
-            return team.rules().rtsAi;
+            return team.rules().rtsAi || team.rules().buildAi;
         }
 
         @Override

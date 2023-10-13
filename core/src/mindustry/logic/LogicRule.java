@@ -6,6 +6,7 @@ public enum LogicRule{
     waves,
     wave,
     waveSpacing,
+    waveSending,
     attackMode,
     enemyCoreBuildRadius,
     dropZoneRadius,
@@ -17,7 +18,9 @@ public enum LogicRule{
 
     //team specific
     buildSpeed,
+    unitHealth,
     unitBuildSpeed,
+    unitCost,
     unitDamage,
     blockHealth,
     blockDamage,

@@ -123,6 +123,8 @@ public class UnitAssembler extends PayloadBlock{
         updateClipRadius(areaSize * tilesize);
         consume(consPayload = new ConsumePayloadDynamic((UnitAssemblerBuild build) -> build.plan().requirements));
 
+        consumeBuilder.each(c -> c.multiplier = b -> state.rules.unitCost(b.team));
+
         super.init();
     }
 
@@ -239,8 +241,8 @@ public class UnitAssembler extends PayloadBlock{
 
         public boolean moduleFits(Block other, float ox, float oy, int rotation){
             float
-            dx = ox + Geometry.d4x(rotation) * (other.size/2 + 1) * tilesize,
-            dy = oy + Geometry.d4y(rotation) * (other.size/2 + 1) * tilesize;
+            dx = ox + Geometry.d4x(rotation) * (other.size/2f + 0.5f) * tilesize,
+            dy = oy + Geometry.d4y(rotation) * (other.size/2f + 0.5f) * tilesize;
 
             Vec2 spawn = getUnitSpawn();
 
@@ -477,6 +479,8 @@ public class UnitAssembler extends PayloadBlock{
 
             Draw.rect(topRegion, x, y);
 
+            if(isPayload()) return;
+
             //draw drone construction
             if(droneWarmup > 0.001f){
                 Draw.draw(Layer.blockOver + 0.2f, () -> {
@@ -590,7 +594,7 @@ public class UnitAssembler extends PayloadBlock{
         public boolean acceptPayload(Building source, Payload payload){
             var plan = plan();
             return (this.payload == null || source instanceof UnitAssemblerModuleBuild) &&
-                    plan.requirements.contains(b -> b.item == payload.content() && blocks.get(payload.content()) < b.amount);
+                    plan.requirements.contains(b -> b.item == payload.content() && blocks.get(payload.content()) < Mathf.round(b.amount * state.rules.unitCost(team)));
         }
 
         @Override

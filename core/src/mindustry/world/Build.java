@@ -59,7 +59,7 @@ public class Build{
             tile.build.lastAccessed = unit.getControllerName();
         }
 
-        Core.app.post(() -> Events.fire(new BlockBuildBeginEvent(tile, team, unit, true)));
+        Events.fire(new BlockBuildBeginEvent(tile, team, unit, true));
     }
 
     /** Places a ConstructBlock at this location. */
@@ -77,10 +77,12 @@ public class Build{
         //auto-rotate the block to the correct orientation and bail out
         if(tile.team() == team && tile.block == result && tile.build != null && tile.block.quickRotate){
             if(unit != null && unit.getControllerName() != null) tile.build.lastAccessed = unit.getControllerName();
+            int previous = tile.build.rotation;
             tile.build.rotation = Mathf.mod(rotation, 4);
             tile.build.updateProximity();
             tile.build.noSleep();
             Fx.rotateBlock.at(tile.build.x, tile.build.y, tile.build.block.size);
+            Events.fire(new BuildRotateEvent(tile.build, unit, previous));
             return;
         }
 
@@ -113,9 +115,9 @@ public class Build{
         build.prevBuild = prevBuild;
         if(unit != null && unit.getControllerName() != null) build.lastAccessed = unit.getControllerName();
 
-        result.placeBegan(tile, previous);
+        Events.fire(new BlockBuildBeginEvent(tile, team, unit, false));
 
-        Core.app.post(() -> Events.fire(new BlockBuildBeginEvent(tile, team, unit, false)));
+        result.placeBegan(tile, previous, unit);
     }
 
     /** Returns whether a tile can be placed at this location by this team. */
@@ -169,6 +171,10 @@ public class Build{
             return false;
         }
 
+        if((type.isFloor() && tile.floor() == type) || (type.isOverlay() && tile.overlay() == type)){
+            return false;
+        }
+
         if(!type.canPlaceOn(tile, team, rotation)){
             return false;
         }
@@ -192,10 +198,6 @@ public class Build{
                 !check.floor().placeableOn || //solid wall
                 (!checkVisible && !check.block().alwaysReplace) || //replacing a block that should be replaced (e.g. payload placement)
                     !((type.canReplace(check.block()) || //can replace type
-                        //controversial change: allow rebuilding damaged blocks
-                        //this could be buggy and abuse-able, so I'm not enabling it yet
-                        //note that this requires a change in BuilderComp as well
-                        //(type == check.block() && check.centerX() == x && check.centerY() == y && check.build != null && check.build.health < check.build.maxHealth - 0.0001f) ||
                         (check.build instanceof ConstructBuild build && build.current == type && check.centerX() == tile.x && check.centerY() == tile.y)) && //same type in construction
                     type.bounds(tile.x, tile.y, Tmp.r1).grow(0.01f).contains(check.block.bounds(check.centerX(), check.centerY(), Tmp.r2))) || //no replacement
                 (type.requiresWater && check.floor().liquidDrop != Liquids.water) //requires water but none found

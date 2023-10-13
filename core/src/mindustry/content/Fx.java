@@ -8,6 +8,7 @@ import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.entities.*;
+import mindustry.entities.abilities.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -28,11 +29,11 @@ public class Fx{
 
     none = new Effect(0, 0f, e -> {}),
     
-    blockCrash = new Effect(100f, e -> {
+    blockCrash = new Effect(90f, e -> {
         if(!(e.data instanceof Block block)) return;
 
         alpha(e.fin() + 0.5f);
-        float offset = Mathf.lerp(0f, 200f, e.fout());
+        float offset = Mathf.lerp(0f, 180f, e.fout());
         color(0f, 0f, 0f, 0.44f);
         rect(block.fullIcon, e.x - offset * 4f, e.y, (float)block.size * 8f, (float)block.size * 8f);
         color(Color.white);
@@ -54,9 +55,9 @@ public class Fx{
     unitSpawn = new Effect(30f, e -> {
         if(!(e.data instanceof UnitType unit)) return;
 
-        float scl = 1f + e.fout() * 2f;
-
         TextureRegion region = unit.fullIcon;
+
+        float scl = (1f + e.fout() * 2f) * region.scl();
 
         alpha(e.fout());
         mixcol(Color.white, e.fin());
@@ -67,7 +68,7 @@ public class Fx{
 
         alpha(e.fin());
 
-        rect(region, e.x, e.y, region.width * Draw.scl * scl, region.height * Draw.scl * scl, e.rotation - 90);
+        rect(region, e.x, e.y, region.width * scl, region.height * scl, e.rotation - 90);
     }),
 
     unitCapKill = new Effect(80f, e -> {
@@ -416,6 +417,20 @@ public class Fx{
         Lines.spikes(e.x, e.y, 1f + e.fin() * 6f, e.fout() * 4f, 6);
     }),
 
+    sparkExplosion = new Effect(30f, 160f, e -> {
+        color(e.color);
+        stroke(e.fout() * 3f);
+        float circleRad = 6f + e.finpow() * e.rotation;
+        Lines.circle(e.x, e.y, circleRad);
+
+        rand.setSeed(e.id);
+        for(int i = 0; i < 16; i++){
+            float angle = rand.random(360f);
+            float lenRand = rand.random(0.5f, 1f);
+            Lines.lineAngle(e.x, e.y, angle, e.foutpow() * e.rotation * 0.8f * rand.random(1f, 0.6f) + 2f, e.finpow() * e.rotation * 1.2f * lenRand + 6f);
+        }
+    }),
+
     titanExplosion = new Effect(30f, 160f, e -> {
         color(e.color);
         stroke(e.fout() * 3f);
@@ -606,6 +621,12 @@ public class Fx{
         color(Pal.heal);
         stroke(e.fout() * 2f);
         Lines.circle(e.x, e.y, 2f + e.finpow() * 7f);
+    }),
+
+    dynamicWave = new Effect(22, e -> {
+        color(e.color, 0.7f);
+        stroke(e.fout() * 2f);
+        Lines.circle(e.x, e.y, 4f + e.finpow() * e.rotation);
     }),
 
     shieldWave = new Effect(22, e -> {
@@ -1516,6 +1537,15 @@ public class Fx{
         });
     }),
 
+    smokePuff = new Effect(30, e -> {
+        color(e.color);
+
+        randLenVectors(e.id, 6, 4f + 30f * e.finpow(), (x, y) -> {
+            Fill.circle(e.x + x, e.y + y, e.fout() * 3f);
+            Fill.circle(e.x + x / 2f, e.y + y / 2f, e.fout());
+        });
+    }),
+
     shootSmall = new Effect(8, e -> {
         color(Pal.lighterOrange, Pal.lightOrange, e.fin());
         float w = 1f + 5 * e.fout();
@@ -2404,6 +2434,14 @@ public class Fx{
     shieldBreak = new Effect(40, e -> {
         color(e.color);
         stroke(3f * e.fout());
+        if(e.data instanceof Unit u){
+            var ab = (ForceFieldAbility)Structs.find(u.abilities, a -> a instanceof ForceFieldAbility);
+            if(ab != null){
+                Lines.poly(e.x, e.y, ab.sides, e.rotation + e.fin(), ab.rotation);
+                return;
+            }
+        }
+
         Lines.poly(e.x, e.y, 6, e.rotation + e.fin());
     }).followParent(true),
 
