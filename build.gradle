@@ -6,7 +6,7 @@ buildscript{
 
         arcHash = getArcHash()
     }
-    
+
     repositories{
         mavenLocal()
         mavenCentral()
@@ -22,13 +22,13 @@ buildscript{
 }
 
 plugins{
-    id "org.jetbrains.kotlin.jvm" version "1.7.0"
-    id "org.jetbrains.kotlin.kapt" version "1.7.0"
+    id "org.jetbrains.kotlin.jvm" version "1.6.0"
+    id "org.jetbrains.kotlin.kapt" version "1.6.0"
 }
 
 allprojects{
     apply plugin: 'maven-publish'
-    
+
     version = project.hasProperty("packageVersion") ? project.getProperty("packageVersion") : 'release'
     group = 'com.github.Anuken'
 

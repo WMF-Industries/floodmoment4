@@ -632,9 +632,6 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
                 return;
             }
 
-            // Uhhh.... Formations are gone in erekir. What do we do about it.
-//            player.unit().commandNearby(new LayeredFormation());
-//            Fx.commandSend.at(player, player.unit().type.commandRadius);
         }
         //should only get to this code if docking failed or this isn't a docking unit
 

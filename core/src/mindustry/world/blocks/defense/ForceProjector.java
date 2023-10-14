@@ -43,8 +43,7 @@ public class ForceProjector extends Block{
     public boolean consumeCoolant = true;
     public Effect absorbEffect = Fx.absorb;
     public Effect shieldBreakEffect = Fx.shieldBreak;
-    public @Load("@-top")
-    TextureRegion topRegion;
+    public @Load("@-top") TextureRegion topRegion;
 
     //TODO json support
     public @Nullable Consume itemConsumer, coolantConsumer;
@@ -62,8 +61,8 @@ public class ForceProjector extends Block{
 
     private static final Cons<Tile> creeperConsumer = tile -> {
         if(((tile.creep >= 1f && tile.creeperable)
-                || (creeperLevels.containsKey(tile.block()) && tile.team() == creeperTeam)) && !paramEntity.broken
-                && Intersector.isInRegularPolygon(((ForceProjector)(paramEntity.block)).sides, paramEntity.x, paramEntity.y, paramEntity.realRadius(), ((ForceProjector)(paramEntity.block)).shieldRotation, tile.x, tile.y)){
+                || (creeperLevels.containsKey(tile.block()) && tile.team() == creeperTeam))
+                && !paramEntity.broken && inForceField(tile)){
             if (paramEntity.team != creeperTeam){
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);
 
@@ -193,7 +192,7 @@ public class ForceProjector extends Block{
 
             phaseHeat = Mathf.lerpDelta(phaseHeat, Mathf.num(phaseValid), 0.1f);
 
-            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && efficiency > 0){
+            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && consPower.efficiency(tile.build) > 0){
                 consume();
             }
 
@@ -203,7 +202,7 @@ public class ForceProjector extends Block{
                 Fx.reactorsmoke.at(x + Mathf.range(tilesize / 2f), y + Mathf.range(tilesize / 2f));
             }
 
-            warmup = Mathf.lerpDelta(warmup, efficiency, 0.1f);
+            warmup = Mathf.lerpDelta(warmup, consPower.efficiency(tile.build), 0.1f);
 
             if(buildup > 0){
                 float scale = !broken ? cooldownNormal : cooldownBrokenBase;

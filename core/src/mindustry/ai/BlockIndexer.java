@@ -421,7 +421,7 @@ public class BlockIndexer{
     }
 
     /** Find the closest ore block relative to a position. */
-    public @Nullable Tile findClosestOre(float xp, float yp, Item item){
+    public Tile findClosestOre(float xp, float yp, Item item){
         if(ores[item.id] != null){
             float minDst = 0f;
             Tile closest = null;
@@ -436,7 +436,7 @@ public class BlockIndexer{
                                 closest = tile;
                                 minDst = dst;
                             }
-                        } else arr.removeIndex(0); // This may fix the bug where the miner ai ceases to work randomly
+                        }
                     }
                 }
             }

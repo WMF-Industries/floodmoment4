@@ -1,8 +1,8 @@
 package mindustry.async;
 
 import arc.math.*;
-import arc.math.geom.QuadTree.*;
 import arc.math.geom.*;
+import arc.math.geom.QuadTree.*;
 import arc.struct.*;
 import mindustry.*;
 import mindustry.async.PhysicsProcess.PhysicsWorld.*;

@@ -156,7 +156,7 @@ public class Damage{
         boolean found = World.raycast(b.tileX(), b.tileY(), World.toTile(b.x + vec.x), World.toTile(b.y + vec.y),
         (x, y) -> (furthest = world.tile(x, y)) != null && furthest.team() != b.team && (furthest.build != null && furthest.build.absorbLasers()));
 
-        return found && furthest != null ? Math.max(6f, b.dst(furthest.worldx(), furthest.worldy())) - 2f : length;
+        return found && furthest != null ? Math.max(6f, b.dst(furthest.worldx(), furthest.worldy())) : length;
     }
 
     public static float findPierceLength(Bullet b, int pierceCap, float length){

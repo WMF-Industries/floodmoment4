@@ -48,7 +48,11 @@ public class SuicideAI extends GroundAI{
                     (target instanceof Building b ? b.block.size * Vars.tilesize / 2f : 2000f));
 
             //do not move toward walls or transport blocks
-            if(!(target instanceof Building)){
+            if(!(target instanceof Building build && !(build.block instanceof CoreBlock) && (
+                build.block.group == BlockGroup.walls ||
+                build.block.group == BlockGroup.liquids ||
+                build.block.group == BlockGroup.transportation
+            ))){
                 blockedByBlock = false;
 
                 //raycast for target
@@ -111,6 +115,7 @@ public class SuicideAI extends GroundAI{
 
     @Override
     public Teamc target(float x, float y, float range, boolean air, boolean ground){
-        return Units.closestTarget(unit.team, x, y, range, u -> u.checkTarget(air, ground), t -> ground);
+        return Units.closestTarget(unit.team, x, y, range, u -> u.checkTarget(air, ground), t -> ground &&
+            !(t.block instanceof Conveyor || t.block instanceof Conduit)); //do not target conveyors/conduits
     }
 }

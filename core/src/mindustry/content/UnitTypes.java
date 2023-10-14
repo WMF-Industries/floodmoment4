@@ -359,7 +359,7 @@ public class UnitTypes{
             mineTier = 2;
             mineSpeed = 5f;
 
-            abilities.add(new ShieldRegenFieldAbility(20f, 40f, 60f * 5, 60f));
+            // abilities.add(new ShieldRegenFieldAbility(20f, 40f, 60f * 5, 60f));
             ammoType = new PowerAmmoType(1300);
 
             weapons.add(new Weapon("heal-shotgun-weapon"){{
@@ -606,11 +606,14 @@ public class UnitTypes{
         crawler = new UnitType("crawler"){{
             aiController = SuicideAI::new;
 
+//            health = 200;
             health = 100;
+//            speed = 1f;
             speed = 1.5f;
             accel = 0.08f;
             drag = 0.016f;
             flying = true;
+//            hitSize = 8f;
             hitSize = 6f;
             targetAir = false;
             engineOffset = 7.8f;
@@ -631,8 +634,8 @@ public class UnitTypes{
                 mirror = false;
                 bullet = new ArtilleryBulletType(25f, 0f, "clear"){{
                     isCreeper = true;
-                    anticreepBubble = 8;
-                    anticreepBubbleTime = 10f;
+                    anticreepBubble = 8; // radius
+                    anticreepBubbleTime = 10f; // time in seconds
 
                     lifetime = 10f;
                     collidesTiles = false;
@@ -655,7 +658,8 @@ public class UnitTypes{
         atrax = new UnitType("atrax"){{
             aiController = SuicideAI::new;
 
-            speed = 0.6f;
+//            speed = 0.6f;
+            speed = 0.5f;
             drag = 0.4f;
             hitSize = 13f;
             rotateSpeed = 3f;
@@ -698,7 +702,8 @@ public class UnitTypes{
         spiroct = new UnitType("spiroct"){{
             aiController = SuicideAI::new;
 
-            speed = 0.54f;
+//            speed = 0.54f;
+            speed = 0.4f;
             drag = 0.4f;
             hitSize = 12f;
             creeperDeposit = 7f;
@@ -766,8 +771,8 @@ public class UnitTypes{
             aiController = SuicideAI::new;
 
             drag = 0.1f;
-            speed = 0.62f;
-            hitSize = 23f;
+            speed = 0.5f;
+            hitSize = 21f;
             creeperDeposit = 5f;
             health = 8000;
             armor = 6f;
@@ -872,7 +877,7 @@ public class UnitTypes{
 
             drag = 0.1f;
             speed = 0.5f;
-            hitSize = 26f;
+            hitSize = 21f;
             creeperDeposit = 9f;
             health = 22000;
             armor = 13f;
@@ -1006,12 +1011,18 @@ public class UnitTypes{
             accel = 0.08f;
             drag = 0.04f;
             flying = true;
-            health = 70;
-            engineOffset = 5.75f;
-            //TODO balance
-            //targetAir = false;
+//            health = 70;
+            health = 275;
+//            engineOffset = 5.75f;
+            engineOffset = 5.5f;
+            range = 140f;
+            //as default AI, flares are not very useful in core rushes, they attack nothing in the way
+            targetAir = false;
             targetFlags = new BlockFlag[]{BlockFlag.generator, null};
-            creeperResistance = 0.3f;
+            circleTarget = false;
+            creeperResistance = 0.2f;
+
+            // new stuff
             hitSize = 9;
             itemCapacity = 10;
 
@@ -1034,9 +1045,8 @@ public class UnitTypes{
 
         horizon = new UnitType("horizon"){{
             aiController = BuilderAI::new;
-
-            health = 340;
-            speed = 1.65f;
+            health = 440;
+            speed = 1.7f;
             accel = 0.08f;
             drag = 0.016f;
             flying = true;
@@ -1061,7 +1071,7 @@ public class UnitTypes{
                 inaccuracy = 15f;
                 ignoreRotation = true;
                 shootSound = Sounds.none;
-                bullet = new BombBulletType(27f, 25f){{
+                bullet = new BombBulletType(0f, 25f){{
                     width = 10f;
                     height = 14f;
                     hitEffect = Fx.flakExplosion;
@@ -1081,8 +1091,8 @@ public class UnitTypes{
         };
 
         zenith = new UnitType("zenith"){{
-            health = 700;
-            speed = 1.7f;
+            health = 1400;
+            speed = 1.8f;
             accel = 0.04f;
             drag = 0.016f;
             flying = true;

@@ -220,7 +220,7 @@ public class CommandAI extends AIController{
             faceTarget();
         }
 
-        if (targetPos == null && command == null && unit.team != CreeperUtils.creeperTeam) {
+        if (targetPos == null && unit.team != CreeperUtils.creeperTeam) {
             var creep = Vars.indexer.findClosestCreeper(unit.x, unit.y);
 
             if (creep.build != null) {

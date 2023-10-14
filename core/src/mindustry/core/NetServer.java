@@ -1,7 +1,6 @@
 package mindustry.core;
 
 import arc.*;
-import arc.files.Fi;
 import arc.func.*;
 import arc.graphics.*;
 import arc.math.*;
@@ -308,14 +307,6 @@ public class NetServer implements ApplicationListener{
     }
 
     private void registerCommands(){
-        clientCommands.<Player>register("info", "", "Displays information about the server.", (args, player) -> {
-            try{
-                player.sendMessage(new Fi("info.txt").readString());
-            }catch(Exception e){
-                player.sendMessage("[#656566]⚠ No information provided for this server.");
-            }
-        });
-
         clientCommands.<Player>register("tutorial", "", "Start the interactive tutorial", (args, player) -> {
             Call.menuChoose(player, tutorialID, 0);
         });
