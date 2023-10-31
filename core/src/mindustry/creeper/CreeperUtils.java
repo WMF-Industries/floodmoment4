@@ -135,7 +135,6 @@ public class CreeperUtils{
             return;
 
         Call.effect(Fx.sapExplosion, x, y, sporeRadius, Color.blue);
-
         depositCreeper(tile, sporeRadius, sporeAmount);
     }
 
@@ -416,7 +415,15 @@ public class CreeperUtils{
                 Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
             }
 
-            tile.build.damage(creeperDamage * tile.creep);
+            float damage = creeperDamage * tile.creep;
+
+            if(tile.block() instanceof CoreBlock && tile.build.team() != creeperTeam && tile.build.health() <= damage){
+                var block = tile.block();
+                Call.effect(Fx.reactorExplosion, tile.build.x, tile.build.y, 0, Color.blue);
+                Call.sound(Sounds.explosionbig, 0.5f, 1, 1);
+                tile.build.remove();
+                tile.build.tile.setNet(block, creeperTeam, 0);
+            }else tile.build.damage(damage);
             tile.creep *= creeperEvaporationUponDamagePercent;
         }
     }
