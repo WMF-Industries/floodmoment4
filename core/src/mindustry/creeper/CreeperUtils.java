@@ -242,6 +242,23 @@ public class CreeperUtils{
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
         });
 
+        Timer.schedule(() -> {
+            sb.append(Strings.format(
+                    "\uE88B [@] @/@ []emitters suspended",
+                    getTrafficlightColor(Mathf.clamp((nullifiedCount / Math.max(1.0, creeperEmitters.size)), 0f, 1f)),
+                    nullifiedCount, creeperEmitters.size
+            ));
+            if (chargedEmitters.size > 0) {
+                sb.append(Strings.format(
+                        "\n\uE88B [@] @ []charged emitters remaining",
+                        getTrafficlightColor(1f - Mathf.clamp(chargedEmitters.size / 10f, 0f, 1f)),
+                        chargedEmitters.size
+                ));
+            }
+            Call.infoPopup(sb.toString(), 2.5f, 20, 50, 20, 520, 0);
+            sb.setLength(0);
+        }, 0, 2.475f);
+
         Events.on(EventType.BlockDestroyEvent.class, e -> {
             if(creeperLevels.containsKey(e.tile.block())){
                 e.tile.creep = 0;
@@ -301,23 +318,7 @@ public class CreeperUtils{
             double percentage = shield.healthLeft / ((ForceProjector)shield.block).shieldHealth;
             Call.label("[" + getTrafficlightColor(percentage) + "]" + (int)(percentage * 100) + "%" + (shield.phaseHeat > 0.1f ? " [#f4ba6e]\uE86B +" + ((int)((1f - CreeperUtils.shieldBoostProtectionMultiplier) * 100f)) + "%" : ""), 1f, shield.x, shield.y);
         }
-
         nullifiedCount = newcount;
-
-        sb.append(Strings.format(
-                "\uE88B [@] @/@ []emitters suspended",
-                getTrafficlightColor(Mathf.clamp((nullifiedCount / Math.max(1.0, creeperEmitters.size)), 0f, 1f)),
-                nullifiedCount, creeperEmitters.size
-        ));
-        if (chargedEmitters.size > 0) {
-            sb.append(Strings.format(
-                    "\n\uE88B [@] @ []charged emitters remaining",
-                    getTrafficlightColor(1f - Mathf.clamp(chargedEmitters.size / 10f, 0f, 1f)),
-                    chargedEmitters.size
-            ));
-        }
-        Call.infoPopup(sb.toString(), 1f, 20, 50, 20, 527, 0);
-        sb.setLength(0);
     }
 
     public static void updateCreeper(){

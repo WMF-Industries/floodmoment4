@@ -15,6 +15,7 @@ public class ChargedEmitter implements Position{
     public Building build;
 
     public int counter;
+    public int throttle;
     public float buildup;
     public float overflow;
     public boolean emitting;
@@ -29,7 +30,10 @@ public class ChargedEmitter implements Position{
         if(build.health < build.maxHealth && overflow > 0){
             if(!emitting) overflow--;
             build.heal(build.maxHealth);
-            Call.effect(Fx.healBlock, build.x, build.y, build.block.size, creeperTeam.color);
+            if(++throttle >= 6){
+                Call.effect(Fx.healBlock, build.x, build.y, build.block.size, creeperTeam.color);
+                throttle = 0;
+            }
         }
 
         if(emitting){

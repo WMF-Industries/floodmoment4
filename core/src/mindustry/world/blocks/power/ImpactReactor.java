@@ -96,8 +96,9 @@ public class ImpactReactor extends PowerGenerator{
                     Call.soundAt(Sounds.dullExplosion, x, y, 1, 1);
                     Call.effect(Fx.dynamicSpikes, x, y, warmup * 3f, team.color);
                 }else if(targetEmitter != null && targetEmitter.build != null){
-                    float duration = 1.25f - warmup;
-                    Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", duration, this.x, this.y);
+                    Timer.schedule(() -> {
+                    Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
+                    }, 0, 1);
                 }
             }else{
                 lastFx += 1;
