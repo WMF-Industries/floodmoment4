@@ -76,7 +76,7 @@ public class ImpactReactor extends PowerGenerator{
 
         @Override
         public void updateTile(){
-            if(lastFx > (2f - warmup) * 25){
+            if(!this.dead() && lastFx > (2f - warmup) * 25){
                 lastFx = 0;
 
                 if (targetEmitter == null){
@@ -169,7 +169,6 @@ public class ImpactReactor extends PowerGenerator{
             }
 
             totalProgress += warmup * Time.delta;
-
             productionEfficiency = Mathf.pow(warmup, 5f);
         }
 
