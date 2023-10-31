@@ -6,7 +6,6 @@ import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
 import mindustry.ai.*;
-import mindustry.creeper.CreeperUtils;
 import mindustry.core.*;
 import mindustry.entities.*;
 import mindustry.entities.units.*;
@@ -218,14 +217,6 @@ public class CommandAI extends AIController{
 
         }else if(target != null){
             faceTarget();
-        }
-
-        if (targetPos == null && unit.team != CreeperUtils.creeperTeam) {
-            var creep = Vars.indexer.findClosestCreeper(unit.x, unit.y);
-
-            if (creep.build != null) {
-                attackTarget = creep.build;
-            }
         }
     }
 

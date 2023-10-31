@@ -95,7 +95,10 @@ public class SuicideAI extends GroundAI{
             }
 
             if(move){
-                pathfind(Pathfinder.fieldCore);
+                if(unit.isFlying() && target != null){
+                    moveTo(target, unit.type.range * 0.2f);
+                    unit.lookAt(target);
+                }else pathfind(Pathfinder.fieldCore);
             }
         }
 

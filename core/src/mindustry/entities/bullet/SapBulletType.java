@@ -63,7 +63,7 @@ public class SapBulletType extends BulletType{
         Healthc target = Damage.linecast(b, b.x, b.y, b.rotation(), length);
         b.data = target;
 
-        if(target != null){
+        if(target != null && sapStrength != 0){
             float result = Math.max(Math.min(target.health(), damage), 0);
 
             if(b.owner instanceof Healthc h){

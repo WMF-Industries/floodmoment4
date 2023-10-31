@@ -33,6 +33,7 @@ public class Items{
         }};
 
         sand = new Item("sand", Color.valueOf("f7cba4")){{
+            hardness = 1;
             lowPriority = true;
             buildable = false;
             //needed to show up as requirement
@@ -60,7 +61,7 @@ public class Items{
         }};
 
         scrap = new Item("scrap", Color.valueOf("777777")){{
-
+            hardness = 1;
         }};
 
         silicon = new Item("silicon", Color.valueOf("53565c")){{

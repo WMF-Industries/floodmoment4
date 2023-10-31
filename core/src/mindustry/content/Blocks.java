@@ -351,13 +351,11 @@ public class Blocks{
 
         sand = new Floor("sand-floor"){{
             itemDrop = Items.sand;
-            playerUnmineable = true;
             attributes.set(Attribute.oil, 0.7f);
         }};
 
         darksand = new Floor("darksand"){{
             itemDrop = Items.sand;
-            playerUnmineable = true;
             attributes.set(Attribute.oil, 1.5f);
         }};
 
@@ -1582,7 +1580,6 @@ public class Blocks{
 
             floodHealth = 150;
 
-            chanceDeflect = 10f;
             flashHit = true;
             envDisabled |= Env.scorching;
         }};
@@ -1602,7 +1599,6 @@ public class Blocks{
 
             floodHealth = 175;
 
-            lightningChance = 0f;
             envDisabled |= Env.scorching;
         }};
 

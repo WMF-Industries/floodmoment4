@@ -15,14 +15,14 @@ import static mindustry.creeper.CreeperUtils.*;
 public class Emitter implements Position{
     public Building build;
     public EmitterType type;
+    public boolean suspended;
     public boolean nullified;
-
     protected int counter;
 
     public static HashMap<Block, EmitterType> emitterTypes = new HashMap<>();
 
     public Emitter(Building build){
-        if (build == null) {
+        if (build == null){
             creeperEmitters.remove(this);
             return;
         }
@@ -34,16 +34,17 @@ public class Emitter implements Position{
     public boolean update(){
         if(build == null || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild)) return false;
 
-        nullified = build.nullifyTimeout > 0f;
+        suspended = build.nullifyTimeout > 0f;
+        nullified = (build.nullifyTimeout > 0f && build.tile.creep < maxTileCreep);
 
-        if(!nullified & counter >= type.interval){
+        if(!suspended & counter >= type.interval){
             counter = 0;
             // two methods so upgrading will work
             if(build.tile.creep >= 10.35f && type.level != 3) {
-                build.tile.creep = Math.min(build.tile.creep + type.amt, type.upgradeThreshold + maxTileCreep);
+                build.tile.creep = Math.min(build.tile.creep + type.amt, (type.upgradeThreshold + maxTileCreep));
             } else {
                 build.tile.getLinkedTiles(t ->
-                        t.creep = Math.min(t.creep + type.amt, maxTileCreep)
+                    t.creep = Math.min(t.creep + type.amt, maxTileCreep)
                 );
             }
         }
@@ -54,22 +55,20 @@ public class Emitter implements Position{
 
     // updates every 1 second
     public void fixedUpdate(){
-        if(nullified && build.tile.creep < maxTileCreep){
+        if(nullified){
             Call.label("[red]*[] SUSPENDED [red]*[]", 1f, build.x, build.y);
             Call.effect(Fx.placeBlock, build.x, build.y, build.block.size, Color.yellow);
-        } else if (build != null && build.tile != null && type.level != 3 && build.tile.creep >= maxTileCreep){
+        }else if(build != null && build.tile != null && type.level <= 2 && build.tile.creep > maxTileCreep) {
             Call.label(Strings.format("[green]*[white] UPGRADING []@% *[]", (int) ((build.tile.creep - maxTileCreep) * 100 / (type.upgradeThreshold - maxTileCreep))), 1f, build.x, build.y);
-            if (build.tile.creep >= type.upgradeThreshold){
-                // yeet the flood after upgrading
-                build.tile.creep = 0;
-                build.tile.getLinkedTiles(t ->
-                        t.creep = 0
-                );
+            if (build.tile.creep >= type.upgradeThreshold) {
                 // get next emitter level & upgrade
                 EmitterType next = type.getNext();
+                creeperEmitters.remove(this);
                 build.tile.setNet(next.block, creeperTeam, 0);
                 this.build = build.tile.build;
                 this.type = next;
+                // yeet the creeper afterward
+                build.tile.getLinkedTiles(t -> t.creep = 0);
             }
         }
     }
@@ -91,9 +90,9 @@ public class Emitter implements Position{
     }
 
     public enum EmitterType{
-        shard(3, 30, 1, 30, Blocks.coreShard),
-        foundation(5, 20, 2, 3000, Blocks.coreFoundation),
-        nucleus(7, 15, 3, -1, Blocks.coreNucleus);
+        shard(3, 30, 1, 750, Blocks.coreShard),
+        foundation(5, 20, 2, 4500, Blocks.coreFoundation),
+        nucleus(7, 15, 3, 0, Blocks.coreNucleus);
 
         public final int amt;
         public final int level;
@@ -111,9 +110,7 @@ public class Emitter implements Position{
 
         public EmitterType getNext(){
             for(EmitterType t : values()){
-                if(t.level == (level + 1)){
-                    return t;
-                }
+                if(t.level == (level + 1)) return t;
             }
             return null;
         }

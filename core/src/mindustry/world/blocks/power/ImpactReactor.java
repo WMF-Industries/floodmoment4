@@ -8,7 +8,6 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
 import mindustry.creeper.*;
-import mindustry.entities.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -72,12 +71,14 @@ public class ImpactReactor extends PowerGenerator{
         public float warmup, totalProgress;
         public int lastFx = 0;
         public int finFx = 0;
+        public int smokeFx = 0;
         public Emitter targetEmitter;
 
         @Override
         public void updateTile(){
             if(lastFx > (2f - warmup) * 25){
                 lastFx = 0;
+
                 if (targetEmitter == null){
                     Emitter core = CreeperUtils.closestEmitter(tile);
                     if (core != null && within(core, nullifierRange)){
@@ -85,7 +86,7 @@ public class ImpactReactor extends PowerGenerator{
                     }
                 }
 
-                if(targetEmitter != null && targetEmitter.build != null){
+                if(targetEmitter != null && targetEmitter.build != null && targetEmitter.nullified){
                     Geometry.iterateLine(0f, x, y, targetEmitter.getX(), targetEmitter.getY(), 1f - warmup, (x, y) -> {
                         Timer.schedule(() -> {
                             Call.effect(Fx.missileTrailShort, x, y, warmup * 3f, Pal.accent);
@@ -94,6 +95,9 @@ public class ImpactReactor extends PowerGenerator{
 
                     Call.soundAt(Sounds.dullExplosion, x, y, 1, 1);
                     Call.effect(Fx.dynamicSpikes, x, y, warmup * 3f, team.color);
+                }else if(targetEmitter != null && targetEmitter.build != null){
+                    float duration = 1.25f - warmup;
+                    Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", duration, this.x, this.y);
                 }
             }else{
                 lastFx += 1;
@@ -107,42 +111,49 @@ public class ImpactReactor extends PowerGenerator{
                     warmup = 1f;
                 }
 
-                if(finFx > (1.1f - warmup) * 50){
-                    finFx = 0;
-                    if(targetEmitter != null){
-                        if(Mathf.chance(warmup * 0.1f)){
-                            targetEmitter.build.tile.getLinkedTiles(t -> {
-                                Call.effect(Fx.mineHuge, t.getX(), t.getY(), warmup, Pal.health);
-                            });
+                if(targetEmitter != null && targetEmitter.nullified){
+                    if(Mathf.equal(warmup, 1f, 0.01f)){
+                        Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
 
-                            Call.effect(Fx.smokeCloud, x + Mathf.range(0, 36), y + Mathf.range(0, 36), 1f, Pal.gray);
-                            Call.soundAt(Mathf.chance(0.7f) ? Sounds.flame2 : Sounds.flame, x, y, 0.8f, Mathf.range(0.8f, 1.5f));
+                        creeperEmitters.remove(targetEmitter);
+
+                        Call.effect(Fx.shockwave, x, y, 16f, Pal.accent);
+                        Call.soundAt(Sounds.corexplode, x, y, 1.2f, 1f);
+
+                        Building build = targetEmitter.build;
+                        Block block = build.block;
+                        Tile target = build.tile;
+
+                        build.kill();
+
+                        if(state.rules.coreCapture) {
+                            target.setNet(block, team(), 0);
+                            Call.effect(Fx.placeBlock, target.getX(), target.getY(), block.size, team().color);
+                        }
+
+                        targetEmitter = null;
+                        Core.app.post(this::kill);
+                    }else{
+                        if(finFx > (1.1f - warmup) * 50){
+                            finFx = 0;
+                            if(Mathf.chance(warmup * 0.1f)) {
+                                    targetEmitter.build.tile.getLinkedTiles(t -> {
+                                        Call.effect(Fx.mineHuge, t.getX(), t.getY(), warmup, Pal.health);
+                                    });
+
+                                    Call.soundAt(Mathf.chance(0.7f) ? Sounds.flame2 : Sounds.flame, x, y, 0.8f, Mathf.range(0.8f, 1.5f));
+                            }
+                        }else{
+                            finFx += 1;
                         }
                     }
-                }else{
-                    finFx += 1;
-                }
-                if(targetEmitter != null && Mathf.equal(warmup, 1f, 0.01f)){
-                    Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
-
-                    creeperEmitters.remove(targetEmitter);
-
-                    Call.effect(Fx.shockwave, x, y, 16f, Pal.accent);
-                    Call.soundAt(Sounds.corexplode, x, y, 1.2f, 1f);
-
-                    Building build = targetEmitter.build;
-                    Block block = build.block;
-                    Tile target = build.tile;
-
-                    build.kill();
-
-                    if(state.rules.coreCapture) {
-                        target.setNet(block, team(), 0);
-                        Call.effect(Fx.placeBlock, target.getX(), target.getY(), block.size, team().color);
+                }else if(smokeFx > (1.1f - warmup) * 50){
+                    smokeFx = 0;
+                    if(targetEmitter != null && Mathf.chance(warmup * 0.3f)) {
+                        Call.effect(Fx.smokeCloud, x + Mathf.range(0, 32), y + Mathf.range(0, 32), 1f, Pal.gray);
                     }
-
-                    targetEmitter = null;
-                    Core.app.post(this::kill);
+                }else{
+                    smokeFx += 1;
                 }
 
                 if(!prevOut && (getPowerProduction() > consPower.requestedPower(this))){

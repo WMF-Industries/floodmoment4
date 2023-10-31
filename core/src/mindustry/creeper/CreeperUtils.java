@@ -14,12 +14,15 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
+import mindustry.world.blocks.storage.CoreBlock;
 
 import static mindustry.Vars.*;
 
 public class CreeperUtils{
+    public static StringBuilder sb = new StringBuilder();
     public static final float updateInterval = 2/60f; // Base update interval in seconds
-    public static final float transferRate = 0.25f; // Base transfer rate NOTE: keep below 0.25f
+    public static final float baseTransferRate = 0.25f; // Base transfer rate NOTE: keep below 0.25f
+    public static float transferRate; //Assigned a value later in the code
     public static final float creeperDamage = 0.2f; // Base creeper damage
     public static final float creeperEvaporationUponDamagePercent = 0.98f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
@@ -41,9 +44,9 @@ public class CreeperUtils{
     }};
      */
 
-    public static BulletType sporeType = Bullets.placeholder;
+    public static BulletType sporeType = UnitTypes.arkyid.weapons.get(6).bullet;
 
-    public static float sporeMaxRangeMultiplier = 30f;
+    public static float sporeMaxRangeMultiplier = 27.5f;
     public static float sporeAmount = 20f;
     public static float sporeRadius = 5f;
     public static float sporeSpeedMultiplier = 0.15f;
@@ -89,10 +92,10 @@ public class CreeperUtils{
     public static final String[] tutEntries = {
     "[accent]\uE875[] Tutorial 1/6", "In [#e056f0]\uE83B the flood[] there are [scarlet]no units[] to defeat.\nInstead, your goal is to suspend all [accent]emitters[], which are simply [accent]enemy cores, launchpads and accelerators.[]",
     "[accent]\uE875[] Tutorial 2/6", "[scarlet]⚠ beware![]\n[accent]Emitters[] spawn [#e056f0]\uE83B the flood[], which when in proximity to friendly buildings or units, damages them.",
-    "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ beware![]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for small periods.",
+    "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ beware![]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for small periods.\nWhen active, they are immune to damage.",
     "[accent]\uE875[] Tutorial 4/6", "You can [accent]suspend emitters[] by constantly dealing damage to them, and destroy [accent]charged emitters[] to remove them.",
     "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building an \uF871 [accent]Impact Reactor[] near them and activating it.",
-    "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[]. You can stop the upgrade by suspending them.",
+    "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[]. You can stop the upgrade by damaging them.",
     "[white]\uF872[]", "[accent]Spore Launchers[]\n[accent]Thorium Reactors[] shoot long distance artillery that on impact, releases [accent]a huge amount of flood[], you can defend against this with segments \uF80E.",
     "[white]\uF682[]", "[accent]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",
     "[white]\uF6AD[]", "[accent]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
@@ -247,22 +250,6 @@ public class CreeperUtils{
 
         Timer.schedule(() -> {
             if(!state.isGame()) return;
-            Call.infoPopup(
-            Strings.format(
-                "\uE88B [@] @/@ []emitters suspended",
-                getTrafficlightColor(Mathf.clamp((nullifiedCount / Math.max(1.0, creeperEmitters.size)), 0f, 1f)),
-                    nullifiedCount, creeperEmitters.size
-            ), 10f, 20, 50, 20, 527, 0);
-
-            if (chargedEmitters.size > 0) {
-                Call.infoPopup(
-                        Strings.format(
-                                "\uE88B [@] @ []charged emitters remaining",
-                                getTrafficlightColor(1f - Mathf.clamp(chargedEmitters.size / 10f, 0f, 1f)),
-                                chargedEmitters.size
-                        ), 10f, 20, 50, 20, 500, 0);
-            }
-
             // check for gameover
             if(nullifiedCount == creeperEmitters.size){
                 Timer.schedule(() -> {
@@ -300,7 +287,7 @@ public class CreeperUtils{
         chargedEmitters.forEach(ChargedEmitter::fixedUpdate);
 
         for(ForceProjector.ForceBuild shield : shields){
-            if(shield == null || shield.dead || shield.health <= 0f || shield.healthLeft <= 0f){
+            if(shield == null || shield.dead || shield.healthLeft <= 0f){
                 shields.remove(shield);
                 if(shield == null) continue;
                 Core.app.post(shield::kill);
@@ -316,6 +303,21 @@ public class CreeperUtils{
         }
 
         nullifiedCount = newcount;
+
+        sb.append(Strings.format(
+                "\uE88B [@] @/@ []emitters suspended",
+                getTrafficlightColor(Mathf.clamp((nullifiedCount / Math.max(1.0, creeperEmitters.size)), 0f, 1f)),
+                nullifiedCount, creeperEmitters.size
+        ));
+        if (chargedEmitters.size > 0) {
+            sb.append(Strings.format(
+                    "\n\uE88B [@] @ []charged emitters remaining",
+                    getTrafficlightColor(1f - Mathf.clamp(chargedEmitters.size / 10f, 0f, 1f)),
+                    chargedEmitters.size
+            ));
+        }
+        Call.infoPopup(sb.toString(), 1f, 20, 50, 20, 527, 0);
+        sb.setLength(0);
     }
 
     public static void updateCreeper(){
@@ -429,6 +431,12 @@ public class CreeperUtils{
         for(int i = 0; i <= 3; i++){
             Tile target = source.nearby(i);
             if(cannotTransfer(source, target)) continue;
+
+            if(source.creep > maxTileCreep && source.block() != Blocks.coreNucleus){
+                transferRate = 0.025f;
+            }else{
+                transferRate = baseTransferRate;
+            }
 
             // creeper delta, cannot transfer more than 1/4 source creep or less than 0.001f. Target creep cannot exceed max creep
             float delta = Mathf.clamp((source.creep - target.creep) * transferRate, 0, Math.min(source.creep * transferRate, maxTileCreep - target.creep));

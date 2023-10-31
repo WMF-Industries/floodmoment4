@@ -27,7 +27,7 @@ public class ChargedEmitter implements Position{
             return false;
 
         if(build.health < build.maxHealth && overflow > 0){
-            overflow--;
+            if(!emitting) overflow--;
             build.heal(build.maxHealth);
             Call.effect(Fx.healBlock, build.x, build.y, build.block.size, creeperTeam.color);
         }

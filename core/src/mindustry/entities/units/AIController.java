@@ -232,12 +232,7 @@ public class AIController implements UnitController{
     }
 
     public Teamc findMainTarget(float x, float y, float range, boolean air, boolean ground){
-        var creep = indexer.findClosestCreeper(x, y);
-        if (unit.team() != CreeperUtils.creeperTeam && creep.build != null) {
-            return creep.build;
-        } else {
-            return findTarget(x, y, range, air, ground);
-        }
+        return findTarget(x, y, range, air, ground);
     }
 
     public Teamc findTarget(float x, float y, float range, boolean air, boolean ground){

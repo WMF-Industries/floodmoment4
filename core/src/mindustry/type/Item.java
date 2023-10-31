@@ -166,6 +166,6 @@ public class Item extends UnlockableContent implements Senseable{
 
     /** Allocates a new array containing all items that generate ores. */
     public static Seq<Item> getAllOres(){
-        return content.blocks().select(b -> b instanceof OreBlock).map(b -> b.itemDrop);
+        return content.blocks().select(b -> b instanceof OreBlock || (b instanceof Floor && b.itemDrop != null)).map(b -> b.itemDrop);
     }
 }

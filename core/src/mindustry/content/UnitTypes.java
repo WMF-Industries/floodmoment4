@@ -734,9 +734,9 @@ public class UnitTypes{
                 y = -1.5f;
 
                 bullet = new SapBulletType(){{
-                    sapStrength = 0.5f;
+                    sapStrength = 0f;
                     length = 75f;
-                    damage = 23;
+                    damage = 25;
                     shootEffect = Fx.shootSmall;
                     hitColor = color = Color.valueOf("bf92f9");
                     despawnEffect = Fx.none;
@@ -754,9 +754,9 @@ public class UnitTypes{
                 shootSound = Sounds.sap;
 
                 bullet = new SapBulletType(){{
-                    sapStrength = 0.8f;
+                    sapStrength = 0f;
                     length = 40f;
-                    damage = 18;
+                    damage = 20;
                     shootEffect = Fx.shootSmall;
                     hitColor = color = Color.valueOf("bf92f9");
                     despawnEffect = Fx.none;
@@ -801,7 +801,7 @@ public class UnitTypes{
             groundLayer = Layer.legUnit;
 
             BulletType sapper = new SapBulletType(){{
-                sapStrength = 0.85f;
+                sapStrength = 0f;
                 length = 55f;
                 damage = 40;
                 shootEffect = Fx.shootSmall;
@@ -859,6 +859,8 @@ public class UnitTypes{
                     ammoMultiplier = 4f;
                     splashDamageRadius = 70f;
                     splashDamage = 65f;
+                    pierceBuilding = true;
+                    pierceCap = 5;
                     backColor = Pal.sapBulletBack;
                     frontColor = lightningColor = Pal.sapBullet;
                     lightning = 3;
@@ -1298,7 +1300,6 @@ public class UnitTypes{
         mono = new UnitType("mono"){{
             //there's no reason to command monos anywhere. it's just annoying.
             controller = u -> new MinerAI();
-
             defaultCommand = UnitCommand.mineCommand;
 
             flying = true;
@@ -1491,6 +1492,8 @@ public class UnitTypes{
                     healPercent = 15f;
                     splashDamage = 220f;
                     splashDamageRadius = 80f;
+                    pierceBuilding = true;
+                    pierceCap = 9;
                 }};
             }});
         }};
@@ -1603,6 +1606,7 @@ public class UnitTypes{
                 ejectEffect = Fx.casing1;
                 shootSound = Sounds.shoot;
                 bullet = new FlakBulletType(4.2f, 3){{
+                    collidesGround = true;
                     lifetime = 60f;
                     ammoMultiplier = 4f;
                     shootEffect = Fx.shootSmall;
