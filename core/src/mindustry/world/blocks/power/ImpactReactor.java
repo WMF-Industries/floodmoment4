@@ -76,15 +76,19 @@ public class ImpactReactor extends PowerGenerator{
 
         @Override
         public void updateTile(){
-            if(!this.dead() && lastFx > (2f - warmup) * 25){
-                lastFx = 0;
-
-                if (targetEmitter == null){
+            if(Core.graphics.getFrameId() % 60 == 0) {
+                if(targetEmitter == null){
                     Emitter core = CreeperUtils.closestEmitter(tile);
                     if (core != null && within(core, nullifierRange)){
                         targetEmitter = core;
                     }
+                }else if(!targetEmitter.suspended){
+                    Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
                 }
+            }
+
+            if(++lastFx > (2f - warmup) * 25){
+                lastFx = 0;
 
                 if(targetEmitter != null && targetEmitter.build != null && targetEmitter.nullified){
                     Geometry.iterateLine(0f, x, y, targetEmitter.getX(), targetEmitter.getY(), 1f - warmup, (x, y) -> {
@@ -95,13 +99,7 @@ public class ImpactReactor extends PowerGenerator{
 
                     Call.soundAt(Sounds.dullExplosion, x, y, 1, 1);
                     Call.effect(Fx.dynamicSpikes, x, y, warmup * 3f, team.color);
-                }else if(targetEmitter != null && targetEmitter.build != null){
-                    Timer.schedule(() -> {
-                    Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
-                    }, 0, 1);
                 }
-            }else{
-                lastFx += 1;
             }
 
             if(efficiency >= 0.9999f && power.status >= 0.99f){
@@ -134,27 +132,21 @@ public class ImpactReactor extends PowerGenerator{
 
                         targetEmitter = null;
                         Core.app.post(this::kill);
-                    }else{
-                        if(finFx > (1.1f - warmup) * 50){
-                            finFx = 0;
-                            if(Mathf.chance(warmup * 0.1f)) {
-                                    targetEmitter.build.tile.getLinkedTiles(t -> {
-                                        Call.effect(Fx.mineHuge, t.getX(), t.getY(), warmup, Pal.health);
-                                    });
+                    }else if(++finFx > (1.1f - warmup) * 50){
+                        finFx = 0;
+                        if(Mathf.chance(warmup * 0.1f)) {
+                            targetEmitter.build.tile.getLinkedTiles(t -> {
+                                Call.effect(Fx.mineHuge, t.getX(), t.getY(), warmup, Pal.health);
+                            });
 
-                                    Call.soundAt(Mathf.chance(0.7f) ? Sounds.flame2 : Sounds.flame, x, y, 0.8f, Mathf.range(0.8f, 1.5f));
-                            }
-                        }else{
-                            finFx += 1;
+                            Call.soundAt(Mathf.chance(0.7f) ? Sounds.flame2 : Sounds.flame, x, y, 0.8f, Mathf.range(0.8f, 1.5f));
                         }
                     }
-                }else if(smokeFx > (1.1f - warmup) * 50){
+                }else if(++smokeFx > (1.1f - warmup) * 50){
                     smokeFx = 0;
                     if(targetEmitter != null && Mathf.chance(warmup * 0.3f)) {
                         Call.effect(Fx.smokeCloud, x + Mathf.range(0, 32), y + Mathf.range(0, 32), 1f, Pal.gray);
                     }
-                }else{
-                    smokeFx += 1;
                 }
 
                 if(!prevOut && (getPowerProduction() > consPower.requestedPower(this))){
@@ -164,10 +156,7 @@ public class ImpactReactor extends PowerGenerator{
                 if(timer(timerUse, itemDuration / timeScale)){
                     consume();
                 }
-            }else{
-                warmup = Mathf.lerpDelta(warmup, 0f, 0.01f);
-            }
-
+            }else warmup = Mathf.lerpDelta(warmup, 0f, 0.01f);
             totalProgress += warmup * Time.delta;
             productionEfficiency = Mathf.pow(warmup, 5f);
         }
