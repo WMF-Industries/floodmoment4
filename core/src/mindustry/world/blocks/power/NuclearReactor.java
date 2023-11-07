@@ -1,8 +1,6 @@
 package mindustry.world.blocks.power;
 
 import arc.*;
-import arc.func.Cons;
-import arc.audio.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
@@ -11,8 +9,6 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
-import mindustry.creeper.CreeperUtils;
-import mindustry.entities.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -20,7 +16,6 @@ import mindustry.logic.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.Tile;
-import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
 
 import static mindustry.Vars.*;
@@ -122,9 +117,15 @@ public class NuclearReactor extends PowerGenerator{
 
             heat = Mathf.clamp(heat);
 
-            if(Mathf.chance(0.005)){
-                if(team == creeperTeam)
-                    Call.setItem(this, Items.thorium, Mathf.random(0, 3));
+            if(Mathf.chance(0.0025)){
+                if(team == creeperTeam){
+                    int maxFuel;
+                    if(sporeScaleThreat){
+                        maxFuel = Math.max(Math.round(this.tile.creep), 1);
+                    }else maxFuel = 3;
+
+                    Call.setItem(this, Items.thorium, Mathf.random(0, maxFuel));
+                }
             }
 
 
@@ -141,8 +142,16 @@ public class NuclearReactor extends PowerGenerator{
                     Call.createBullet(sporeType, creeperTeam, x, y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, Math.min(sporeMaxRangeMultiplier, (distance * sporeType.lifetime) / (sporeType.speed * sporeSpeedMultiplier) / 8200f));
 
                     Tile t = tile;
+
+                    double multifireChance;
+                    if(sporeScaleThreat){
+                        t.getLinkedTiles(l -> l.creep -= sporeCreepUse);
+                        multifireChance = sporeBaseMultifireChance * t.creep;
+                    }else multifireChance = 0;
+
                     Timer.schedule(() -> {
                         t.setNet(Blocks.thoriumReactor, creeperTeam, 0);
+                        if(Mathf.chance(multifireChance)) Call.createBullet(sporeType, creeperTeam, x, y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, Math.min(sporeMaxRangeMultiplier, (distance * sporeType.lifetime) / (sporeType.speed * sporeSpeedMultiplier) / 8200f));
                     }, 0.1f);
                 }
 

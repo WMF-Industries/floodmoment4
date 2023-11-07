@@ -607,6 +607,11 @@ public class BulletType extends Content implements Cloneable{
 
         var start_time = Time.millis();
 
+        float refreshRate;
+        if(anticreepBubble > 5){
+            refreshRate = Math.max(anticreepBubbleTime / 10, 1f);
+        }else refreshRate = 0.5f;
+
         var fxRunner = Timer.schedule(() -> {
             // play effects around the circle
             tiles.each(t -> {
@@ -614,9 +619,9 @@ public class BulletType extends Content implements Cloneable{
                 Timer.schedule(() -> {
                     var size_multiplier = 1 - (Time.millis() - start_time) / 1000f / anticreepBubbleTime; // Moves from 1 to 0 with time
                     Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.01f, 1.5f * size_multiplier), color);
-                }, Mathf.random(0f, 0.5f));
+                }, Mathf.random(refreshRate));
             });
-        }, 0, 0.5f);
+        }, 0, refreshRate);
 
         Timer.schedule(() -> {
             fxRunner.cancel();

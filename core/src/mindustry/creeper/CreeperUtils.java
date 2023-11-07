@@ -52,6 +52,9 @@ public class CreeperUtils{
     public static float sporeSpeedMultiplier = 0.15f;
     public static float sporeHealthMultiplier = 10f;
     public static float sporeTargetOffset = 256f;
+    public static boolean sporeScaleThreat = true;
+    public static double sporeBaseMultifireChance = 0.01d;
+    public static float sporeCreepUse = 0.75f;
 
     public static float unitShieldDamageMultiplier = 1.5f;
     public static float buildShieldDamageMultiplier = 0.75f;
@@ -60,6 +63,7 @@ public class CreeperUtils{
     public static float shieldCreeperDropRadius = 4f;
 
     public static float nullifierRange = 16 * tilesize;
+    public static float erekirNullifyTime = 45;
 
     public static float radarBeamDamage = 600f; // damage the radar creeper beam deals to units
 
@@ -94,7 +98,7 @@ public class CreeperUtils{
     "[accent]\uE875[] Tutorial 2/6", "[scarlet]⚠ beware![]\n[accent]Emitters[] spawn [#e056f0]\uE83B the flood[], which when in proximity to friendly buildings or units, damages them.",
     "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ beware![]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for small periods.\nWhen active, they are immune to damage.",
     "[accent]\uE875[] Tutorial 4/6", "You can [accent]suspend emitters[] by constantly dealing damage to them, and destroy [accent]charged emitters[] to remove them.",
-    "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building an \uF871 [accent]Impact Reactor[] near them and activating it.",
+    "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building an \uF871 [accent]Impact Reactor[] or \uF689 [accent]Lustre[] near them and activating it.",
     "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[]. You can stop the upgrade by damaging them.",
     "[white]\uF872[]", "[accent]Spore Launchers[]\n[accent]Thorium Reactors[] shoot long distance artillery that on impact, releases [accent]a huge amount of flood[], you can defend against this with segments \uF80E.",
     "[white]\uF682[]", "[accent]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",

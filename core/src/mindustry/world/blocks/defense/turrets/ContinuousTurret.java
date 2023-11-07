@@ -1,14 +1,24 @@
 package mindustry.world.blocks.defense.turrets;
 
+import arc.Core;
 import arc.math.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
+import mindustry.creeper.CreeperUtils;
+import mindustry.creeper.Emitter;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
+import mindustry.graphics.Pal;
+import mindustry.world.Block;
+import mindustry.world.Tile;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
+
+import static arc.math.Angles.angle;
+import static mindustry.Vars.state;
+import static mindustry.creeper.CreeperUtils.*;
 
 /** A turret that fires a continuous beam bullet with no reload or coolant necessary. The bullet only disappears when the turret stops shooting. */
 public class ContinuousTurret extends Turret{
@@ -37,6 +47,7 @@ public class ContinuousTurret extends Turret{
     public class ContinuousTurretBuild extends TurretBuild{
         public Seq<BulletEntry> bullets = new Seq<>();
         public float lastLength = size * 4f;
+        int nullifyTime;
 
         @Override
         protected void updateCooling(){
@@ -87,6 +98,45 @@ public class ContinuousTurret extends Turret{
                 wasShooting = true;
                 heat = 1f;
                 curRecoil = recoil;
+            }
+
+            if(this.team != creeperTeam){
+                Emitter targetEmitter = CreeperUtils.closestEmitter(tile);
+                if(targetEmitter == null) return;
+
+                if(this.targetPos.x == targetEmitter.getX() && this.targetPos.y == targetEmitter.getY() && Angles.within(this.rotation, Angles.angle(this.x, this.y, targetEmitter.getX(), targetEmitter.getY()), 5) && targetEmitter.nullified && isShooting() && hasAmmo()){
+
+                    if(Core.graphics.getFrameId() % 60 == 0){
+                        ++nullifyTime;
+                        Call.label(Strings.format("[accent]\uE810[orange]@%", Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1)), 1, this.x, this.y);
+                        Call.effect(Fx.healBlock, targetEmitter.getX(), targetEmitter.getY(), targetEmitter.build.block.size, creeperTeam.color);
+                    }
+
+                    if(nullifyTime >= erekirNullifyTime){
+                        Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
+
+                        creeperEmitters.remove(targetEmitter);
+
+                        Call.effect(Fx.shockwave, x, y, 16f, Pal.accent);
+                        Call.soundAt(Sounds.corexplode, x, y, 1.2f, 1f);
+
+                        Building build = targetEmitter.build;
+                        Block block = build.block;
+                        Tile target = build.tile;
+
+                        build.kill();
+
+                        if(state.rules.coreCapture){
+                            target.setNet(block, team(), 0);
+                            Call.effect(Fx.placeBlock, target.getX(), target.getY(), block.size, team().color);
+                        }
+                    }
+                }else{
+                    nullifyTime = 0;
+                    if(Core.graphics.getFrameId() % 60 == 0){
+                        Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
+                    }
+                }
             }
         }
 
