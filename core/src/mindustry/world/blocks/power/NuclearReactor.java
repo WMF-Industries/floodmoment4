@@ -117,15 +117,12 @@ public class NuclearReactor extends PowerGenerator{
 
             heat = Mathf.clamp(heat);
 
-            if(Mathf.chance(0.0025)){
-                if(team == creeperTeam){
-                    int maxFuel;
-                    if(sporeScaleThreat){
-                        maxFuel = Math.max(Math.round(this.tile.creep), 1);
-                    }else maxFuel = 3;
-
-                    Call.setItem(this, Items.thorium, Mathf.random(0, maxFuel));
-                }
+            if(Mathf.chance(0.0025) && this.items.get(fuelItem) <= 10 && team == creeperTeam){
+                int maxFuel;
+                if(sporeScaleThreat){
+                    maxFuel = Math.max(Math.round(this.tile.creep), 1);
+                }else maxFuel = 3;
+                Call.setItem(this, Items.thorium, Mathf.random(0, maxFuel));
             }
 
 
@@ -151,7 +148,7 @@ public class NuclearReactor extends PowerGenerator{
 
                     Timer.schedule(() -> {
                         t.setNet(Blocks.thoriumReactor, creeperTeam, 0);
-                        if(Mathf.chance(multifireChance)) Call.createBullet(sporeType, creeperTeam, x, y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, Math.min(sporeMaxRangeMultiplier, (distance * sporeType.lifetime) / (sporeType.speed * sporeSpeedMultiplier) / 8200f));
+                        if(Mathf.chance(multifireChance)) Call.setItem(t.build, Items.thorium, itemCapacity);
                     }, 0.1f);
                 }
 
