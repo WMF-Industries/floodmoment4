@@ -165,3 +165,5 @@ android/libs/
 
 # ignored due to frequent branch conflicts.
 core/assets/logicids.dat
+
+/buildSrc
