@@ -1051,6 +1051,7 @@ public class UnitTypes{
             speed = 1.7f;
             accel = 0.08f;
             drag = 0.016f;
+            itemCapacity = 20;
             flying = true;
             hitSize = 10f;
             targetAir = false;

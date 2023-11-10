@@ -104,7 +104,7 @@ public class CreeperUtils{
     "[white]\uF6AD[]", "[scarlet]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
     "[white]\uF7FA[]", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
     "[white]\uF898[]", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] absorb [#e056f0]the flood[].\nUnlike unit shields, \uF898 need [accent]coolant and power to regenerate[] & [accent]explode[] if overloaded / destroyed.\n[red]Reclaiming them gives no resources![]",
-    "[white]\uF7F5[]", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood, additionally their carrying capacity is set to 40.\nUse them to transport items over flood.",
+    "[white]\uF7F5[]", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood, additionally their carrying capacity is set to 20.\nUse them to transport items over flood.",
     };
 
     private static float updateTimer;
