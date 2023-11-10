@@ -73,17 +73,21 @@ public class ImpactReactor extends PowerGenerator{
         public int finFx = 0;
         public int smokeFx = 0;
         public Emitter targetEmitter;
+        float refresh;
 
         @Override
         public void updateTile(){
-            if(Core.graphics.getFrameId() % 60 == 0) {
+            refresh += Time.delta;
+            if(refresh >= 60) {
+                refresh = 0;
+                if(!targetEmitter.suspended) {
+                    Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
+                }
                 if(targetEmitter == null){
                     Emitter core = CreeperUtils.closestEmitter(tile);
                     if (core != null && within(core, nullifierRange)){
                         targetEmitter = core;
                     }
-                }else if(!targetEmitter.suspended){
-                    Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
                 }
             }
 

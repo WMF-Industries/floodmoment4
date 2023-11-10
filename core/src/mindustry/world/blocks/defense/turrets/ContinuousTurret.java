@@ -49,6 +49,7 @@ public class ContinuousTurret extends Turret{
         public float lastLength = size * 4f;
         public Emitter targetEmitter;
         int nullifyTime;
+        float refresh;
 
         @Override
         protected void updateCooling(){
@@ -103,20 +104,22 @@ public class ContinuousTurret extends Turret{
 
             if(this.team != creeperTeam){
                 Emitter core = CreeperUtils.closestEmitter(tile);
-                if (core != null && within(core, range)){
+                if(core != null && within(core, range)){
                     targetEmitter = core;
                 }
 
                 if(targetEmitter != null){
                     if(this.targetPos.x == targetEmitter.getX() && this.targetPos.y == targetEmitter.getY() && Angles.within(this.rotation, Angles.angle(this.x, this.y, targetEmitter.getX(), targetEmitter.getY()), 2.5f)){
+                        refresh += Time.delta;
                         if(targetEmitter.nullified && isShooting() && hasAmmo()){
-                            if (Core.graphics.getFrameId() % 60 == 0) {
+                            if(refresh >= 60){
+                                refresh = 0;
                                 ++nullifyTime;
                                 Call.label(Strings.format("[accent]\uE810[@]@%", getTrafficlightColor((double) Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1) / 100), Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1)), 1, this.x, this.y);
                                 Call.effect(Fx.healBlock, targetEmitter.getX(), targetEmitter.getY(), targetEmitter.build.block.size, creeperTeam.color);
                             }
 
-                            if (nullifyTime >= erekirNullifyTime) {
+                            if(nullifyTime >= erekirNullifyTime){
                                 Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
 
                                 creeperEmitters.remove(targetEmitter);
@@ -130,12 +133,17 @@ public class ContinuousTurret extends Turret{
 
                                 build.kill();
 
-                                if (state.rules.coreCapture) {
+                                if(state.rules.coreCapture){
                                     target.setNet(block, team(), 0);
                                     Call.effect(Fx.placeBlock, target.getX(), target.getY(), block.size, team().color);
                                 }
                             }
-                        }else if(Core.graphics.getFrameId() % 60 == 0) Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
+                        }else{
+                            if(refresh >= 60){
+                                refresh = 0;
+                                Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
+                            }
+                        }
                     }else nullifyTime = 0;
                 }
             }

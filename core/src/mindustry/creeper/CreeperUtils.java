@@ -22,7 +22,6 @@ public class CreeperUtils{
     public static StringBuilder sb = new StringBuilder();
     public static final float updateInterval = 2/60f; // Base update interval in seconds
     public static final float baseTransferRate = 0.25f; // Base transfer rate NOTE: keep below 0.25f
-    public static float transferRate; //Assigned a value later in the code
     public static final float creeperDamage = 0.2f; // Base creeper damage
     public static final float creeperEvaporationUponDamagePercent = 0.98f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
@@ -95,17 +94,17 @@ public class CreeperUtils{
     public static final String[][] tutStart = {{"[#49e87c]\uE875 Take the tutorial[]"}, {"[#e85e49]⚠ Skip (not recommended)[]"}};
     public static final String[] tutEntries = {
     "[accent]\uE875[] Tutorial 1/6", "In [#e056f0]\uE83B the flood[] there are [scarlet]no units[] to defeat.\nInstead, your goal is to suspend all [accent]emitters[], which are simply [accent]enemy cores, launchpads and accelerators.[]",
-    "[accent]\uE875[] Tutorial 2/6", "[scarlet]⚠ beware![]\n[accent]Emitters[] spawn [#e056f0]\uE83B the flood[], which when in proximity to friendly buildings or units, damages them.",
-    "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ beware![]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for small periods.\nWhen active, they are immune to damage.",
-    "[accent]\uE875[] Tutorial 4/6", "You can [accent]suspend emitters[] by constantly dealing damage to them, and destroy [accent]charged emitters[] to remove them.",
-    "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building an \uF871 [accent]Impact Reactor[] or \uF689 [accent]Lustre[] near them and activating it.",
-    "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[]. You can stop the upgrade by damaging them.",
-    "[white]\uF872[]", "[accent]Spore Launchers[]\n[accent]Thorium Reactors[] shoot long distance artillery that on impact, releases [accent]a huge amount of flood[], you can defend against this with segments \uF80E.",
-    "[white]\uF682[]", "[accent]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",
-    "[white]\uF6AD[]", "[accent]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
-    "[white]\uF898[]", "[accent]Flood Shield[]\n[accent]Force Projectors[] and [accent]unit shields[] actively absorb [#e056f0]the flood[], but [accent]explode[] when they are full.",
-    "[white]\uF7FA[]", "[accent]Flood Creep[]\n[accent]Spider-Type units[] explode when in contact of friendly buildings and release tons of [#e056f0]the flood[].",
-    "[white]\uF7F5[]", "[accent]Horizons[] are immune to the flood but [orange]do not deal any damage[]. Use them to carry [accent]resources[] over the flood. They are not immune to emitters and spore launchers.",
+    "[accent]\uE875[] Tutorial 2/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Emitters[] spawn [#e056f0]\uE83B the flood[], which when in proximity to friendly buildings or units, damages them.",
+    "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for short periods.\nWhen active, they are immune to damage.",
+    "[accent]\uE875[] Tutorial 4/6", "You can [accent]suspend emitters[] by constantly damaging them, and destroy [accent]charged emitters[] to remove them.",
+    "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building and activating an \uF871 [accent]Impact Reactor[] / \uF689 [accent]Lustre[] nearby.",
+    "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[].\nYou can stop the upgrade by damaging them.",
+    "[white]\uF872[]", "[scarlet]Spore Launchers[]\n[accent]Thorium Reactors[] fire long distance artillery that releases [accent]a huge amount of flood[] on impact.\nYou can defend against this with \uF80E [accent]Segments[white] & \uF898 []Force Projectors[].",
+    "[white]\uF682[]", "[scarlet]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",
+    "[white]\uF6AD[]", "[scarlet]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
+    "[white]\uF7FA[]", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
+    "[white]\uF898[]", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] absorb [#e056f0]the flood[].\nUnlike unit shields, \uF898 need [accent]coolant and power to regenerate[] & [accent]explode[] if overloaded / destroyed.\n[red]Reclaiming them gives no resources![]",
+    "[white]\uF7F5[]", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood, additionally their carrying capacity is set to 40.\nUse them to transport items over flood.",
     };
 
     private static float updateTimer;
@@ -135,10 +134,8 @@ public class CreeperUtils{
 
     public static void sporeCollision(Bullet bullet, float x, float y){
         Tile tile = world.tileWorld(x, y);
-        if(invalidTile(tile))
-            return;
+        if(invalidTile(tile)) return;
 
-        Call.effect(Fx.sapExplosion, x, y, sporeRadius, Color.blue);
         depositCreeper(tile, sporeRadius, sporeAmount);
     }
 
@@ -147,7 +144,7 @@ public class CreeperUtils{
 
         if(Emitter.emitterTypes.containsKey(build.block)){
             creeperEmitters.add(new Emitter(build));
-        } else if (ChargedEmitter.chargedEmitterTypes.containsKey(build.block)) {
+        }else if (ChargedEmitter.chargedEmitterTypes.containsKey(build.block)) {
             chargedEmitters.add(new ChargedEmitter(build));
         }
     }
@@ -260,7 +257,7 @@ public class CreeperUtils{
             }
             Call.infoPopup(sb.toString(), 2.5f, 20, 50, 20, 520, 0);
             sb.setLength(0);
-        }, 0, 2.475f);
+        }, 0, 2.495f);
 
         Events.on(EventType.BlockDestroyEvent.class, e -> {
             if(creeperLevels.containsKey(e.tile.block())){
@@ -354,14 +351,13 @@ public class CreeperUtils{
         if(++pulseOffset == 64) pulseOffset = 0;
         Tile[] arr = world.tiles.array;
         int l = arr.length;
-        for (int i = 0; i < l; i++) { // Enhanced for allocates a lot of garbage here
+        for(int i = 0; i < l; i++) { // Enhanced for allocates a lot of garbage here
             Tile tile = arr[i];
             if(!tile.creeperable) continue;
 
             // spread creep and apply damage
             transferCreeper(tile);
             applyDamage(tile);
-
 
             if((closestEmitterDist(tile) - pulseOffset) % 64 == 0){
                 drawCreeper(tile);
@@ -415,12 +411,11 @@ public class CreeperUtils{
 
     public static void applyDamage(Tile tile){
         if(tile.build != null && tile.build.team != creeperTeam && tile.creep > 1f){
-            if(Mathf.chance(0.02d)){
+            if(Mathf.chance(0.01d)){
                 Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
             }
 
             float damage = creeperDamage * tile.creep;
-
             if(tile.block() instanceof CoreBlock && tile.build.team() != creeperTeam && tile.build.health() <= damage){
                 var block = tile.block();
                 Call.effect(Fx.reactorExplosion, tile.build.x, tile.build.y, 0, Color.blue);
@@ -428,6 +423,7 @@ public class CreeperUtils{
                 tile.build.remove();
                 tile.build.tile.setNet(block, creeperTeam, 0);
             }else tile.build.damage(damage);
+
             tile.creep *= creeperEvaporationUponDamagePercent;
         }
     }
@@ -439,27 +435,19 @@ public class CreeperUtils{
     public static void transferCreeper(Tile source){
         if(source.build == null || source.creep < 1f) return;
 
-        float total = 0f;
+        float transferRate = (source.creep > maxTileCreep && source.block() != Blocks.coreNucleus) ? 0.025f : baseTransferRate;
+
+        float creepBefore = source.creep;
         for(int i = 0; i <= 3; i++){
             Tile target = source.nearby(i);
             if(cannotTransfer(source, target)) continue;
 
-            if(source.creep > maxTileCreep && source.block() != Blocks.coreNucleus){
-                transferRate = 0.025f;
-            }else{
-                transferRate = baseTransferRate;
-            }
-
             // creeper delta, cannot transfer more than 1/4 source creep or less than 0.001f. Target creep cannot exceed max creep
-            float delta = Mathf.clamp((source.creep - target.creep) * transferRate, 0, Math.min(source.creep * transferRate, maxTileCreep - target.creep));
+            float delta = Mathf.clamp((creepBefore - target.creep) * transferRate, 0, Math.min(source.creep * transferRate, maxTileCreep - target.creep));
             if(delta > 0.001f){
                 target.creep += delta;
-                total += delta;
+                source.creep -= delta;
             }
-        }
-
-        if(total > 0.001f){
-            source.creep -= total;
         }
     }
 

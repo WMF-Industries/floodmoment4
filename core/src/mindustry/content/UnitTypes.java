@@ -1310,6 +1310,7 @@ public class UnitTypes{
             engineSize = 1.8f;
             engineOffset = 5.7f;
             range = 50f;
+            creeperResistance = 1f; //monos are dumb and die all the time
             isEnemy = false;
 
             ammoType = new PowerAmmoType(500);
