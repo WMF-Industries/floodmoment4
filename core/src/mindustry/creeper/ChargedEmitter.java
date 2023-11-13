@@ -19,6 +19,7 @@ public class ChargedEmitter implements Position{
     public float buildup;
     public float overflow;
     public boolean emitting;
+    boolean immune;
     public StringBuilder sb = new StringBuilder();
 
     public static HashMap<Block, ChargedEmitterType> chargedEmitterTypes = new HashMap<>();
@@ -27,8 +28,11 @@ public class ChargedEmitter implements Position{
         if(build == null || build.health <= 1f)
             return false;
 
-        if(build.health < build.maxHealth && overflow > 0){
-            if(!emitting) overflow--;
+        if(build.health < build.maxHealth && overflow > 0 || emitting || this.build.tile.creep >= 6.5f){
+            if(!emitting && this.build.tile.creep < 6.5f){
+                overflow--;
+                immune = false;
+            }else immune = true;
             build.heal(build.maxHealth);
             if(++throttle >= 6){
                 Call.effect(Fx.healBlock, build.x, build.y, build.block.size, creeperTeam.color);
@@ -55,16 +59,20 @@ public class ChargedEmitter implements Position{
 
     public void fixedUpdate(){
         sb.setLength(0);
+        if(immune){
+            sb.append(Strings.format("[accent]\uE86B [stat]Immune[] \uE86B[]"));
+        }
         if(overflow > 0){
-            sb.append(Strings.format("[green]@[] - [stat]@%", type.upgradable() ? "\ue804" : "\ue813", (int)(overflow * 100 / type.chargeCap)));
+            if(!sb.isEmpty()) sb.append("\n");
+            sb.append(Strings.format("[green]@[] - [stat]@%[]", type.upgradable() ? "\ue804" : "\ue813", (int)(overflow * 100 / type.chargeCap)));
         }
         if(emitting){
             Call.effect(Fx.launch, build.x, build.y, build.block.size, creeperTeam.color);
         }else{
-            if (sb.length() > 0) sb.append("\n");
+            if(!sb.isEmpty()) sb.append("\n");
             sb.append(Strings.format("[red]⚠[] - [stat] @%", (int)(buildup * 100 / type.chargeCap)));
         }
-        if(sb.length() > 0){
+        if(!sb.isEmpty()){
             Call.label(sb.toString(), 1f, build.x, build.y);
         }
         if(type.upgradable() && type.chargeCap > 0 && build != null && build.tile != null && overflow >= type.chargeCap){

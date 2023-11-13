@@ -95,7 +95,7 @@ public class CreeperUtils{
     public static final String[] tutEntries = {
     "[accent]\uE875[] Tutorial 1/6", "In [#e056f0]\uE83B the flood[] there are [scarlet]no units[] to defeat.\nInstead, your goal is to suspend all [accent]emitters[], which are simply [accent]enemy cores, launchpads and accelerators.[]",
     "[accent]\uE875[] Tutorial 2/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Emitters[] spawn [#e056f0]\uE83B the flood[], which when in proximity to friendly buildings or units, damages them.",
-    "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for short periods.\nWhen active, they are immune to damage.",
+    "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for short periods.\nWhen active or surrounded by lots of flood, they are immune to damage.",
     "[accent]\uE875[] Tutorial 4/6", "You can [accent]suspend emitters[] by constantly damaging them, and destroy [accent]charged emitters[] to remove them.",
     "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building and activating an \uF871 [accent]Impact Reactor[] / \uF689 [accent]Lustre[] nearby.",
     "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[].\nYou can stop the upgrade by damaging them.",
