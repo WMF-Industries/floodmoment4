@@ -103,7 +103,9 @@ public class ContinuousTurret extends Turret{
             }
 
             if(this.team != creeperTeam){
-                if(refresh >= 60) {
+                refresh += Time.delta;
+                if(refresh >= 60){
+                    refresh = 0;
                     Emitter core = CreeperUtils.closestEmitter(tile);
                     if(core != null && within(core, range)){
                         targetEmitter = core;
@@ -114,7 +116,6 @@ public class ContinuousTurret extends Turret{
                     }else timeSuspended = 0;
 
                     if(this.targetPos.x == targetEmitter.getX() && this.targetPos.y == targetEmitter.getY() && Angles.within(this.rotation, Angles.angle(this.x, this.y, targetEmitter.getX(), targetEmitter.getY()), 2.5f)){
-                        refresh += Time.delta;
                         if(timeSuspended >= 5 && isShooting() && hasAmmo()){
                             ++nullifyTime;
                             Call.label(Strings.format("[accent]\uE810[@]@%", getTrafficlightColor((double) Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1) / 100), Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1)), 1, this.x, this.y);
@@ -143,7 +144,7 @@ public class ContinuousTurret extends Turret{
                             Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
                         }
                     }else nullifyTime = 0;
-                }refresh = 0;
+                }
             }
         }
 

@@ -79,9 +79,9 @@ public class ImpactReactor extends PowerGenerator{
         @Override
         public void updateTile(){
             refresh += Time.delta;
-            if(refresh >= 60) {
+            if(refresh >= 60){
                 refresh = 0;
-                if(!targetEmitter.suspended) {
+                if(!targetEmitter.suspended){
                     Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
                 }
                 if(targetEmitter == null){
