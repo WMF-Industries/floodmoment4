@@ -74,6 +74,7 @@ public class ImpactReactor extends PowerGenerator{
         public int smokeFx = 0;
         public Emitter targetEmitter;
         float refresh;
+        int timeSuspended;
 
         @Override
         public void updateTile(){
@@ -88,13 +89,15 @@ public class ImpactReactor extends PowerGenerator{
                     if (core != null && within(core, nullifierRange)){
                         targetEmitter = core;
                     }
-                }
+                }else if(targetEmitter.nullified){
+                    ++timeSuspended;
+                }else timeSuspended = 0;
             }
 
             if(++lastFx > (2f - warmup) * 25){
                 lastFx = 0;
 
-                if(targetEmitter != null && targetEmitter.build != null && targetEmitter.nullified){
+                if(targetEmitter != null && targetEmitter.build != null && timeSuspended >= 5){
                     Geometry.iterateLine(0f, x, y, targetEmitter.getX(), targetEmitter.getY(), 1f - warmup, (x, y) -> {
                         Timer.schedule(() -> {
                             Call.effect(Fx.missileTrailShort, x, y, warmup * 3f, Pal.accent);
@@ -114,7 +117,7 @@ public class ImpactReactor extends PowerGenerator{
                     warmup = 1f;
                 }
 
-                if(targetEmitter != null && targetEmitter.nullified){
+                if(targetEmitter != null && timeSuspended >= 5){
                     if(Mathf.equal(warmup, 1f, 0.01f)){
                         Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
 
