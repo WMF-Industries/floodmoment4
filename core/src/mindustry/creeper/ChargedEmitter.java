@@ -63,16 +63,16 @@ public class ChargedEmitter implements Position{
             sb.append(Strings.format("[accent]\uE86B [stat]Immune[] \uE86B[]"));
         }
         if(overflow > 0){
-            if(!sb.isEmpty()) sb.append("\n");
+            if(sb.length() != 0) sb.append("\n");
             sb.append(Strings.format("[green]@[] - [stat]@%[]", type.upgradable() ? "\ue804" : "\ue813", (int)(overflow * 100 / type.chargeCap)));
         }
         if(emitting){
             Call.effect(Fx.launch, build.x, build.y, build.block.size, creeperTeam.color);
         }else{
-            if(!sb.isEmpty()) sb.append("\n");
+            if(sb.length() != 0) sb.append("\n");
             sb.append(Strings.format("[red]⚠[] - [stat] @%", (int)(buildup * 100 / type.chargeCap)));
         }
-        if(!sb.isEmpty()){
+        if(sb.length() != 0){
             Call.label(sb.toString(), 1f, build.x, build.y);
         }
         if(type.upgradable() && type.chargeCap > 0 && build != null && build.tile != null && overflow >= type.chargeCap){

@@ -244,18 +244,18 @@ public class CreeperUtils{
 
         Timer.schedule(() -> {
             sb.append(Strings.format(
-                    "\uE88B [@] @/@ []emitters suspended",
+                    "\uE83B [@] @/@ []emitter@ suspended",
                     getTrafficlightColor(Mathf.clamp((nullifiedCount / Math.max(1.0, creeperEmitters.size)), 0f, 1f)),
-                    nullifiedCount, creeperEmitters.size
+                    nullifiedCount, creeperEmitters.size, creeperEmitters.size > 1 ? "s" : ""
             ));
-            if (chargedEmitters.size > 0) {
+            if (chargedEmitters.size > 0){
                 sb.append(Strings.format(
-                        "\n\uE88B [@] @ []charged emitters remaining",
+                        "\n\uE810 [@] @ []charged emitter@ left",
                         getTrafficlightColor(1f - Mathf.clamp(chargedEmitters.size / 10f, 0f, 1f)),
-                        chargedEmitters.size
+                        chargedEmitters.size, chargedEmitters.size > 1 ? "s" : ""
                 ));
             }
-            Call.infoPopup(sb.toString(), 2.5f, 20, 50, 20, 520, 0);
+            Call.infoPopup(sb.toString(), 2.5f, 20, 50, 20, 500, 0);
             sb.setLength(0);
         }, 0, 2.495f);
 
@@ -398,9 +398,7 @@ public class CreeperUtils{
     }
 
     public static void drawCreeper(Tile tile){
-            if(tile.creep < 1f){
-                return;
-            }
+            if(tile.creep < 1f) return;
 
             int currentLvl = creeperLevels.get(tile.block(), 11);
 
@@ -411,12 +409,12 @@ public class CreeperUtils{
 
     public static void applyDamage(Tile tile){
         if(tile.build != null && tile.build.team != creeperTeam && tile.creep > 1f){
-            if(Mathf.chance(0.01d)){
+            if(Mathf.chance(0.005d)){
                 Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
             }
 
             float damage = creeperDamage * tile.creep;
-            if(tile.block() instanceof CoreBlock && tile.build.team() != creeperTeam && tile.build.health() <= damage){
+            if(tile.block() instanceof CoreBlock && tile.build.health() <= damage){
                 var block = tile.block();
                 Call.effect(Fx.reactorExplosion, tile.build.x, tile.build.y, 0, Color.blue);
                 Call.sound(Sounds.explosionbig, 0.5f, 1, 1);
@@ -435,7 +433,7 @@ public class CreeperUtils{
     public static void transferCreeper(Tile source){
         if(source.build == null || source.creep < 1f) return;
 
-        float transferRate = (source.creep > maxTileCreep && source.block() != Blocks.coreNucleus) ? 0.025f : baseTransferRate;
+        float transferRate = source.creep > maxTileCreep ? 0.025f : baseTransferRate;
 
         float creepBefore = source.creep;
         for(int i = 0; i <= 3; i++){
