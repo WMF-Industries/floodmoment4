@@ -4327,6 +4327,7 @@ public class UnitTypes{
             allowedInPayloads = false;
             logicControllable = false;
             playerControllable = false;
+            creeperResistance = 1;
             envDisabled = 0;
             payloadCapacity = 0f;
 
@@ -4356,6 +4357,7 @@ public class UnitTypes{
             accel = 0.11f;
             speed = 1.3f;
             health = 90;
+            creeperResistance = 1;
             engineSize = 2f;
             engineOffset = 6.5f;
             payloadCapacity = 0f;
