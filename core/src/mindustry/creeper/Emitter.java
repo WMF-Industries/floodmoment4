@@ -35,14 +35,13 @@ public class Emitter implements Position{
         if(build == null || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild)) return false;
 
         suspended = build.nullifyTimeout > 0f;
-        nullified = (build.nullifyTimeout > 0f && build.tile.creep < maxTileCreep);
 
         if(!suspended & counter >= type.interval){
             counter = 0;
             // two methods so upgrading will work
-            if(build.tile.creep >= 10.35f && type.level != 3) {
+            if(build.tile.creep >= 10.35f && type.level != 3){
                 build.tile.creep = Math.min(build.tile.creep + type.amt, (type.upgradeThreshold + maxTileCreep));
-            } else {
+            }else{
                 build.tile.getLinkedTiles(t ->
                     t.creep = Math.min(t.creep + type.amt, maxTileCreep)
                 );
@@ -55,6 +54,7 @@ public class Emitter implements Position{
 
     // updates every 1 second
     public void fixedUpdate(){
+        nullified = suspended && build.tile.creep < maxTileCreep; //this doesn't have to be updated every tick
         if(nullified){
             Call.label("[red]*[] SUSPENDED [red]*[]", 1f, build.x, build.y);
             Call.effect(Fx.placeBlock, build.x, build.y, build.block.size, Color.yellow);

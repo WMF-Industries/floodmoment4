@@ -287,7 +287,7 @@ public class CreeperUtils{
             if(invalidTile(ct) || (tile.block() instanceof StaticWall || (tile.floor() != null && !tile.floor().placeableOn || tile.floor().isDeep() || tile.block() instanceof Cliff)))
                 return;
 
-            ct.creep = Math.min(ct.creep + amount, 10);
+            ct.creep = Math.min(ct.creep + amount, ct.creep > maxTileCreep ? Integer.MAX_VALUE : maxTileCreep);
         });
     }
 
@@ -342,8 +342,10 @@ public class CreeperUtils{
         if(resetCache) resetDistanceCache();
 
         // no emitters so game over
-        if(creeperEmitters.size == 0
-        || closestEmitter(world.tile(0, 0)) == null){
+        if((creeperEmitters.size == 0
+        || closestEmitter(world.tile(0, 0)) == null)
+        && chargedEmitters.size == 0
+        || closestChargedEmitter(world.tile(0, 0)) == null){
             return;
         }
 
@@ -398,13 +400,13 @@ public class CreeperUtils{
     }
 
     public static void drawCreeper(Tile tile){
-            if(tile.creep < 1f) return;
+        if(tile.creep < 1f) return;
 
-            int currentLvl = creeperLevels.get(tile.block(), 11);
+        int currentLvl = creeperLevels.get(tile.block(), 11);
 
-            if((tile.build == null || tile.block().alwaysReplace || (tile.build.team == creeperTeam && currentLvl <= 10)) && (currentLvl < (int)tile.creep || currentLvl > (int)tile.creep + 0.1f)){
-                tile.setNet(creeperBlocks.get(Mathf.clamp((int)tile.creep, 0, 10)), creeperTeam, Mathf.random(0, 3));
-            }
+        if((tile.build == null || tile.block().alwaysReplace || (tile.build.team == creeperTeam && currentLvl <= 10)) && (currentLvl < (int)tile.creep || currentLvl > (int)tile.creep + 0.1f)){
+            tile.setNet(creeperBlocks.get(Mathf.clamp((int)tile.creep, 0, 10)), creeperTeam, Mathf.random(0, 3));
+        }
     }
 
     public static void applyDamage(Tile tile){
