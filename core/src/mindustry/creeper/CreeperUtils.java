@@ -243,14 +243,17 @@ public class CreeperUtils{
         });
 
         Timer.schedule(() -> {
-            sb.append(Strings.format(
-                    "\uE83B [@] @/@ []emitter@ suspended",
-                    getTrafficlightColor(Mathf.clamp((nullifiedCount / Math.max(1.0, creeperEmitters.size)), 0f, 1f)),
-                    nullifiedCount, creeperEmitters.size, creeperEmitters.size > 1 ? "s" : ""
-            ));
-            if (chargedEmitters.size > 0){
+            if(creeperEmitters.size > 0){
                 sb.append(Strings.format(
-                        "\n\uE810 [@] @ []charged emitter@ left",
+                        "\uE83B [@] @/@ []emitter@ suspended",
+                        getTrafficlightColor(Mathf.clamp((nullifiedCount / Math.max(1.0, creeperEmitters.size)), 0f, 1f)),
+                        nullifiedCount, creeperEmitters.size, creeperEmitters.size > 1 ? "s" : ""
+                ));
+            }
+            if(chargedEmitters.size > 0){
+                if(sb.length() != 0) sb.append("\n");
+                sb.append(Strings.format(
+                        "\uE810 [@] @ []charged emitter@ left",
                         getTrafficlightColor(1f - Mathf.clamp(chargedEmitters.size / 10f, 0f, 1f)),
                         chargedEmitters.size, chargedEmitters.size > 1 ? "s" : ""
                 ));
