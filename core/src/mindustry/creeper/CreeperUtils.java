@@ -153,18 +153,16 @@ public class CreeperUtils{
         sporeType.isCreeper = true;
 
 
-        // old walls since conveyors no longer work :{
+        // walls since conveyors no longer work :{
         creeperBlocks.put(0, Blocks.air);
         creeperBlocks.put(1, Blocks.scrapWall);
         creeperBlocks.put(2, Blocks.titaniumWall);
         creeperBlocks.put(3, Blocks.thoriumWall);
-        creeperBlocks.put(4, Blocks.plastaniumWall);
-
-        // new erekir walls
-        creeperBlocks.put(5, Blocks.phaseWall);
-        creeperBlocks.put(6, Blocks.surgeWall);
-        creeperBlocks.put(7, Blocks.reinforcedSurgeWall);
-        creeperBlocks.put(8, Blocks.berylliumWall);
+        creeperBlocks.put(4, Blocks.phaseWall);
+        creeperBlocks.put(5, Blocks.surgeWall);
+        creeperBlocks.put(6, Blocks.reinforcedSurgeWall);
+        creeperBlocks.put(7, Blocks.berylliumWall);
+        creeperBlocks.put(8, Blocks.plastaniumWall);
         creeperBlocks.put(9, Blocks.tungstenWall);
         creeperBlocks.put(10, Blocks.carbideWall);
 

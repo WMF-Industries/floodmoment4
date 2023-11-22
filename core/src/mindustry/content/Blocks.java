@@ -1540,7 +1540,7 @@ public class Blocks{
             requirements(Category.defense, with(Items.plastanium, 5, Items.metaglass, 2));
             health = 125 * wallHealthMultiplier;
 
-            floodHealth = 125;
+            floodHealth = 225;
 
             insulated = true;
             absorbLasers = true;
@@ -1578,7 +1578,7 @@ public class Blocks{
             requirements(Category.defense, with(Items.phaseFabric, 6));
             health = 150 * wallHealthMultiplier;
 
-            floodHealth = 150;
+            floodHealth = 125;
 
             flashHit = true;
             envDisabled |= Env.scorching;
@@ -1597,7 +1597,7 @@ public class Blocks{
             requirements(Category.defense, with(Items.surgeAlloy, 6));
             health = 230 * wallHealthMultiplier;
 
-            floodHealth = 175;
+            floodHealth = 150;
 
             envDisabled |= Env.scorching;
         }};
@@ -1669,7 +1669,7 @@ public class Blocks{
             requirements(Category.defense, with(Items.beryllium, 6));
             health = 130 * wallHealthMultiplier;
 
-            floodHealth = 225;
+            floodHealth = 200;
 
             armor = 2f;
             buildCostMultiplier = 8f;
@@ -1686,6 +1686,12 @@ public class Blocks{
         tungstenWall = new Wall("tungsten-wall"){{
             requirements(Category.defense, with(Items.tungsten, 6));
             health = 180 * wallHealthMultiplier;
+
+            floodHealth = 250;
+            //TODO check if there'll be more deyncs
+            insulated = true;
+            absorbLasers = true;
+
             armor = 14f;
             buildCostMultiplier = 8f;
         }};
@@ -1709,7 +1715,7 @@ public class Blocks{
             requirements(Category.defense, with(Items.surgeAlloy, 6, Items.tungsten, 2));
             health = 250 * wallHealthMultiplier;
 
-            floodHealth = 200;
+            floodHealth = 175;
 
             lightningChance = 0f;
             lightningDamage = 30f;
@@ -1732,6 +1738,9 @@ public class Blocks{
             health = 270 * wallHealthMultiplier;
 
             floodHealth = 300;
+            //TODO check if there'll be more deyncs
+            insulated = true;
+            absorbLasers = true;
 
             armor = 16f;
         }};
