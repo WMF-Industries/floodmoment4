@@ -102,7 +102,7 @@ public class ContinuousTurret extends Turret{
                 curRecoil = recoil;
             }
 
-            if(this.team != creeperTeam){
+            if(this.team != creeperTeam && this.block == Blocks.lustre){
                 refresh += Time.delta;
                 if(refresh >= 60){
                     refresh = 0;
