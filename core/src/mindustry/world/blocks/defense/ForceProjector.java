@@ -76,9 +76,9 @@ public class ForceProjector extends Block{
             }else if(tile.build != null && tile.build.team == creeperTeam) {
                 effect = true;
                 tile.build.heal(Blocks.scrapWall.health);
-            }else effect = false;
+            }
 
-            if(effect && refresh >= 6){
+            if(effect && refresh >= 15){
                 refresh = 0;
                 effect = false;
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);
