@@ -22,6 +22,7 @@ import mindustry.world.*;
 import mindustry.world.meta.*;
 
 import static mindustry.Vars.*;
+import static mindustry.creeper.CreeperUtils.*;
 
 public class ShockwaveTower extends Block{
     public int timerCheck = timers ++;
@@ -76,16 +77,16 @@ public class ShockwaveTower extends Block{
         public float fx_iv;
 
         @Override
-        public void updateTile(){
-            if(potentialEfficiency > 0 && (reloadCounter += Time.delta) >= reload && timer(timerCheck, checkInterval)){
+        public void updateTile() {
+            if (potentialEfficiency > 0 && (reloadCounter += Time.delta) >= reload && timer(timerCheck, checkInterval)) {
                 targets.clear();
                 Groups.bullet.intersect(x - range, y - range, range * 2, range * 2, b -> {
-                    if(b.team != team && b.type.hittable){
+                    if (b.team != team && b.type.hittable) {
                         targets.add(b);
                     }
                 });
 
-                if(targets.size > 0){
+                if (targets.size > 0) {
                     heat = 1f;
                     reloadCounter = 0f;
                     waveEffect.at(x, y, range, waveColor);
@@ -93,16 +94,16 @@ public class ShockwaveTower extends Block{
                     Effect.shake(shake, shake, this);
                     float waveDamage = Math.min(bulletDamage, bulletDamage * falloffCount / targets.size);
 
-                    for(var target : targets){
-                        if(target.damage > waveDamage){
+                    for (var target : targets) {
+                        if (target.damage > waveDamage) {
                             target.damage -= waveDamage;
-                        }else{
+                        } else {
                             target.remove();
                         }
                         hitEffect.at(target.x, target.y, waveColor);
                     }
 
-                    if(team == state.rules.defaultTeam){
+                    if (team == state.rules.defaultTeam) {
                         Events.fire(Trigger.shockwaveTowerUse);
                     }
                 }
@@ -110,30 +111,28 @@ public class ShockwaveTower extends Block{
 
             heat = Mathf.clamp(heat - Time.delta / reload * cooldownMultiplier);
 
+            if(team == CreeperUtils.creeperTeam){
+                var target = Units.bestTarget(team, x, y, CreeperUtils.creepTowerRange, e -> false, t -> t.team() != CreeperUtils.creeperTeam, UnitSorts.closest);
+                if(target != null){
+                    var tile = target.tileOn();
 
-            var target = Units.bestTarget(team, x, y, CreeperUtils.creepTowerRange, e -> false, t -> t.team() != CreeperUtils.creeperTeam, UnitSorts.closest);
-            if(team == CreeperUtils.creeperTeam && target != null) {
-                var tile = target.tileOn();
+                    if(tile != null){
+                        if(++fx_iv > fx_interval){
+                            fx_iv = 0;
+                            Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.2f, (fx, fy) -> {
+                                Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
+                            });
 
-                if (tile != null) {
-                    if(fx_iv > fx_interval) {
-                        Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.2f, (fx, fy) -> {
-                            Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
-                        });
+                            Call.soundAt(Sounds.mud, target.x(), target.y(), 1f, 1f);
 
-                        Call.soundAt(Sounds.mud, target.x(), target.y(), 1f, 1f);
+                            Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
+                            Call.effect(Fx.shieldApply, target.x(), target.y(), target.blockOn() == null ? 1 : target.blockOn().size, Color.blue);
+                        }
 
-                        Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
-                        Call.effect(Fx.shieldApply, target.x(), target.y(), target.blockOn() == null ? 1 : target.blockOn().size, Color.blue);
-
-                        fx_iv = 0;
-                    } else {
-                        fx_iv++;
+                        if(tile.creeperable && tile.floor().placeableOn && !tile.floor().isDeep()){
+                            tile.creep = Math.min(tile.creep + creepTowerDeposit, maxTileCreep);
+                        }else tile.build.damage(creeperTeam, creeperDamage * (creepTowerDeposit * tile.block().size));
                     }
-
-                    tile.getLinkedTiles((t) -> {
-                        t.creep = Math.min(t.creep+=CreeperUtils.creepTowerDeposit, CreeperUtils.maxTileCreep);
-                    });
                 }
             }
         }

@@ -88,7 +88,7 @@ public class Radar extends Block{
             if (team() == CreeperUtils.creeperTeam && !on_cd && target != null) {
                 shot_warmup = Mathf.lerp(shot_warmup, 1.0f, 0.01f);
 
-                if (warmup_iv > shot_warmup_fx_interval * (1f - shot_warmup)) {
+                if(++warmup_iv > shot_warmup_fx_interval * (1f - shot_warmup)) {
                     warmup_iv = 0f;
 
                     Geometry.iterateLine(0f, tile.worldx(), tile.worldy(), target.x(), target.y(), tile.dst(target) * (1f - shot_warmup), (x, y) -> {
@@ -98,7 +98,6 @@ public class Radar extends Block{
                     Call.effect(Fx.placeBlock, target.x(), target.y(), 1, Color.blue);
                     Call.soundAt(Sounds.lasershoot, target.x(), target.y(), 1f, 1);
                 }
-                warmup_iv += 1f;
 
                 if (shot_warmup > 0.9f) {
                     Call.soundAt(Sounds.lasercharge2, target.x(), target.y(), 1.5f, 0.8f);

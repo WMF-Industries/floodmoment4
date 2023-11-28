@@ -32,35 +32,31 @@ public class Emitter implements Position{
 
     // updates every interval in CreeperUtils
     public boolean update(){
-        if(build == null || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild)) return false;
+        if(build == null || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild))return false;
 
-        suspended = build.nullifyTimeout > 0f;
-
-        if(!suspended & counter >= type.interval){
+        if(!suspended && ++counter >= type.interval){
             counter = 0;
             // two methods so upgrading will work
-            if(build.tile.creep >= 10.35f && type.level != 3){
+            if (build.tile.creep >= 10.35f && type.level != 3) {
                 build.tile.creep = Math.min(build.tile.creep + type.amt, (type.upgradeThreshold + maxTileCreep));
-            }else{
-                build.tile.getLinkedTiles(t ->
-                    t.creep = Math.min(t.creep + type.amt, maxTileCreep)
-                );
-            }
+            } else build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt, maxTileCreep));
         }
-        counter++;
 
         return true;
     }
 
     // updates every 1 second
     public void fixedUpdate(){
-        nullified = suspended && build.tile.creep < maxTileCreep; //this doesn't have to be updated every tick
+        if(build == null)return;
+
+        suspended = build.nullifyTimeout > 0f; //this doesn't have to be updated every tick
+        nullified = suspended && build.tile.creep <= maxTileCreep;
         if(nullified){
             Call.label("[red]*[] SUSPENDED [red]*[]", 1f, build.x, build.y);
             Call.effect(Fx.placeBlock, build.x, build.y, build.block.size, Color.yellow);
-        }else if(build != null && build.tile != null && type.level <= 2 && build.tile.creep > maxTileCreep) {
+        }else if(build.tile != null && type.level <= 2 && build.tile.creep > maxTileCreep) {
             Call.label(Strings.format("[green]*[white] UPGRADING []@% *[]", (int) ((build.tile.creep - maxTileCreep) * 100 / (type.upgradeThreshold - maxTileCreep))), 1f, build.x, build.y);
-            if (build.tile.creep >= type.upgradeThreshold) {
+            if (build.tile.creep >= type.upgradeThreshold){
                 // get next emitter level & upgrade
                 EmitterType next = type.getNext();
                 creeperEmitters.remove(this);

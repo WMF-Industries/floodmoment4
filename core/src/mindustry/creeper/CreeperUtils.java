@@ -261,9 +261,7 @@ public class CreeperUtils{
         }, 0, 2.495f);
 
         Events.on(EventType.BlockDestroyEvent.class, e -> {
-            if(creeperLevels.containsKey(e.tile.block())){
-                e.tile.creep = 0;
-            }
+            e.tile.creep = 0;
         });
 
         Timer.schedule(() -> {
@@ -323,8 +321,7 @@ public class CreeperUtils{
     }
 
     public static void updateCreeper(){
-        updateTimer += Time.delta;
-        if (updateTimer < updateInterval) return; // 30 fps flood updating
+        if((updateTimer += Time.delta) < updateInterval) return; // 30 fps flood updating
         updateTimer = 0;
 
         // update emitters
@@ -345,16 +342,14 @@ public class CreeperUtils{
         // no emitters so game over
         if((creeperEmitters.size == 0
         || closestEmitter(world.tile(0, 0)) == null)
-        && chargedEmitters.size == 0
-        || closestChargedEmitter(world.tile(0, 0)) == null){
-            return;
-        }
+        && (chargedEmitters.size == 0
+        || closestChargedEmitter(world.tile(0, 0)) == null))return;
 
         // update creeper flow
-        if(++pulseOffset == 64) pulseOffset = 0;
+        if(++pulseOffset >= 64) pulseOffset = 0;
         Tile[] arr = world.tiles.array;
         int l = arr.length;
-        for(int i = 0; i < l; i++) { // Enhanced for allocates a lot of garbage here
+        for(int i = 0; i < l; i++){ // Enhanced for allocates a lot of garbage here
             Tile tile = arr[i];
             if(!tile.creeperable) continue;
 
@@ -372,7 +367,7 @@ public class CreeperUtils{
 
     public static void resetDistanceCache(){
         for(int i = 0; i < emitterDst.length; i++){ // Don't use enhanced for as that allocates
-            for (int j = 0; j < emitterDst[i].length; j++) {
+            for (int j = 0; j < emitterDst[i].length; j++){
                 var tile = world.tile(i, j);
                 var dst = -1;
                 Emitter ce = closestEmitter(tile);
@@ -416,15 +411,7 @@ public class CreeperUtils{
                 Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
             }
 
-            float damage = creeperDamage * tile.creep;
-            if(tile.block() instanceof CoreBlock && tile.build.health() <= damage){
-                var block = tile.block();
-                Call.effect(Fx.reactorExplosion, tile.build.x, tile.build.y, 0, Color.blue);
-                Call.sound(Sounds.explosionbig, 0.5f, 1, 1);
-                tile.build.remove();
-                tile.build.tile.setNet(block, creeperTeam, 0);
-            }else tile.build.damage(damage);
-
+            tile.build.damage(creeperTeam, creeperDamage * tile.creep);
             tile.creep *= creeperEvaporationUponDamagePercent;
         }
     }

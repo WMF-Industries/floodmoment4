@@ -103,23 +103,25 @@ public class ContinuousTurret extends Turret{
             }
 
             if(this.team != creeperTeam && this.block == Blocks.lustre){
-                refresh += Time.delta;
-                if(refresh >= 60){
+                if((refresh += Time.delta) >= 60){
                     refresh = 0;
-                    Emitter core = CreeperUtils.closestEmitter(tile);
-                    if(core != null && within(core, range)){
-                        targetEmitter = core;
-                    }else return;
+                    if(targetEmitter == null){
+                        Emitter core = CreeperUtils.closestEmitter(tile);
+                        if (core != null && within(core, nullifierRange)){
+                            targetEmitter = core;
+                        }
+                    }else{
+                        if(!targetEmitter.nullified){
+                            Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
+                            timeSuspended = 0;
+                        }else{
+                            if(++timeSuspended < 5)Call.label("\uE87C[red]Confirming Suspension[]\uE87C", 1, this.x, this.y);
+                        }
 
-                    if(targetEmitter.nullified){
-                        ++timeSuspended;
-                    }else timeSuspended = 0;
-
-                    if(this.targetPos.x == targetEmitter.getX() && this.targetPos.y == targetEmitter.getY() && Angles.within(this.rotation, Angles.angle(this.x, this.y, targetEmitter.getX(), targetEmitter.getY()), 2.5f)){
-                        if(timeSuspended >= 5 && isShooting() && hasAmmo()){
+                        if(this.targetPos.x == targetEmitter.getX() && this.targetPos.y == targetEmitter.getY() && Angles.within(this.rotation, Angles.angle(this.x, this.y, targetEmitter.getX(), targetEmitter.getY()), 2.5f) && timeSuspended >= 5 && isShooting() && hasAmmo()){
                             ++nullifyTime;
                             Call.label(Strings.format("[accent]\uE810[@]@%", getTrafficlightColor((double) Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1) / 100), Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1)), 1, this.x, this.y);
-                            Call.effect(Fx.healBlock, targetEmitter.getX(), targetEmitter.getY(), targetEmitter.build.block.size, creeperTeam.color);
+                            Call.effect(Fx.healBlockFull, targetEmitter.getX(), targetEmitter.getY(), targetEmitter.build.block.size, creeperTeam.color);
 
                             if(nullifyTime >= erekirNullifyTime){
                                 Call.effect(Fx.massiveExplosion, x, y, 2f, Pal.accentBack);
@@ -140,10 +142,8 @@ public class ContinuousTurret extends Turret{
                                     Call.effect(Fx.placeBlock, target.getX(), target.getY(), block.size, team().color);
                                 }
                             }
-                        }else{
-                            Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
-                        }
-                    }else nullifyTime = 0;
+                        }else nullifyTime = 0;
+                    }
                 }
             }
         }

@@ -51,7 +51,7 @@ public class ForceProjector extends Block{
     protected static ForceBuild paramEntity;
     protected static Effect paramEffect;
     static boolean effect;
-    static float refresh;
+    static int refresh;
     protected static final Cons<Bullet> shieldConsumer = bullet -> {
         if(bullet.team != paramEntity.team && bullet.type.absorbable && Intersector.isInRegularPolygon(((ForceProjector)(paramEntity.block)).sides, paramEntity.x, paramEntity.y, paramEntity.realRadius(), ((ForceProjector)(paramEntity.block)).shieldRotation, bullet.x, bullet.y)){
             bullet.absorb();
@@ -65,23 +65,22 @@ public class ForceProjector extends Block{
         if(((tile.creep >= 1f && tile.creeperable)
                 || (creeperLevels.containsKey(tile.block()) && tile.team() == creeperTeam))
                 && !paramEntity.broken && inForceField(tile)){
-            refresh += Time.delta;
             if(paramEntity.team != creeperTeam){
-                effect = true;
                 paramEntity.hit = 1f;
                 paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
-
-                if(tile.build != null && tile.build.team == creeperTeam)
+                if(tile.build != null && tile.build.team == creeperTeam){
                     tile.build.damage(Blocks.scrapWall.health);
-            }else if(tile.build != null && tile.build.team == creeperTeam) {
+                    effect = true;
+                }
+            }else if(tile.build != null && tile.build.team == creeperTeam && tile.build.damaged()){
                 effect = true;
                 tile.build.heal(Blocks.scrapWall.health);
             }
 
-            if(effect && refresh >= 15){
+            if(effect && ++refresh >= 15){
                 refresh = 0;
                 effect = false;
-                Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);
+                Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, paramEntity.team.color);
             }
         }
     };
@@ -262,7 +261,7 @@ public class ForceProjector extends Block{
                 coolantConsumer.update(this);
                 if(liquids.currentAmount() > 0f){
                     liquids.remove(liquids.current(), 0.5f);
-                    healthLeft = Math.min(healthLeft + regen * liquids.current().heatCapacity, shieldHealth);
+                    healthLeft = Math.min(healthLeft + ((regen * liquids.current().heatCapacity) * delta()), shieldHealth);
                 }
             }
 
