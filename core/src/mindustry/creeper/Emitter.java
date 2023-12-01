@@ -37,9 +37,9 @@ public class Emitter implements Position{
         if(!suspended && ++counter >= type.interval){
             counter = 0;
             // two methods so upgrading will work
-            if (build.tile.creep >= 10.35f && type.level != 3) {
+            if(build.tile.creep >= 10.35f && type.level != 3){
                 build.tile.creep = Math.min(build.tile.creep + type.amt, (type.upgradeThreshold + maxTileCreep));
-            } else build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt, maxTileCreep));
+            }else build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt, maxTileCreep));
         }
 
         return true;
@@ -56,15 +56,18 @@ public class Emitter implements Position{
             Call.effect(Fx.placeBlock, build.x, build.y, build.block.size, Color.yellow);
         }else if(build.tile != null && type.level <= 2 && build.tile.creep > maxTileCreep) {
             Call.label(Strings.format("[green]*[white] UPGRADING []@% *[]", (int) ((build.tile.creep - maxTileCreep) * 100 / (type.upgradeThreshold - maxTileCreep))), 1f, build.x, build.y);
-            if (build.tile.creep >= type.upgradeThreshold){
+            if(build.tile.creep >= type.upgradeThreshold){
                 // get next emitter level & upgrade
                 EmitterType next = type.getNext();
                 creeperEmitters.remove(this);
                 build.tile.setNet(next.block, creeperTeam, 0);
                 this.build = build.tile.build;
                 this.type = next;
-                // yeet the creeper afterward
-                build.tile.getLinkedTiles(t -> t.creep = 0);
+                // make tiles creeperable and remove the creep from upgrading
+                build.tile.getLinkedTiles(t -> {
+                    t.creeperable = true;
+                    t.creep = 0;
+                });
             }
         }
     }

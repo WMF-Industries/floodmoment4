@@ -73,8 +73,8 @@ public class ShockwaveTower extends Block{
         public float heat = 0f;
         public Seq<Bullet> targets = new Seq<>();
 
-        public float fx_interval = 10f;
-        public float fx_iv;
+        public float refreshTime = 10f;
+        public float refresh;
 
         @Override
         public void updateTile() {
@@ -111,23 +111,22 @@ public class ShockwaveTower extends Block{
 
             heat = Mathf.clamp(heat - Time.delta / reload * cooldownMultiplier);
 
-            if(team == CreeperUtils.creeperTeam){
+            if(team == CreeperUtils.creeperTeam && (refresh += Time.delta) > refreshTime){
+                refresh = 0;
                 var target = Units.bestTarget(team, x, y, CreeperUtils.creepTowerRange, e -> false, t -> t.team() != CreeperUtils.creeperTeam, UnitSorts.closest);
                 if(target != null){
                     var tile = target.tileOn();
 
                     if(tile != null){
-                        if(++fx_iv > fx_interval){
-                            fx_iv = 0;
-                            Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.2f, (fx, fy) -> {
-                                Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
-                            });
 
-                            Call.soundAt(Sounds.mud, target.x(), target.y(), 1f, 1f);
+                        Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.2f, (fx, fy) -> {
+                            Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
+                        });
 
-                            Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
-                            Call.effect(Fx.shieldApply, target.x(), target.y(), target.blockOn() == null ? 1 : target.blockOn().size, Color.blue);
-                        }
+                        Call.soundAt(Sounds.mud, target.x(), target.y(), 1f, 1f);
+
+                        Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
+                        Call.effect(Fx.shieldApply, target.x(), target.y(), target.blockOn() == null ? 1 : target.blockOn().size, Color.blue);
 
                         if(tile.creeperable && tile.floor().placeableOn && !tile.floor().isDeep()){
                             tile.creep = Math.min(tile.creep + creepTowerDeposit, maxTileCreep);

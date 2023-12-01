@@ -36,6 +36,7 @@ public enum Gamemode{
     }, map -> map.teams.size > 1),
     pvp(rules -> {
         rules.pvp = true;
+        rules.floodMode = true;
         rules.enemyCoreBuildRadius = 600f;
         rules.buildCostMultiplier = 1f;
         rules.buildSpeedMultiplier = 1f;

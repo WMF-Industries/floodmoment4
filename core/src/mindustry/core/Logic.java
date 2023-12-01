@@ -178,7 +178,7 @@ public class Logic implements ApplicationListener{
 
         //listen to core changes; if all cores have been destroyed, set to derelict.
         Events.on(CoreChangeEvent.class, e -> Core.app.post(() -> {
-            if(state.rules.cleanupDeadTeams && state.rules.pvp && !e.core.isAdded() && e.core.team != Team.derelict && e.core.team.cores().isEmpty()){
+            if(state.rules.cleanupDeadTeams && state.rules.pvp && !e.core.isAdded() && e.core.team != Team.derelict && e.core.team != CreeperUtils.creeperTeam && e.core.team.cores().isEmpty()){
                 e.core.team.data().destroyToDerelict();
             }
         }));
@@ -302,12 +302,15 @@ public class Logic implements ApplicationListener{
                 state.gameOver = true;
                 Events.fire(new GameOverEvent(state.rules.waveTeam));
             }else if(state.rules.attackMode){
+                int countAlive;
                 //count # of teams alive
-                int countAlive = state.teams.getActive().count(t -> t.hasCore() && t.team != Team.derelict);
+                if(state.rules.pvp){
+                    countAlive = state.teams.getActive().count(t -> t.hasCore() && t.team != Team.derelict && t.team != CreeperUtils.creeperTeam);
+                }else countAlive = state.teams.getActive().count(t -> t.hasCore() && t.team != Team.derelict);
 
                 if((countAlive <= 1 || (!state.rules.pvp && state.rules.defaultTeam.core() == null)) && !state.gameOver){
                     //find team that won
-                    TeamData left = state.teams.getActive().find(t -> t.hasCore() && t.team != Team.derelict);
+                    TeamData left = state.teams.getActive().find(t -> t.hasCore() && t.team != Team.derelict && t.team != CreeperUtils.creeperTeam);
                     Events.fire(new GameOverEvent(left == null ? Team.derelict : left.team));
                     state.gameOver = true;
                 }

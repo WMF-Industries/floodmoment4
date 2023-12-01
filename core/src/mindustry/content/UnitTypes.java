@@ -855,6 +855,7 @@ public class UnitTypes{
                     knockback = 0.8f;
                     lifetime = 70f;
                     width = height = 19f;
+                    collides = true;
                     collidesTiles = true;
                     ammoMultiplier = 4f;
                     splashDamageRadius = 70f;
@@ -3027,6 +3028,7 @@ public class UnitTypes{
                         Drawf.light(e.x, e.y, 23f, e.color, e.fout() * 0.7f);
                     }));
 
+                    collides = true;
                     collidesTiles = true;
                     backColor = hitColor = Pal.techBlue;
                     frontColor = Color.white;

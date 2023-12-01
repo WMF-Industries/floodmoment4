@@ -1,7 +1,6 @@
 package mindustry.creeper;
 
 import arc.*;
-import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
@@ -14,7 +13,6 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
-import mindustry.world.blocks.storage.CoreBlock;
 
 import static mindustry.Vars.*;
 
@@ -66,7 +64,7 @@ public class CreeperUtils{
 
     public static float radarBeamDamage = 600f; // damage the radar creeper beam deals to units
 
-    public static float creepTowerDeposit = 0.3f; // amount of creep deposited by the creep tower per tick
+    public static float creepTowerDeposit = 3f; // amount of creep deposited by the creep tower every 10 ticks
     public static float creepTowerRange = 300f; // just slightly bigger than ripple's range
 
 
@@ -221,7 +219,10 @@ public class CreeperUtils{
             creeperEmitters.clear();
 
             for(Tile tile : world.tiles){
-                if(!tile.floor().isDeep() && tile.floor().placeableOn && (tile.breakable() || tile.block() == Blocks.air || tile.block() instanceof TreeBlock)){
+                if(!tile.floor().isDeep()
+                && tile.floor().placeableOn
+                && (tile.breakable() || tile.block() == Blocks.air || tile.block() instanceof TreeBlock)
+                && !(tile.block() instanceof StaticWall || tile.block() instanceof Cliff)){
                     tile.creeperable = true;
                 }
             }
@@ -265,9 +266,9 @@ public class CreeperUtils{
         });
 
         Timer.schedule(() -> {
-            if(!state.isGame()) return;
+            if (!state.isGame() || state.rules.pvp) return;
             // check for gameover
-            if(nullifiedCount == creeperEmitters.size){
+            if (nullifiedCount == creeperEmitters.size) {
                 Timer.schedule(() -> {
                     if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0){
                         // gameover
@@ -444,9 +445,7 @@ public class CreeperUtils{
         || target == null
         || target.creep >= maxTileCreep
         || source.creep <= target.creep
-        || target.block() instanceof StaticWall
-        || target.block() instanceof Cliff
-        || (target.floor() != null && (!target.floor().placeableOn || target.floor().isDeep()))){
+        || !target.creeperable){
             return true;
         }
         if(source.build != null && source.build.team != creeperTeam){

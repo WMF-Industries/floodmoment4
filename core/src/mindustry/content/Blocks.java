@@ -1773,7 +1773,7 @@ public class Blocks{
             requirements(Category.effect, with(Items.lead, 30, Items.copper, 25));
             consumePower(0.3f);
             size = 1;
-            reload = 200f;
+            reload = 800f;
             range = 40f;
             healPercent = 4f;
             phaseBoost = 4f;
@@ -1786,7 +1786,7 @@ public class Blocks{
             requirements(Category.effect, with(Items.lead, 100, Items.titanium, 25, Items.silicon, 40, Items.copper, 50));
             consumePower(1.5f);
             size = 2;
-            reload = 250f;
+            reload = 500f;
             range = 85f;
             healPercent = 11f;
             phaseBoost = 15f;
@@ -1869,8 +1869,8 @@ public class Blocks{
             consumeLiquid(Liquids.hydrogen, 1f / 60f);
             consumeItem(Items.phaseFabric).boost();
 
-            healPercent = 4f / 60f;
-            healAmount = 12f;
+            healPercent = 2f / 60f;
+            healAmount = 5f;
 
             Color col = Color.valueOf("8ca9e8");
 
