@@ -102,7 +102,7 @@ public class SuicideAI extends GroundAI{
             }
         }
 
-        if(unit.team == CreeperUtils.creeperTeam && unit.type.creeperDeposit > 0){
+        if((unit.team == CreeperUtils.creeperTeam || state.rules.pvp) && unit.type.creeperDeposit > 0){
             if(destroy) {
                 unit.deposit();
             }else{

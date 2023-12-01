@@ -655,7 +655,7 @@ abstract class UnitComp implements Healthc, Physicsc, Hitboxc, Statusc, Teamc, I
 
     /** Deposits creeper. **/
     public void deposit(){
-        if(team == creeperTeam && type.creeperDeposit > 0){
+        if((team == creeperTeam || state.rules.pvp) && type.creeperDeposit > 0){
             depositCreeper(world.tileWorld(x, y), type.hitSize / 2, type.creeperDeposit);
             Call.effect(Fx.sapExplosion, x, y, 10, creeperTeam.color);
         }

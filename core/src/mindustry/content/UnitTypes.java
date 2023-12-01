@@ -9,12 +9,14 @@ import arc.util.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.annotations.Annotations.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.entities.*;
 import mindustry.entities.abilities.*;
 import mindustry.entities.bullet.*;
 import mindustry.entities.effect.*;
 import mindustry.entities.part.*;
 import mindustry.entities.pattern.*;
+import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -27,6 +29,7 @@ import static arc.graphics.g2d.Draw.*;
 import static arc.graphics.g2d.Lines.*;
 import static arc.math.Angles.*;
 import static mindustry.Vars.*;
+import static mindustry.creeper.CreeperUtils.*;
 
 public class UnitTypes{
     //region standard
@@ -873,7 +876,24 @@ public class UnitTypes{
                     statusDuration = 60f * 10;
                 }};
             }});
-        }};
+        }
+            @Override
+            public void update(Unit unit) {
+                super.update(unit);
+                if(((creeperEmitters.size == 0
+                || closestEmitter(world.tile(0, 0)) == null)
+                && (chargedEmitters.size == 0
+                || closestChargedEmitter(world.tile(0, 0)) == null))
+                || !state.rules.pvp || ((updateRate += Time.delta) < 60)) return;
+
+                updateRate = 0;
+                unit.apply(StatusEffects.disarmed, 90f);
+                var target = Units.bestTarget(unit.team, unit.x, unit.y, unit.range(),
+                e -> e.team() != CreeperUtils.creeperTeam && e.team() != Team.derelict && e.hasWeapons(),
+                t -> t.team() != CreeperUtils.creeperTeam && t.team() != Team.derelict, UnitSorts.closest);
+                if(target != null) unit.deposit();
+            }
+        };
 
         toxopid = new UnitType("toxopid"){{
             aiController = SuicideAI::new;
@@ -1004,7 +1024,24 @@ public class UnitTypes{
                     }};
                 }};
             }});
-        }};
+        }
+            @Override
+            public void update(Unit unit) {
+                super.update(unit);
+                if(((creeperEmitters.size == 0
+                || closestEmitter(world.tile(0, 0)) == null)
+                && (chargedEmitters.size == 0
+                || closestChargedEmitter(world.tile(0, 0)) == null))
+                || !state.rules.pvp || ((updateRate += Time.delta) < 60)) return;
+
+                updateRate = 0;
+                unit.apply(StatusEffects.disarmed, 90f);
+                var target = Units.bestTarget(unit.team, unit.x, unit.y, unit.range(),
+                        e -> e.team() != CreeperUtils.creeperTeam && e.team() != Team.derelict && e.hasWeapons(),
+                        t -> t.team() != CreeperUtils.creeperTeam && t.team() != Team.derelict, UnitSorts.closest);
+                if(target != null) unit.deposit();
+            }
+        };
 
         //endregion
         //region air attack

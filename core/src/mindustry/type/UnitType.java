@@ -321,6 +321,7 @@ public class UnitType extends UnlockableContent implements Senseable{
 
     /** how much creeper this unit deposits upon death */
     public float creeperDeposit = 0f;
+    public float updateRate;
 
     /** amount of items this unit can carry; <0 to determine based on hitSize. */
     public int itemCapacity = -1;

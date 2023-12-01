@@ -72,9 +72,13 @@ public class CreeperUtils{
     public static float suspendTimeout = 180f; // The amount of ticks a core remains suspended (resets upon enough damage applied)
 
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
+    public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
     public static int tutorialID;
+    public static int pvpTutorialID;
     private static int nullifiedCount = 0;
     private static int pulseOffset = 0;
+    private static int timePassed;
+    private static boolean stateUpdate = true;
 
     public static final Team creeperTeam = Team.blue;
 
@@ -103,6 +107,12 @@ public class CreeperUtils{
     "[white]\uF7FA[]", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
     "[white]\uF898[]", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] absorb [#e056f0]the flood[].\nUnlike unit shields, \uF898 need [accent]coolant and power to regenerate[] & [accent]explode[] if overloaded / destroyed.\n[red]Reclaiming them gives no resources![]",
     "[white]\uF7F5[]", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood, additionally their carrying capacity is set to 20.\nUse them to transport items over flood.",
+    };
+    public static final String[] pvpTutEntries = {
+    "[accent]\uE875[] Tutorial 1/3", "In [#e056f0]\uE83B flood pvp[], your goal is to defeat your enemy as well as defend yourself from [#e056f0]the flood[].\nSuspending emitters does not end the game.",
+    "[accent]\uE875[] Tutorial 2/3", "After the game starts, [accent]Polygonal Core Protection[] is enabled for [accent]15 minutes[]\nUse the given protection period to prepare your defenses!",
+    "[accent]\uE875[] Tutorial 3/3", "Content wise, flood pvp is nearly identical to standard flood.\nThe strategies used on a standard flood server might prove to also be effective here.",
+    "[white]\uF7F7[]", "[lime]PvP Creep[]\n\uF7F7 & \uF7DE explode when it contact with enemy team's units & buildings and release tons of [#e056f0]the flood[].\nThis ability is disabled once all emitters are nullified.",
     };
 
     private static float updateTimer;
@@ -197,10 +207,22 @@ public class CreeperUtils{
             });
         }
 
+        int pvpMenuID = 0;
+        for(int pi = pvpTutEntries.length; --pi >= 0; ){
+            final int pj = pi;
+            int current = pvpMenuID;
+            pvpMenuID = Menus.registerMenu((player, selection) -> {
+                if(selection == 1) return;
+                if(pj == tutEntries.length / 2) return;
+                Call.menu(player.con, current, pvpTutEntries[2 * pj], pvpTutEntries[2 * pj + 1], pj == pvpTutEntries.length / 2 - 1 ? tutFinal : tutContinue);
+            });
+        }
+
         tutorialID = menuID;
+        pvpTutorialID = pvpMenuID;
         Events.on(EventType.PlayerJoin.class, e -> {
             if(e.player.getInfo().timesJoined > 1) return;
-            Call.menu(e.player.con, tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
+            Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
         });
 
         Events.on(EventType.GameOverEvent.class, e -> {
@@ -230,6 +252,8 @@ public class CreeperUtils{
             for(Building build : Groups.build){
                 tryAddEmitter(build);
             }
+
+            if(state.rules.pvp) state.rules.polygonCoreProtection = true;
 
             Log.info(Structs.count(world.tiles.array, t -> t.creeperable) + " creeperable tiles");
             Log.info(creeperEmitters.size + " emitters");
@@ -292,8 +316,16 @@ public class CreeperUtils{
     }
 
     public static void fixedUpdate(){
-        // dont update anything if game is paused
+        // don't update anything if game is paused
         if(!state.isPlaying() || state.isPaused()) return;
+
+        // flood should allow to nullify emitters
+        if(stateUpdate && (!state.rules.pvp || ++timePassed >= preparationPeriod)){
+            stateUpdate = false;
+            state.rules.polygonCoreProtection = false;
+            if(state.rules.enemyCoreBuildRadius > 10) state.rules.enemyCoreBuildRadius = 10f * tilesize;
+            if(state.rules.pvp)Call.announce("Preparation Period Over!\nPolygonal Core Protection Disabled.");
+        }
 
         int newcount = 0;
         for(Emitter emitter : creeperEmitters){
@@ -344,7 +376,8 @@ public class CreeperUtils{
         if((creeperEmitters.size == 0
         || closestEmitter(world.tile(0, 0)) == null)
         && (chargedEmitters.size == 0
-        || closestChargedEmitter(world.tile(0, 0)) == null))return;
+        || closestChargedEmitter(world.tile(0, 0)) == null)) return;
+
 
         // update creeper flow
         if(++pulseOffset >= 64) pulseOffset = 0;
@@ -443,9 +476,9 @@ public class CreeperUtils{
     public static boolean cannotTransfer(Tile source, Tile target){
         if(source == null
         || target == null
-        || target.creep >= maxTileCreep
+        || !target.creeperable
         || source.creep <= target.creep
-        || !target.creeperable){
+        || target.creep >= maxTileCreep){
             return true;
         }
         if(source.build != null && source.build.team != creeperTeam){
