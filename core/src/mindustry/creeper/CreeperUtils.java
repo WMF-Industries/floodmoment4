@@ -112,7 +112,7 @@ public class CreeperUtils{
     "[accent]\uE875[] Tutorial 1/3", "In [#e056f0]\uE83B flood pvp[], your goal is to defeat your enemy as well as defend yourself from [#e056f0]the flood[].\nSuspending emitters does not end the game.",
     "[accent]\uE875[] Tutorial 2/3", "After the game starts, [accent]Polygonal Core Protection[] is enabled for [accent]15 minutes[]\nUse the given protection period to prepare your defenses!",
     "[accent]\uE875[] Tutorial 3/3", "Content wise, flood pvp is nearly identical to standard flood.\nThe strategies used on a standard flood server might prove to also be effective here.",
-    "[white]\uF7F7[]", "[lime]PvP Creep[]\n\uF7F7 & \uF7DE explode when it contact with enemy team's units & buildings and release tons of [#e056f0]the flood[].\nThis ability is disabled once all emitters are nullified.",
+    "[white]\uF7F7[]", "[lime]PvP Creep[]\n\uF7F7 & \uF7DE explode when in contact with enemy team's units & buildings and release tons of [#e056f0]the flood[].\nThis ability is disabled once all emitters are nullified.",
     };
 
     private static float updateTimer;
