@@ -78,7 +78,7 @@ public class CreeperUtils{
     private static int nullifiedCount = 0;
     private static int pulseOffset = 0;
     private static int timePassed;
-    private static boolean stateUpdate = true;
+    private static boolean stateUpdate;
 
     public static final Team creeperTeam = Team.blue;
 
@@ -254,6 +254,7 @@ public class CreeperUtils{
             }
 
             if(state.rules.pvp) state.rules.polygonCoreProtection = true;
+            stateUpdate = true;
 
             Log.info(Structs.count(world.tiles.array, t -> t.creeperable) + " creeperable tiles");
             Log.info(creeperEmitters.size + " emitters");

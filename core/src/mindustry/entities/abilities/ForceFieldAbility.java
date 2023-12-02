@@ -36,7 +36,7 @@ public class ForceFieldAbility extends Ability{
     /** State. */
     protected float radiusScale, alpha;
 
-    private static float realRad;
+    private static float realRad, updateRate;
     private static Unit paramUnit;
     private static ForceFieldAbility paramField;
     private static final Cons<Bullet> shieldConsumer = trait -> {
@@ -57,7 +57,15 @@ public class ForceFieldAbility extends Ability{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(((tile.creep >= 1f && !tile.block().isStatic()) || (CreeperUtils.creeperLevels.containsKey(tile.block()) && tile.team() == CreeperUtils.creeperTeam)) && Intersector.isInsideHexagon(paramUnit.x, paramUnit.y, realRad * 2f, tile.worldx(), tile.worldy()) && paramUnit.shield > 0){
+        if(!Intersector.isInsideHexagon(paramUnit.x, paramUnit.y, realRad * 2f, tile.worldx(), tile.worldy()) || !tile.creeperable) return;
+
+        float health;
+        if(tile.block().floodHealth > 0){
+            health = tile.block().floodHealth;
+        }else health = tile.block().health;
+        var tmp = Math.min(paramUnit.hitSize, (health / 5));
+
+        if(paramUnit.team != CreeperUtils.creeperTeam && (tile.creep >= 1f || (CreeperUtils.creeperLevels.containsKey(tile.block()) && tile.team() == CreeperUtils.creeperTeam)) && paramUnit.shield > 0){
 
             if(paramUnit.shield <= CreeperUtils.creeperDamage * CreeperUtils.creeperLevels.get(tile.block(), 1)){
                 paramUnit.shield -= paramField.cooldown * paramField.regen;
@@ -68,11 +76,10 @@ public class ForceFieldAbility extends Ability{
             paramUnit.shield -= CreeperUtils.creeperDamage * CreeperUtils.unitShieldDamageMultiplier * (tile.creep / 2f) + (tile.block() instanceof CoreBlock && tile.team() == CreeperUtils.creeperTeam ? 2 : 0);
             paramField.alpha = 1f;
 
-            var dmg = Blocks.conveyor.health / 10;
             if(tile.build != null && tile.build.team == CreeperUtils.creeperTeam)
-                tile.build.damage(dmg);
+                tile.build.damage(tmp);
 
-            if(tile.build != null && tile.build.health <= dmg)
+            if(tile.build != null && tile.build.health <= tmp)
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, Color.blue);
         }
     };
