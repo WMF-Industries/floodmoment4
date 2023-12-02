@@ -19,8 +19,7 @@ import mindustry.annotations.Annotations.*;
 import mindustry.audio.*;
 import mindustry.content.*;
 import mindustry.core.*;
-import mindustry.creeper.CreeperUtils;
-import mindustry.creeper.Emitter;
+import mindustry.creeper.*;
 import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
@@ -40,7 +39,6 @@ import mindustry.world.blocks.heat.HeatConductor.*;
 import mindustry.world.blocks.logic.LogicBlock.*;
 import mindustry.world.blocks.payloads.*;
 import mindustry.world.blocks.power.*;
-import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
 import mindustry.world.modules.*;
@@ -95,8 +93,8 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
     /** The efficiency this block *would* have if shouldConsume() returned true. */
     transient float potentialEfficiency;
 
-    float nullifyTimeout = 0f;
-    float nullifyDamage = 0f;
+    transient float nullifyTimeout = 0f;
+    transient float nullifyDamage = 0f;
 
     transient float healSuppressionTime = -1f;
     transient float lastHealTime = -120f * 10f;
