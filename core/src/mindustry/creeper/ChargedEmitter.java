@@ -33,11 +33,11 @@ public class ChargedEmitter implements Position{
                 immune = false;
             }else immune = true;
             build.heal(build.maxHealth);
-            if(++throttle >= 6){
+            if(++throttle >= 6 && build.health < build.maxHealth){
                 Call.effect(Fx.healBlock, build.x, build.y, build.block.size, creeperTeam.color);
                 throttle = 0;
             }
-        }
+        }else immune = false;
 
         if(emitting){
             if(++counter >= type.interval){
@@ -62,13 +62,13 @@ public class ChargedEmitter implements Position{
             sb.append(Strings.format("[accent]\uE86B [stat]Immune[] \uE86B[]"));
         }
         if(overflow > 0){
-            if(sb.length() != 0) sb.append("\n");
+            if(sb.length() != 0) sb.append("\n    ");
             sb.append(Strings.format("[green]@[] - [stat]@%[]", type.upgradable() ? "\ue804" : "\ue813", (int)(overflow * 100 / type.chargeCap)));
         }
         if(emitting){
             Call.effect(Fx.launch, build.x, build.y, build.block.size, creeperTeam.color);
         }else{
-            if(sb.length() != 0) sb.append("\n");
+            if(sb.length() != 0) sb.append(immune ? "\n    " : "\n");
             sb.append(Strings.format("[red]⚠[] - [stat] @%", (int)(buildup * 100 / type.chargeCap)));
         }
         if(sb.length() != 0){
