@@ -107,7 +107,7 @@ public class ContinuousTurret extends Turret{
                     refresh = 0;
                     if(targetEmitter == null){
                         Emitter core = CreeperUtils.closestEmitter(tile);
-                        if (core != null && within(core, nullifierRange)){
+                        if(core != null && within(core, this.range())){
                             targetEmitter = core;
                         }
                     }else{
@@ -135,6 +135,9 @@ public class ContinuousTurret extends Turret{
                                 Block block = build.block;
                                 Tile target = build.tile;
 
+                                build.tile.getLinkedTiles(t -> {
+                                    t.creep = 0;
+                                });
                                 build.kill();
 
                                 if(state.rules.coreCapture){

@@ -131,6 +131,9 @@ public class ImpactReactor extends PowerGenerator{
                         Block block = build.block;
                         Tile target = build.tile;
 
+                        build.tile.getLinkedTiles(t -> {
+                            t.creep = 0;
+                        });
                         build.kill();
 
                         if(state.rules.coreCapture) {

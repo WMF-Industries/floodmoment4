@@ -63,7 +63,7 @@ public class Emitter implements Position{
                 build.tile.setNet(next.block, creeperTeam, 0);
                 this.build = build.tile.build;
                 this.type = next;
-                // make tiles creeperable and remove the creep from upgrading
+                // make tiles creeperable and remove the creep after upgrading
                 build.tile.getLinkedTiles(t -> {
                     t.creeperable = true;
                     t.creep = 0;

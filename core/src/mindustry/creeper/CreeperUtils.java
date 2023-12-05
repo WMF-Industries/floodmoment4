@@ -13,6 +13,7 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
+import mindustry.world.blocks.storage.CoreBlock;
 
 import static mindustry.Vars.*;
 
@@ -73,11 +74,9 @@ public class CreeperUtils{
 
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
-    public static int tutorialID;
-    public static int pvpTutorialID;
-    private static int nullifiedCount = 0;
-    private static int pulseOffset = 0;
-    private static int timePassed;
+    public static int tutorialID, pvpTutorialID;
+    private static int timePassed, pulseOffset;
+    private static int nullifiedCount = pulseOffset = timePassed = 0;
     private static boolean stateUpdate;
 
     public static final Team creeperTeam = Team.blue;
@@ -293,7 +292,7 @@ public class CreeperUtils{
         Timer.schedule(() -> {
             if (!state.isGame() || state.rules.pvp) return;
             // check for gameover
-            if (nullifiedCount == creeperEmitters.size) {
+            if(nullifiedCount == creeperEmitters.size){
                 Timer.schedule(() -> {
                     if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0){
                         // gameover
@@ -325,7 +324,7 @@ public class CreeperUtils{
             stateUpdate = false;
             state.rules.polygonCoreProtection = false;
             if(state.rules.enemyCoreBuildRadius > 10) state.rules.enemyCoreBuildRadius = 10f * tilesize;
-            if(state.rules.pvp)Call.announce("Preparation Period Over!\nPolygonal Core Protection Disabled.");
+            if(state.rules.pvp)Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
         }
 
         int newcount = 0;
