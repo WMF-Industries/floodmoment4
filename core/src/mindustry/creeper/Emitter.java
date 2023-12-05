@@ -32,7 +32,7 @@ public class Emitter implements Position{
 
     // updates every interval in CreeperUtils
     public boolean update(){
-        if(build == null || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild))return false;
+        if(build == null || !build.isAdded() || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild))return false;
 
         if(!suspended && ++counter >= type.interval){
             counter = 0;

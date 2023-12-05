@@ -353,6 +353,8 @@ public class NetServer implements ApplicationListener{
                 player.sendMessage("[#656566]⚠ Not enough permissions!");
                 return;
             }
+
+            Call.infoToast("Reloading emitters!", 3);
             canGameover = false;
 
             chargedEmitters.clear();

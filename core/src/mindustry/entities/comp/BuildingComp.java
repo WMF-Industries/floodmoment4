@@ -140,8 +140,10 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
         this.block = block;
         this.team = team;
 
-        fakeHealth = block.floodHealth;
-        doFakeHealth = fakeHealth > 0;
+        if(team == CreeperUtils.creeperTeam){
+            fakeHealth = block.floodHealth * state.rules.blockHealth(CreeperUtils.creeperTeam);
+            doFakeHealth = fakeHealth > 0;
+        }
 
         if(block.loopSound != Sounds.none){
             sound = new SoundLoop(block.loopSound, block.loopSoundVolume);

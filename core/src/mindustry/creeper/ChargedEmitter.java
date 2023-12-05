@@ -25,7 +25,7 @@ public class ChargedEmitter implements Position{
     public static HashMap<Block, ChargedEmitterType> chargedEmitterTypes = new HashMap<>();
 
     public boolean update(){
-        if(build == null || build.health <= 1f)return false;
+        if(build == null || build.health <= 1f || !build.isAdded())return false;
 
         if(build.health < build.maxHealth && overflow > 0 || emitting || this.build.tile.creep >= 6.5f){
             if(!emitting && this.build.tile.creep < 6.5f){
