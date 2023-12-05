@@ -348,6 +348,23 @@ public class NetServer implements ApplicationListener{
             CreeperUtils.depositCreeper(unit.tileOn(), Integer.parseInt(args[0]), Integer.parseInt(args[1]));
         });
 
+        clientCommands.<Player>register("reload", "Reloads the emitters.", (args, player) -> {
+            if(!player.admin){
+                player.sendMessage("[#656566]⚠ Not enough permissions!");
+                return;
+            }
+            canGameover = false;
+
+            chargedEmitters.clear();
+            creeperEmitters.clear();
+
+            for(Building build : Groups.build){
+                tryAddEmitter(build);
+            }
+
+            canGameover = true;
+        });
+
         clientCommands.<Player>register("help", "[page]", "Lists all commands.", (args, player) -> {
             if(args.length > 0 && !Strings.canParseInt(args[0])){
                 player.sendMessage("[scarlet]'page' must be a number.");

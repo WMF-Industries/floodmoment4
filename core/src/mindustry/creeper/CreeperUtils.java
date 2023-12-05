@@ -75,6 +75,7 @@ public class CreeperUtils{
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
     public static int tutorialID, pvpTutorialID;
+    public static boolean canGameover;
     private static int timePassed, pulseOffset;
     private static int nullifiedCount = pulseOffset = timePassed = 0;
     private static boolean stateUpdate;
@@ -294,7 +295,7 @@ public class CreeperUtils{
             // check for gameover
             if(nullifiedCount == creeperEmitters.size){
                 Timer.schedule(() -> {
-                    if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0){
+                    if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0 && canGameover){
                         // gameover
                         state.gameOver = true;
                         Events.fire(new EventType.GameOverEvent(state.rules.defaultTeam));
