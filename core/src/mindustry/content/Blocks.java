@@ -38,7 +38,6 @@ import mindustry.world.draw.*;
 import mindustry.world.meta.*;
 
 import static mindustry.Vars.*;
-import static mindustry.creeper.CreeperUtils.*;
 import static mindustry.type.ItemStack.*;
 
 public class Blocks{
@@ -1526,6 +1525,7 @@ public class Blocks{
             health = 110 * wallHealthMultiplier;
 
             floodHealth = 75;
+            solid = false;
 
             envDisabled |= Env.scorching;
         }};
@@ -1541,7 +1541,7 @@ public class Blocks{
             requirements(Category.defense, with(Items.plastanium, 5, Items.metaglass, 2));
             health = 125 * wallHealthMultiplier;
 
-            floodHealth = 225;
+            floodHealth = 200;
 
             insulated = true;
             absorbLasers = true;
@@ -1631,6 +1631,7 @@ public class Blocks{
             health = 60 * wallHealthMultiplier;
 
             floodHealth = 50;
+            solid = false;
 
             variants = 5;
             envDisabled |= Env.scorching;
@@ -1670,7 +1671,10 @@ public class Blocks{
             requirements(Category.defense, with(Items.beryllium, 6));
             health = 130 * wallHealthMultiplier;
 
-            floodHealth = 200;
+            floodHealth = 225;
+            //TODO check if there'll be more deyncs
+            insulated = true;
+            absorbLasers = true;
 
             armor = 2f;
             buildCostMultiplier = 8f;

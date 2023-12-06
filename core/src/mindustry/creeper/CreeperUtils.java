@@ -13,7 +13,6 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
-import mindustry.world.blocks.storage.CoreBlock;
 
 import static mindustry.Vars.*;
 
@@ -169,8 +168,8 @@ public class CreeperUtils{
         creeperBlocks.put(4, Blocks.phaseWall);
         creeperBlocks.put(5, Blocks.surgeWall);
         creeperBlocks.put(6, Blocks.reinforcedSurgeWall);
-        creeperBlocks.put(7, Blocks.berylliumWall);
-        creeperBlocks.put(8, Blocks.plastaniumWall);
+        creeperBlocks.put(7, Blocks.plastaniumWall);
+        creeperBlocks.put(8, Blocks.berylliumWall);
         creeperBlocks.put(9, Blocks.tungstenWall);
         creeperBlocks.put(10, Blocks.carbideWall);
 
