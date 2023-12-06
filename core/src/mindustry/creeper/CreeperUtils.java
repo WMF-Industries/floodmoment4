@@ -265,6 +265,20 @@ public class CreeperUtils{
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
         });
 
+        Events.on(EventType.CoreChangeEvent.class, e ->{
+            if(!state.rules.coreCapture) return;
+
+            canGameover = false;
+            chargedEmitters.clear();
+            creeperEmitters.clear();
+
+            for(Building build : Groups.build){
+                tryAddEmitter(build);
+            }
+
+            canGameover = true;
+        });
+
         Timer.schedule(() -> {
             if(creeperEmitters.size > 0){
                 sb.append(Strings.format(
