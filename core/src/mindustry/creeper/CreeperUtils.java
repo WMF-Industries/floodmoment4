@@ -74,10 +74,10 @@ public class CreeperUtils{
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
     public static int tutorialID, pvpTutorialID;
-    public static boolean canGameover;
+    public static boolean canGameover, stateUpdate;
+    private static final int maxProtectionRadius = 10 * tilesize;
     private static int timePassed, pulseOffset;
     private static int nullifiedCount = pulseOffset = timePassed = 0;
-    private static boolean stateUpdate;
 
     public static final Team creeperTeam = Team.blue;
 
@@ -146,19 +146,36 @@ public class CreeperUtils{
         depositCreeper(tile, sporeRadius, sporeAmount);
     }
 
-    public static void tryAddEmitter(Building build) {
+    public static void tryAddEmitter(Building build){
         if(build.team != creeperTeam) return;
+
+        boolean canAdd = true;
+
+        for(Emitter emitter : creeperEmitters){
+            if(emitter.build == build){
+                canAdd = false;
+                break;
+            }
+        }
+
+        for(ChargedEmitter charged : chargedEmitters){
+            if(charged.build == build){
+                canAdd = false;
+                break;
+            }
+        }
+
+        if(!canAdd) return;
 
         if(Emitter.emitterTypes.containsKey(build.block)){
             creeperEmitters.add(new Emitter(build));
-        }else if (ChargedEmitter.chargedEmitterTypes.containsKey(build.block)) {
+        }else if(ChargedEmitter.chargedEmitterTypes.containsKey(build.block)){
             chargedEmitters.add(new ChargedEmitter(build));
         }
     }
 
     public static void init(){
         sporeType.isCreeper = true;
-
 
         // walls since conveyors no longer work :{
         creeperBlocks.put(0, Blocks.air);
@@ -265,20 +282,6 @@ public class CreeperUtils{
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
         });
 
-        Events.on(EventType.CoreChangeEvent.class, e ->{
-            if(!state.rules.coreCapture) return;
-
-            canGameover = false;
-            chargedEmitters.clear();
-            creeperEmitters.clear();
-
-            for(Building build : Groups.build){
-                tryAddEmitter(build);
-            }
-
-            canGameover = true;
-        });
-
         Timer.schedule(() -> {
             if(creeperEmitters.size > 0){
                 sb.append(Strings.format(
@@ -337,7 +340,7 @@ public class CreeperUtils{
         if(stateUpdate && (!state.rules.pvp || ++timePassed >= preparationPeriod)){
             stateUpdate = false;
             state.rules.polygonCoreProtection = false;
-            if(state.rules.enemyCoreBuildRadius > 10) state.rules.enemyCoreBuildRadius = 10f * tilesize;
+            if(state.rules.enemyCoreBuildRadius > maxProtectionRadius) state.rules.enemyCoreBuildRadius = maxProtectionRadius;
             if(state.rules.pvp)Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
         }
 
