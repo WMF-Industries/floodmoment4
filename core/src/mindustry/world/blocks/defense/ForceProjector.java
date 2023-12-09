@@ -62,7 +62,7 @@ public class ForceProjector extends Block{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(((tile.creep >= 1f && tile.creeperable)
+        if(tile != null && ((tile.creep >= 1f && tile.creeperable)
         || (creeperLevels.containsKey(tile.block())
         && tile.team() == creeperTeam)) && !paramEntity.broken
         && paramEntity.enabled && inForceField(tile)){
@@ -70,7 +70,7 @@ public class ForceProjector extends Block{
                 paramEntity.hit = 1f;
                 paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
                 if(tile.build != null && tile.build.team == creeperTeam){
-                    tile.build.damage(Blocks.scrapWall.health);
+                    tile.build.damage(paramEntity.team, Blocks.scrapWall.health);
                     effect = true;
                 }
             }else if(tile.build != null && tile.build.team == creeperTeam && tile.build.damaged()){
@@ -278,7 +278,7 @@ public class ForceProjector extends Block{
         @Override
         public double sense(LAccess sensor){
             if(sensor == LAccess.heat) return shieldHealth / buildup;
-            if(sensor == LAccess.shield) return broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - healthLeft, 0);
+            if(sensor == LAccess.shield) return broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - buildup, 0);
             return super.sense(sensor);
         }
 
