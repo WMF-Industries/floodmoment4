@@ -115,7 +115,6 @@ public class ShockwaveTower extends Block{
                     var tile = target.tileOn();
 
                     if(tile != null){
-
                         Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.2f, (fx, fy) -> {
                             Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
                         });
@@ -125,9 +124,14 @@ public class ShockwaveTower extends Block{
                         Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
                         Call.effect(Fx.shieldApply, target.x(), target.y(), target.blockOn() == null ? 1 : target.blockOn().size, Color.blue);
 
-                        if(tile.creeperable && tile.floor().placeableOn && !tile.floor().isDeep()){
-                            tile.creep = Math.min(tile.creep + creepTowerDeposit, maxTileCreep);
-                        }else tile.build.damage(creeperTeam, creeperDamage * (creepTowerDeposit * tile.block().size));
+                        float damage = creeperDamage * (creepTowerDeposit * tile.block().size);
+                        if(tile.build.health <= damage){
+                            tile.getLinkedTilesAs(tile.block(), tempTiles);
+                            tile.build.kill();
+                            Timer.schedule(() -> {
+                                tempTiles.forEach(t -> t.creep = creepTowerDeposit);
+                            }, 0.125f);
+                        }else tile.build.damage(creeperTeam, damage);
                     }
                 }
             }

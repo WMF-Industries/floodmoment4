@@ -65,7 +65,7 @@ public class CreeperUtils{
 
     public static float radarBeamDamage = 600f; // damage the radar creeper beam deals to units
 
-    public static float creepTowerDeposit = 3f; // amount of creep deposited by the creep tower every 10 ticks
+    public static float creepTowerDeposit = 3f; // amount of creep deposited by the creep tower after the building is killed
     public static float creepTowerRange = 300f; // just slightly bigger than ripple's range
 
 
@@ -225,13 +225,7 @@ public class CreeperUtils{
             Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
         });
 
-        Events.on(EventType.GameOverEvent.class, e -> {
-            if(fixedRunner != null)
-                fixedRunner.cancel();
-
-            for(Tile t : world.tiles.array) t.creeperable = false;
-            creeperEmitters.clear();
-            chargedEmitters.clear();
+        Events.on(EventType.WorldLoadBeginEvent.class, e -> {
             shields.clear();
         });
 
@@ -263,7 +257,11 @@ public class CreeperUtils{
             emitterDst = new int[world.width()][world.height()];
             resetDistanceCache();
 
+            if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
+
+            state.rules.revealedBlocks.remove(Blocks.arc);
+            state.rules.revealedBlocks.remove(Blocks.lancer);
         });
 
         Timer.schedule(() -> {
@@ -390,7 +388,7 @@ public class CreeperUtils{
 
             // spread creep and apply damage
             transferCreeper(tile);
-            applyDamage(tile);
+            if(tile.creep >= 1) applyDamage(tile);
 
             if((closestEmitterDist(tile) - pulseOffset) % 64 == 0){
                 drawCreeper(tile);
@@ -441,7 +439,7 @@ public class CreeperUtils{
     }
 
     public static void applyDamage(Tile tile){
-        if(tile.build != null && tile.build.team != creeperTeam && tile.creep > 1f){
+        if(tile.build != null && tile.build.team != creeperTeam){
             if(Mathf.chance(0.005d)){
                 Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
             }
@@ -482,11 +480,7 @@ public class CreeperUtils{
         || target.creep >= maxTileCreep){
             return true;
         }
-        if(source.build != null && source.build.team != creeperTeam){
-            applyDamage(source);
-            return true;
-        }
 
-        return false;
+        return source.build == null || source.build.team == creeperTeam;
     }
 }
