@@ -13,8 +13,8 @@ import mindustry.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
 import mindustry.core.*;
-import mindustry.ctype.*;
 import mindustry.creeper.*;
+import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
 import mindustry.game.*;
@@ -439,12 +439,6 @@ public class CoreBlock extends StorageBlock{
 
         @Override
         public void onDestroyed(){
-            if(team == CreeperUtils.creeperTeam){
-                CreeperUtils.creeperEmitters.remove(e -> e.build == this);
-                CreeperUtils.chargedEmitters.remove(e -> e.build == this);
-
-                CreeperUtils.resetDistanceCache();
-            }
             if(state.rules.coreCapture){
                 //just create an explosion, no fire. this prevents immediate recapture
                 Damage.dynamicExplosion(x, y, 0, 0, 0, tilesize * block.size / 2f, state.rules.damageExplosions);
@@ -615,6 +609,13 @@ public class CoreBlock extends StorageBlock{
 
             for(CoreBuild other : state.teams.cores(team)){
                 other.onProximityUpdate();
+            }
+
+            if(team == CreeperUtils.creeperTeam){
+                CreeperUtils.creeperEmitters.remove(e -> e.build == this);
+                CreeperUtils.chargedEmitters.remove(e -> e.build == this);
+
+                CreeperUtils.resetDistanceCache();
             }
         }
 

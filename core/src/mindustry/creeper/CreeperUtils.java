@@ -9,6 +9,7 @@ import mindustry.content.*;
 import mindustry.entities.bullet.*;
 import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.io.*;
 import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
@@ -149,24 +150,6 @@ public class CreeperUtils{
     public static void tryAddEmitter(Building build){
         if(build.team != creeperTeam) return;
 
-        boolean canAdd = true;
-
-        for(Emitter emitter : creeperEmitters){
-            if(emitter.build == build){
-                canAdd = false;
-                break;
-            }
-        }
-
-        for(ChargedEmitter charged : chargedEmitters){
-            if(charged.build == build){
-                canAdd = false;
-                break;
-            }
-        }
-
-        if(!canAdd) return;
-
         if(Emitter.emitterTypes.containsKey(build.block)){
             creeperEmitters.add(new Emitter(build));
         }else if(ChargedEmitter.chargedEmitterTypes.containsKey(build.block)){
@@ -175,6 +158,7 @@ public class CreeperUtils{
     }
 
     public static void init(){
+        SaveVersion.addCustomChunk("flood-data", new CreeperSaveIO());
         sporeType.isCreeper = true;
 
         // walls since conveyors no longer work :{
@@ -251,7 +235,7 @@ public class CreeperUtils{
             shields.clear();
         });
 
-        Events.on(EventType.PlayEvent.class, e -> {
+        Events.on(EventType.WorldLoadEvent.class, e -> {
             for(Tile t : world.tiles.array) t.creeperable = false;
             chargedEmitters.clear();
             creeperEmitters.clear();

@@ -1,19 +1,16 @@
 package mindustry.world.blocks.defense;
 
-import arc.math.*;
-import arc.math.geom.Geometry;
-import arc.util.*;
-import arc.struct.*;
 import arc.*;
 import arc.audio.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
-import mindustry.creeper.CreeperUtils;
+import mindustry.creeper.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
