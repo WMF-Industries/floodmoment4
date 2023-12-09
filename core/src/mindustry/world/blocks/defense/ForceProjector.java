@@ -63,8 +63,9 @@ public class ForceProjector extends Block{
 
     private static final Cons<Tile> creeperConsumer = tile -> {
         if(((tile.creep >= 1f && tile.creeperable)
-                || (creeperLevels.containsKey(tile.block()) && tile.team() == creeperTeam))
-                && !paramEntity.broken && inForceField(tile)){
+        || (creeperLevels.containsKey(tile.block())
+        && tile.team() == creeperTeam)) && !paramEntity.broken
+        && paramEntity.enabled && inForceField(tile)){
             if(paramEntity.team != creeperTeam){
                 paramEntity.hit = 1f;
                 paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
@@ -252,12 +253,11 @@ public class ForceProjector extends Block{
                 Groups.bullet.intersect(x - realRadius, y - realRadius, realRadius * 2f, realRadius * 2f, shieldConsumer);
 
                 Geometry.circle(tile.x, tile.y, (int)(((int)realRadius / Vars.tilesize) * 3), (cx, cy) -> {
-                    if(Intersector.isInsideHexagon(tile.worldx(), tile.worldy(), realRadius * 2f, cx * Vars.tilesize, cy * Vars.tilesize) && Vars.world.tile(cx, cy) != null)
-                        creeperConsumer.get(Vars.world.tile(cx, cy));
+                    if(inForceField(tile)) creeperConsumer.get(Vars.world.tile(cx, cy));
                 });
             }
 
-            if(coolantConsumer != null && coolantConsumer.efficiency(this) > 0 && consPower.efficiency(tile.build) > 0){
+            if(coolantConsumer != null && (coolantConsumer.efficiency(this) > 0 || !enabled) && consPower.efficiency(tile.build) > 0){
                 coolantConsumer.update(this);
                 if(liquids.currentAmount() > 0f){
                     liquids.remove(liquids.current(), 0.5f);
@@ -277,8 +277,8 @@ public class ForceProjector extends Block{
 
         @Override
         public double sense(LAccess sensor){
-            if(sensor == LAccess.heat) return healthLeft / buildup;
-            if(sensor == LAccess.shield) return broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - buildup, 0);
+            if(sensor == LAccess.heat) return shieldHealth / buildup;
+            if(sensor == LAccess.shield) return broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - healthLeft, 0);
             return super.sense(sensor);
         }
 

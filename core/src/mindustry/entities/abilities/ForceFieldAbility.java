@@ -57,23 +57,23 @@ public class ForceFieldAbility extends Ability{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(!Intersector.isInsideHexagon(paramUnit.x, paramUnit.y, realRad * 2f, tile.worldx(), tile.worldy()) || !tile.creeperable) return;
+        if(((!Intersector.isInsideHexagon(paramUnit.x, paramUnit.y, realRad * 2f, tile.worldx(), tile.worldy()) || !tile.creeperable) || (tile.creep < 1 && tile.block() == null)) && paramUnit.shield > 0) return;
 
         float health;
         if(tile.block().floodHealth > 0){
             health = tile.block().floodHealth;
         }else health = tile.block().health;
-        var tmp = Math.min(paramUnit.hitSize, (health / 5));
+        var tmp = Math.min((paramUnit.hitSize / tilesize), (health / 5));
 
-        if(paramUnit.team != CreeperUtils.creeperTeam && (tile.creep >= 1f || (CreeperUtils.creeperLevels.containsKey(tile.block()) && tile.team() == CreeperUtils.creeperTeam)) && paramUnit.shield > 0){
-
-            if(paramUnit.shield <= CreeperUtils.creeperDamage * CreeperUtils.creeperLevels.get(tile.block(), 1)){
+        if(paramUnit.team != CreeperUtils.creeperTeam && tile.team() == CreeperUtils.creeperTeam && paramUnit.shield > 0){
+            if(paramUnit.shield <= CreeperUtils.creeperDamage * CreeperUtils.creeperLevels.get(tile.block(), 1) || tile.block() instanceof CoreBlock){
+                if(tile.block() instanceof CoreBlock) paramUnit.shield = 0;
                 paramUnit.shield -= paramField.cooldown * paramField.regen;
 
                 Call.effect(Fx.shieldBreak, paramUnit.x, paramUnit.y, paramField.radius, paramUnit.team.color);
             }
 
-            paramUnit.shield -= CreeperUtils.creeperDamage * CreeperUtils.unitShieldDamageMultiplier * (tile.creep / 2f) + (tile.block() instanceof CoreBlock && tile.team() == CreeperUtils.creeperTeam ? 2 : 0);
+            paramUnit.shield -= CreeperUtils.creeperDamage * CreeperUtils.unitShieldDamageMultiplier * tile.creep;
             paramField.alpha = 1f;
 
             if(tile.build != null && tile.build.team == CreeperUtils.creeperTeam)
