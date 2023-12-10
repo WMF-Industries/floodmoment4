@@ -123,6 +123,7 @@ public class UnitTypes{
             hitSize = 10f;
             health = 550;
             armor = 4f;
+            creeperResistance = 0.25f; // to offset the horribly low range and bad targetting
             ammoType = new ItemAmmoType(Items.coal);
 
             immunities.add(StatusEffects.burning);

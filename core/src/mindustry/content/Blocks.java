@@ -1564,6 +1564,7 @@ public class Blocks{
             health = 200 * wallHealthMultiplier;
 
             floodHealth = 100;
+            solid = false;
 
             envDisabled |= Env.scorching;
         }};

@@ -52,7 +52,7 @@ public class CreeperUtils{
     public static float sporeTargetOffset = 256f;
     public static boolean sporeScaleThreat = true;
     public static double sporeBaseMultifireChance = 0.01d;
-    public static float sporeCreepUse = 0.75f;
+    public static float sporeCreepUse = 1.25f;
 
     public static float unitShieldDamageMultiplier = 1.5f;
     public static float buildShieldDamageMultiplier = 0.75f;
@@ -248,7 +248,7 @@ public class CreeperUtils{
             }
 
             if(state.rules.pvp) state.rules.polygonCoreProtection = true;
-            stateUpdate = true;
+            stateUpdate = canGameover = true; // canGameover should be reset every game to avoid bugs
 
             Log.info(Structs.count(world.tiles.array, t -> t.creeperable) + " creeperable tiles");
             Log.info(creeperEmitters.size + " emitters");
@@ -285,7 +285,7 @@ public class CreeperUtils{
         }, 0, 2.495f);
 
         Events.on(EventType.BlockDestroyEvent.class, e -> {
-            e.tile.creep = 0;
+            e.tile.getLinkedTiles(t -> t.creep = 0); // clear flood on all the tiles this block spans
         });
 
         Timer.schedule(() -> {

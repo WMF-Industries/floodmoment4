@@ -142,14 +142,17 @@ public class NuclearReactor extends PowerGenerator{
 
                     double multifireChance;
                     if(sporeScaleThreat){
-                        t.getLinkedTiles(l -> l.creep -= sporeCreepUse);
                         multifireChance = sporeBaseMultifireChance * t.creep;
+                        t.getLinkedTiles(l -> l.creep -= sporeCreepUse);
                     }else multifireChance = 0;
 
                     Timer.schedule(() -> {
                         t.setNet(Blocks.thoriumReactor, creeperTeam, 0);
                         if(Mathf.chance(multifireChance)) Call.setItem(t.build, Items.thorium, itemCapacity);
                     }, 0.1f);
+
+                    remove(); // remove instead of killing as killing sets flood to 0
+                    return;
                 }
 
                 kill();
