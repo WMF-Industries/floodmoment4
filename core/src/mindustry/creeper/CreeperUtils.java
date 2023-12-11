@@ -117,6 +117,9 @@ public class CreeperUtils{
 
     private static float updateTimer;
 
+    /** Whether the current map has loaded. We cant use world.isGenerating(); as that's set to false too soon */
+    private static boolean hasLoaded;
+
     public static String getTrafficlightColor(double value){
         return "#" + Integer.toHexString(java.awt.Color.HSBtoRGB((float)value / 3f, 1f, 1f)).substring(2);
     }
@@ -227,7 +230,10 @@ public class CreeperUtils{
             Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
         });
 
-        Events.on(EventType.WorldLoadBeginEvent.class, e -> shields.clear());
+        Events.on(EventType.WorldLoadBeginEvent.class, e -> {
+            shields.clear();
+            hasLoaded = false;
+        });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
             for(Tile t : world.tiles.array) t.creeperable = false;
@@ -262,6 +268,7 @@ public class CreeperUtils{
 
             state.rules.revealedBlocks.remove(Blocks.arc);
             state.rules.revealedBlocks.remove(Blocks.lancer);
+            hasLoaded = true;
         });
 
         Timer.schedule(() -> {
@@ -399,6 +406,7 @@ public class CreeperUtils{
     public static int[][] emitterDst = new int[0][0];
 
     public static void resetDistanceCache(){
+        if(!hasLoaded) return;
         for(int i = 0; i < emitterDst.length; i++){ // Don't use enhanced for as that allocates
             for (int j = 0; j < emitterDst[i].length; j++){
                 var tile = world.tile(i, j);
