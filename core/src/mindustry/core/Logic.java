@@ -311,8 +311,8 @@ public class Logic implements ApplicationListener{
                 if((countAlive <= 1 || (!state.rules.pvp && state.rules.defaultTeam.core() == null)) && !state.gameOver){
                     //find team that won
                     TeamData left = state.teams.getActive().find(t -> t.hasCore() && t.team != Team.derelict && t.team != CreeperUtils.creeperTeam);
-                    Events.fire(new GameOverEvent(left == null ? Team.derelict : left.team));
                     state.gameOver = true;
+                    Events.fire(new GameOverEvent(left == null ? Team.derelict : left.team));
                 }
             }else if(!state.gameOver && state.rules.waves && (state.enemies == 0 && state.rules.winWave > 0 && state.wave >= state.rules.winWave && !spawner.isSpawning())){
                 state.gameOver = true;

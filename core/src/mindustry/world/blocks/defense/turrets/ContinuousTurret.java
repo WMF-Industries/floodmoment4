@@ -1,23 +1,19 @@
 package mindustry.world.blocks.defense.turrets;
 
-import arc.Core;
 import arc.math.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
-import mindustry.creeper.CreeperUtils;
-import mindustry.creeper.Emitter;
+import mindustry.creeper.*;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
-import mindustry.graphics.Pal;
-import mindustry.world.Block;
-import mindustry.world.Tile;
+import mindustry.graphics.*;
+import mindustry.world.*;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
 
-import static arc.math.Angles.angle;
-import static mindustry.Vars.state;
+import static mindustry.Vars.*;
 import static mindustry.creeper.CreeperUtils.*;
 
 /** A turret that fires a continuous beam bullet with no reload or coolant necessary. The bullet only disappears when the turret stops shooting. */
@@ -102,7 +98,7 @@ public class ContinuousTurret extends Turret{
                 curRecoil = recoil;
             }
 
-            if(this.team != creeperTeam && this.block == Blocks.lustre){
+            if(this.team != creeperTeam && block == Blocks.lustre){
                 if((refresh += Time.delta) >= 60){
                     refresh = 0;
                     if(targetEmitter == null){
@@ -112,15 +108,15 @@ public class ContinuousTurret extends Turret{
                         }
                     }else{
                         if(!targetEmitter.nullified){
-                            Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, this.x, this.y);
+                            Call.label("[yellow]⚠[red]Emitter Not Suspended[]⚠", 1, x, y);
                             timeSuspended = 0;
                         }else{
-                            if(++timeSuspended < 5)Call.label("\uE87C[red]Confirming Suspension[]\uE87C", 1, this.x, this.y);
+                            if(++timeSuspended < 5)Call.label("\uE87C[red]Confirming Suspension[]\uE87C", 1, x, y);
                         }
 
-                        if(this.targetPos.x == targetEmitter.getX() && this.targetPos.y == targetEmitter.getY() && Angles.within(this.rotation, Angles.angle(this.x, this.y, targetEmitter.getX(), targetEmitter.getY()), 2.5f) && timeSuspended >= 5 && isShooting() && hasAmmo()){
+                        if(targetPos.epsilonEquals(targetEmitter.getX(), targetEmitter.getY()) && Angles.within(rotation, angleTo(targetEmitter), 2.5f) && timeSuspended >= 5 && isShooting() && hasAmmo()){
                             ++nullifyTime;
-                            Call.label(Strings.format("[accent]\uE810[@]@%", getTrafficlightColor((double) Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1) / 100), Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1)), 1, this.x, this.y);
+                            Call.label(Strings.format("[accent]\uE810[@]@%", getTrafficlightColor((double) Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1) / 100), Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1)), 1, x, y);
                             Call.effect(Fx.healBlockFull, targetEmitter.getX(), targetEmitter.getY(), targetEmitter.build.block.size, creeperTeam.color);
 
                             if(nullifyTime >= erekirNullifyTime){

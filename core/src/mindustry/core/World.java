@@ -348,6 +348,7 @@ public class World{
         }
 
         try{
+            Log.info("Loading map @", map.file.absolutePath());
             SaveIO.load(map.file, new FilterContext(map));
         }catch(Throwable e){
             Log.err(e);

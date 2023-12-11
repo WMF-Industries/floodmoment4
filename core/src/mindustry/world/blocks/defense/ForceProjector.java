@@ -101,6 +101,7 @@ public class ForceProjector extends Block{
         envEnabled |= Env.space;
         ambientSound = Sounds.shield;
         ambientSoundVolume = 0.08f;
+        sync = true;
 
         if(consumeCoolant){
             consume(coolantConsumer = new ConsumeCoolant(coolantConsumption)).boost().update(false);
@@ -198,7 +199,7 @@ public class ForceProjector extends Block{
 
             phaseHeat = Mathf.lerpDelta(phaseHeat, Mathf.num(phaseValid), 0.1f);
 
-            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && consPower.efficiency(tile.build) > 0){
+            if(phaseValid && !broken && timer(timerUse, phaseUseTime) && efficiency > 0){
                 consume();
             }
 
@@ -208,7 +209,7 @@ public class ForceProjector extends Block{
                 Fx.reactorsmoke.at(x + Mathf.range(tilesize / 2f), y + Mathf.range(tilesize / 2f));
             }
 
-            warmup = Mathf.lerpDelta(warmup, consPower.efficiency(tile.build), 0.1f);
+            warmup = Mathf.lerpDelta(warmup, efficiency, 0.1f);
 
             if(buildup > 0){
                 float scale = !broken ? cooldownNormal : cooldownBrokenBase;
@@ -252,15 +253,15 @@ public class ForceProjector extends Block{
                 paramEffect = absorbEffect;
                 Groups.bullet.intersect(x - realRadius, y - realRadius, realRadius * 2f, realRadius * 2f, shieldConsumer);
 
-                Geometry.circle(tile.x, tile.y, (int)(((int)realRadius / Vars.tilesize) * 3), (cx, cy) -> {
+                Geometry.circle(tile.x, tile.y, (((int)realRadius / Vars.tilesize) * 3), (cx, cy) -> {
                     if(inForceField(tile)) creeperConsumer.get(Vars.world.tile(cx, cy));
                 });
             }
 
-            if(coolantConsumer != null && (coolantConsumer.efficiency(this) > 0 || !enabled) && consPower.efficiency(tile.build) > 0){
+            if(coolantConsumer != null && (coolantConsumer.efficiency(this) > 0 || !enabled) && healthLeft < shieldHealth){
                 coolantConsumer.update(this);
-                if(liquids.currentAmount() > 0f){
-                    liquids.remove(liquids.current(), 0.5f);
+                if(liquids.currentAmount() > 0.01f){
+//                    liquids.remove(liquids.current(), 0.5f); // TODO: ???
                     healthLeft = Math.min(healthLeft + ((regen * liquids.current().heatCapacity) * delta()), shieldHealth);
                 }
             }
@@ -277,8 +278,8 @@ public class ForceProjector extends Block{
 
         @Override
         public double sense(LAccess sensor){
-            if(sensor == LAccess.heat) return shieldHealth / buildup;
-            if(sensor == LAccess.shield) return broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - buildup, 0);
+            if(sensor == LAccess.heat) return shieldHealth - healthLeft; // Clients sense buildup which should be equivalent
+            if(sensor == LAccess.shield) return healthLeft; // Equivalent to the client which senses "broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - buildup, 0)"
             return super.sense(sensor);
         }
 
@@ -328,7 +329,8 @@ public class ForceProjector extends Block{
         public void write(Writes write){
             super.write(write);
             write.bool(broken);
-            write.f(buildup);
+            // instead of syncing buildup, we sync healthLeft scaled up to match what buildup would otherwise be (entity.buildup / (shieldHealth + phaseShieldBoost * entity.phaseHeat)
+            write.f(((shieldHealth - healthLeft) / shieldHealth) * (shieldHealth + phaseShieldBoost * phaseHeat));
             write.f(radscl);
             write.f(warmup);
             write.f(phaseHeat);

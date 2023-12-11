@@ -24,6 +24,7 @@ import mindustry.net.*;
 import mindustry.net.Administration.*;
 import mindustry.net.Packets.*;
 import mindustry.world.*;
+import mindustry.world.blocks.defense.*;
 
 import java.io.*;
 import java.net.*;
@@ -37,7 +38,7 @@ import static mindustry.creeper.CreeperUtils.*;
 public class NetServer implements ApplicationListener{
     /** note that snapshots are compressed, so the max snapshot size here is above the typical UDP safe limit */
     private static final int maxSnapshotSize = 800;
-    private static final int timerBlockSync = 0, timerHealthSync = 1;
+    private static final int timerBlockSync = 0, timerHealthSync = 1, timerForceProjSync = 9;
     private static final float blockSyncTime = 60 * 6, healthSyncTime = 30;
     private static final FloatBuffer fbuffer = FloatBuffer.allocate(20);
     private static final Writes dataWrites = new Writes(null);
@@ -948,11 +949,16 @@ public class NetServer implements ApplicationListener{
 
     /** Sends a block snapshot to all players. */
     public void writeBlockSnapshots() throws IOException{
+        writeBlockSnapshots(false);
+    }
+
+    /** Sends a block snapshot to all players. */
+    public void writeBlockSnapshots(boolean forceProjOnly) throws IOException{
         syncStream.reset();
 
         short sent = 0;
         for(Building entity : Groups.build){
-            if(!entity.block.sync) continue;
+            if(!entity.block.sync || (forceProjOnly && !(entity instanceof ForceProjector.ForceBuild))) continue;
             sent++;
 
             dataStream.writeInt(entity.pos());
@@ -1107,7 +1113,10 @@ public class NetServer implements ApplicationListener{
             });
 
             if(Groups.player.size() > 0 && Core.settings.getBool("blocksync") && timer.get(timerBlockSync, blockSyncTime)){
+                timer.reset(timerForceProjSync, 0); // we don't really need to sync the shields twice
                 writeBlockSnapshots();
+            }else if(!Groups.player.isEmpty() && Core.settings.getBool("blocksync") && timer.get(timerForceProjSync, 30f) && !timer.check(timerBlockSync, blockSyncTime - 30f)){
+                writeBlockSnapshots(true);
             }
 
             if(Groups.player.size() > 0 && buildHealthChanged.size > 0 && timer.get(timerHealthSync, healthSyncTime)){

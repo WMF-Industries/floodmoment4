@@ -1829,7 +1829,6 @@ public class Blocks{
 
             itemConsumer = consumeItem(Items.phaseFabric).boost();
             consumePower(4f);
-            coolantConsumer = consumeCoolant(0.1f);
         }};
 
         shockMine = new ShockMine("shock-mine"){{

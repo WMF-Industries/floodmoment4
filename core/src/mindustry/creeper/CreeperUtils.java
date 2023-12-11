@@ -148,12 +148,14 @@ public class CreeperUtils{
     }
 
     public static void tryAddEmitter(Building build){
-        if(build.team != creeperTeam) return;
+        if(build.team != creeperTeam || world.isGenerating()) return;
 
         if(Emitter.emitterTypes.containsKey(build.block)){
             creeperEmitters.add(new Emitter(build));
+            CreeperUtils.resetDistanceCache();
         }else if(ChargedEmitter.chargedEmitterTypes.containsKey(build.block)){
             chargedEmitters.add(new ChargedEmitter(build));
+            CreeperUtils.resetDistanceCache();
         }
     }
 
@@ -225,9 +227,7 @@ public class CreeperUtils{
             Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
         });
 
-        Events.on(EventType.WorldLoadBeginEvent.class, e -> {
-            shields.clear();
-        });
+        Events.on(EventType.WorldLoadBeginEvent.class, e -> shields.clear());
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
             for(Tile t : world.tiles.array) t.creeperable = false;
@@ -481,6 +481,6 @@ public class CreeperUtils{
             return true;
         }
 
-        return source.build == null || source.build.team == creeperTeam;
+        return source.build != null && source.build.team != creeperTeam;
     }
 }

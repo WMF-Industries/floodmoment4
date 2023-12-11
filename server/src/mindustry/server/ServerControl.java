@@ -970,6 +970,7 @@ public class ServerControl implements ApplicationListener{
 
             info("Core destroyed.");
             inGameOverWait = false;
+            state.gameOver = true;
             Events.fire(new GameOverEvent(state.rules.waveTeam));
         });
 
