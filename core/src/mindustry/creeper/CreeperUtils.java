@@ -266,8 +266,8 @@ public class CreeperUtils{
             if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
 
-            state.rules.revealedBlocks.remove(Blocks.arc);
-            state.rules.revealedBlocks.remove(Blocks.lancer);
+            state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
+            state.rules.hideBannedBlocks = true;
             hasLoaded = true;
         });
 
