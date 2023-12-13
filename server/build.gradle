@@ -43,6 +43,7 @@ task dist(type: Jar, dependsOn: configurations.runtimeClasspath){
     exclude("cubemaps/**")
     exclude("cursors/**")
     exclude("shaders/**")
+    exclude("saves/**")
     exclude("icons/icon.icns")
     exclude("icons/icon.ico")
     exclude("icons/icon_64.png")
