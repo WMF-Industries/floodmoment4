@@ -232,6 +232,7 @@ public class CreeperUtils{
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
             shields.clear();
+            stateUpdate = canGameover = true;
             hasLoaded = false;
         });
 
@@ -254,14 +255,12 @@ public class CreeperUtils{
             }
 
             if(state.rules.pvp) state.rules.polygonCoreProtection = true;
-            stateUpdate = canGameover = true; // canGameover should be reset every game to avoid bugs
 
             Log.info(Structs.count(world.tiles.array, t -> t.creeperable) + " creeperable tiles");
             Log.info(creeperEmitters.size + " emitters");
             Log.info(chargedEmitters.size + " charged emitters");
 
             emitterDst = new int[world.width()][world.height()];
-            resetDistanceCache();
 
             if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
@@ -269,6 +268,8 @@ public class CreeperUtils{
             state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
             state.rules.hideBannedBlocks = true;
             hasLoaded = true;
+
+            resetDistanceCache(); // run after loading since it returns if not loaded
         });
 
         Timer.schedule(() -> {
