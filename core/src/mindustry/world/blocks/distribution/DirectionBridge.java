@@ -35,6 +35,7 @@ public class DirectionBridge extends Block{
         update = true;
         solid = true;
         rotate = true;
+        instakill = true;
         group = BlockGroup.transportation;
         noUpdateDisabled = true;
         priority = TargetPriority.transport;

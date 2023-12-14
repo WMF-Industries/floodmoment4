@@ -30,6 +30,7 @@ public class OverflowDuct extends Block{
         noUpdateDisabled = true;
         rotate = true;
         underBullets = true;
+        instakill = true;
         priority = TargetPriority.transport;
         envEnabled = Env.space | Env.terrestrial | Env.underwater;
         regionRotated1 = 1;

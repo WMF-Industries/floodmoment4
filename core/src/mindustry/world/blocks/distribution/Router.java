@@ -22,6 +22,7 @@ public class Router extends Block{
         group = BlockGroup.transportation;
         unloadable = false;
         noUpdateDisabled = true;
+        instakill = true;
     }
 
     public class RouterBuild extends Building implements ControlBlock{

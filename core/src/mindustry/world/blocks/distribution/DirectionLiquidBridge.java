@@ -25,6 +25,7 @@ public class DirectionLiquidBridge extends DirectionBridge{
         canOverdrive = false;
         liquidCapacity = 20f;
         hasLiquids = true;
+        instakill = true;
     }
 
 

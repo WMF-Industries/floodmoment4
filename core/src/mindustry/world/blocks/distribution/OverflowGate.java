@@ -22,6 +22,7 @@ public class OverflowGate extends Block{
         instantTransfer = true;
         unloadable = false;
         canOverdrive = false;
+        instakill = true;
         itemCapacity = 0;
     }
 

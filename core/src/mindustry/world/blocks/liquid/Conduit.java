@@ -52,6 +52,7 @@ public class Conduit extends LiquidBlock implements Autotiler{
         conveyorPlacement = true;
         noUpdateDisabled = true;
         canOverdrive = false;
+        instakill = true;
         priority = TargetPriority.transport;
     }
 

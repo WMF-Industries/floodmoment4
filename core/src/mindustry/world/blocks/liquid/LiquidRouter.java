@@ -13,6 +13,7 @@ public class LiquidRouter extends LiquidBlock{
         noUpdateDisabled = true;
         canOverdrive = false;
         floating = true;
+        instakill = true;
     }
 
     @Override

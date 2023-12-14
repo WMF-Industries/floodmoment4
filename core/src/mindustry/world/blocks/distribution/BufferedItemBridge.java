@@ -15,6 +15,7 @@ public class BufferedItemBridge extends ItemBridge{
         super(name);
         hasPower = false;
         hasItems = true;
+        instakill = true;
         canOverdrive = true;
     }
 

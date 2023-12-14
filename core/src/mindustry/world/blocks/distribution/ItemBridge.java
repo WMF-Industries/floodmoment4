@@ -51,6 +51,7 @@ public class ItemBridge extends Block{
         configurable = true;
         hasItems = true;
         unloadable = false;
+        instakill = true;
         group = BlockGroup.transportation;
         noUpdateDisabled = true;
         copyConfig = false;

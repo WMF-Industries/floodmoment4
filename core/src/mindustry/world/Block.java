@@ -166,6 +166,8 @@ public class Block extends UnlockableContent implements Senseable{
     public int health = -1;
     /** 'fake' flood health. Does not create cracks in blocks when damaged */
     public int floodHealth = -1;
+    /** whether flood instakills the block*/
+    public boolean instakill = false;
     /** damage absorption, similar to unit armor */
     public float armor = 0f;
     /** base block explosiveness */

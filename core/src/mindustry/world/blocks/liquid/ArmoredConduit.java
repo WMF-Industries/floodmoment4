@@ -10,6 +10,7 @@ public class ArmoredConduit extends Conduit{
     public ArmoredConduit(String name){
         super(name);
         leaks = false;
+        instakill = true;
     }
 
     @Override

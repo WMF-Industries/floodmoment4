@@ -22,6 +22,7 @@ public class Junction extends Block{
         unloadable = false;
         floating = true;
         noUpdateDisabled = true;
+        instakill = true;
     }
 
     @Override

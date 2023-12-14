@@ -265,10 +265,7 @@ public class CreeperUtils{
             if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
 
-            state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
-            state.rules.hideBannedBlocks = true;
             hasLoaded = true;
-
             resetDistanceCache(); // run after loading since it returns if not loaded
         });
 
@@ -326,12 +323,22 @@ public class CreeperUtils{
         // don't update anything if game is paused
         if(!state.isPlaying() || state.isPaused()) return;
 
-        // flood should allow to nullify emitters
         if(stateUpdate && (!state.rules.pvp || ++timePassed >= preparationPeriod)){
-            stateUpdate = false;
-            state.rules.polygonCoreProtection = false;
-            if(state.rules.enemyCoreBuildRadius > maxProtectionRadius) state.rules.enemyCoreBuildRadius = maxProtectionRadius;
-            if(state.rules.pvp)Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
+            if(state.rules.enemyCoreBuildRadius > maxProtectionRadius)  // flood should allow to nullify emitters
+                state.rules.enemyCoreBuildRadius = maxProtectionRadius;
+            if(state.rules.pvp){
+                Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
+            }else{ // do not set for pvp, since it waits 15 minutes
+                // set flood banned blocks TODO: small walls are too spammable, should we ban them?
+                state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc/*, Blocks.scrapWall, Blocks.copperWall,
+                Blocks.titaniumWall, Blocks.thoriumWall, Blocks.plastaniumWall, Blocks.phaseWall, Blocks.surgeWall,
+                Blocks.berylliumWall, Blocks.tungstenWall, Blocks.reinforcedSurgeWall, Blocks.carbideWall*/);
+                // set flood revealed blocks TODO: include impact / lustre?
+                state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
+                state.rules.hideBannedBlocks = true;
+            }
+
+            stateUpdate = state.rules.polygonCoreProtection = false;
         }
 
         int newcount = 0;
@@ -449,6 +456,11 @@ public class CreeperUtils{
 
     public static void applyDamage(Tile tile){
         if(tile.build != null && tile.build.team != creeperTeam){
+            if(tile.block().instakill){
+                tile.build.kill(); // for the sake of making transport block spam less effective
+                return; // flood doesn't evaporate when dealing with those blocks
+            }
+
             if(Mathf.chance(0.005d)){
                 Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
             }

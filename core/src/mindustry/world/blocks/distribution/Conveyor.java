@@ -37,6 +37,7 @@ public class Conveyor extends Block implements Autotiler{
         super(name);
         rotate = true;
         update = true;
+        instakill = true;
         group = BlockGroup.transportation;
         hasItems = true;
         itemCapacity = capacity;
