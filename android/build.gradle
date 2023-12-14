@@ -7,7 +7,7 @@ buildscript{
     }
 
     dependencies{
-        classpath 'com.android.tools.build:gradle:7.2.1'
+        classpath 'com.android.tools.build:gradle:8.2.0'
     }
 }
 
@@ -43,6 +43,14 @@ android{
         }
 
         androidTest.setRoot('tests')
+    }
+
+    namespace "com.github.Anuken" // ????????
+    publishing{ // WHY DOES ANDROID GRADLE PLUGIN SUCK
+        singleVariant('java'){
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 
     packagingOptions{

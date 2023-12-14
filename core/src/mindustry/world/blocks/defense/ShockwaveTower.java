@@ -115,7 +115,7 @@ public class ShockwaveTower extends Block{
                     var tile = target.tileOn();
 
                     if(tile != null){
-                        Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 0.2f, (fx, fy) -> {
+                        Geometry.iterateLine(1f, x(), y(), target.x(), target.y(), 8, (fx, fy) -> { // TODO: Dynamic segment count?
                             Call.effect(Fx.lancerLaserChargeBegin, fx, fy, 1, Color.blue);
                         });
 
