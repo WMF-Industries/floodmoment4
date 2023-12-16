@@ -151,8 +151,7 @@ public class NuclearReactor extends PowerGenerator{
                         if(Mathf.chance(multifireChance)) Call.setItem(t.build, Items.thorium, itemCapacity);
                     }, 0.1f);
 
-                    remove(); // remove instead of killing as killing sets flood to 0
-                    return;
+                    return; // do not kill so it won't clear flood
                 }
 
                 kill();

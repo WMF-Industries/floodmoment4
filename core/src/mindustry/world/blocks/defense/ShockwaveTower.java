@@ -124,7 +124,7 @@ public class ShockwaveTower extends Block{
                         Call.effect(Fx.lancerLaserCharge, x, y, Mathf.random(0, 360), Color.blue);
                         Call.effect(Fx.shieldApply, target.x(), target.y(), target.blockOn() == null ? 1 : target.blockOn().size, Color.blue);
 
-                        float damage = creeperDamage * (creepTowerDeposit * tile.block().size);
+                        float damage = creepTowerDamage * tile.block().size;
                         if(tile.build.health <= damage){
                             tile.getLinkedTilesAs(tile.block(), tempTiles);
                             tile.build.kill();

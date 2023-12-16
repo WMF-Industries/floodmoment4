@@ -66,6 +66,7 @@ public class CreeperUtils{
     public static float radarBeamDamage = 600f; // damage the radar creeper beam deals to units
 
     public static float creepTowerDeposit = 3f; // amount of creep deposited by the creep tower after the building is killed
+    public static float creepTowerDamage = 50f; // base damage per second, multiplied by target's size
     public static float creepTowerRange = 300f; // just slightly bigger than ripple's range
 
 
@@ -244,7 +245,7 @@ public class CreeperUtils{
             for(Tile tile : world.tiles){
                 if(!tile.floor().isDeep()
                 && tile.floor().placeableOn
-                && (tile.breakable() || tile.block() == Blocks.air || tile.block() instanceof TreeBlock)
+                && (tile.breakable() || tile.block().isAir() || tile.block() instanceof TreeBlock)
                 && !(tile.block() instanceof StaticWall || tile.block() instanceof Cliff)){
                     tile.creeperable = true;
                 }
@@ -330,11 +331,9 @@ public class CreeperUtils{
                 Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
             }else{ // do not set for pvp, since it waits 15 minutes
                 // set flood banned blocks TODO: small walls are too spammable, should we ban them?
-                state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc/*, Blocks.scrapWall, Blocks.copperWall,
-                Blocks.titaniumWall, Blocks.thoriumWall, Blocks.plastaniumWall, Blocks.phaseWall, Blocks.surgeWall,
-                Blocks.berylliumWall, Blocks.tungstenWall, Blocks.reinforcedSurgeWall, Blocks.carbideWall*/);
+                state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
                 // set flood revealed blocks TODO: include impact / lustre?
-                state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
+                state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
                 state.rules.hideBannedBlocks = true;
             }
 

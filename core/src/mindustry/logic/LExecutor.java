@@ -1348,6 +1348,9 @@ public class LExecutor{
 
                             if(tile.block() != b || tile.team() != t){
                                 tile.setNet(b, t, Mathf.clamp(exec.numi(rotation), 0, 3));
+                                /* this is slow but ensures that whatever is placed using setblock
+                                will affect the way flood expands, like setting blocks to air */
+                                tile.getLinkedTiles(tmp -> tmp.creeperable = (!b.isStatic() || b.isAir()));
                             }
                         }
                     }
