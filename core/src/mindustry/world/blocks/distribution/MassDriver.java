@@ -11,6 +11,7 @@ import arc.util.pooling.Pool.*;
 import arc.util.pooling.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.entities.*;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
@@ -19,6 +20,8 @@ import mindustry.logic.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static mindustry.Vars.*;
 
@@ -120,6 +123,7 @@ public class MassDriver extends Block{
         public void updateTile(){
             Building link = world.build(this.link);
             boolean hasLink = linkValid();
+            float update = 0;
 
             if(hasLink){
                 this.link = link.pos();
@@ -149,7 +153,21 @@ public class MassDriver extends Block{
 
             //dump when idle or accepting
             if(state == DriverState.idle || state == DriverState.accepting){
-                dumpAccumulate();
+                if(team == CreeperUtils.creeperTeam && items.has(Items.dormantCyst)){
+                    if(tile.creep <= (CreeperUtils.maxTileCreep - 0.1f) && (update += Time.delta) > 15){
+                        int itemsStored = items.get(Items.dormantCyst);
+                        // gets the max amount of items that this can use right now, 1 item = 0.1f creep
+                        int maxItemsUsed = Mathf.round(10 * (CreeperUtils.maxTileCreep - Mathf.round(tile.creep, 0.1f)));
+                        tile.getLinkedTiles(t -> {
+                            // don't technically need to use Math.min() here, but it prevents overflow
+                            t.creep = Math.min((itemsStored >= maxItemsUsed) ?
+                            (tile.creep + ((float) maxItemsUsed / 10)) :
+                            (tile.creep + ((float) itemsStored / 10)), CreeperUtils.maxTileCreep);
+                        });
+                        items.remove(Items.dormantCyst, Math.min(itemsStored, maxItemsUsed));
+                        update = 0;
+                    }
+                }else dumpAccumulate(); // don't try to dump when used as creeper transport
             }
 
             //skip when there's no power
@@ -167,12 +185,19 @@ public class MassDriver extends Block{
                 //align to shooter rotation
                 rotation = Angles.moveToward(rotation, angleTo(currentShooter()), rotateSpeed * efficiency);
             }else if(state == DriverState.shooting){
+                if(team == CreeperUtils.creeperTeam && tile.creeperable && items.empty() && hasLink){ // must be empty so we won't mess up item delivery
+                    int creep = Mathf.round(tile.creep);
+                    if(creep >= 1){
+                        items.set(Items.dormantCyst, (creep * 10)); // 10 items per creep level
+                        tile.getLinkedTiles(t -> t.creep -= creep); // remove the same amount it took as items
+                    }
+                }
+
                 //if there's nothing to shoot at OR someone wants to shoot at this thing, bail
                 if(!hasLink || (!waitingShooters.isEmpty() && (itemCapacity - items.total() >= minDistribute))){
                     state = DriverState.idle;
                     return;
                 }
-
                 float targetRotation = angleTo(link);
 
                 if(

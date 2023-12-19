@@ -15,9 +15,8 @@ import static mindustry.creeper.CreeperUtils.*;
 public class Emitter implements Position{
     public Building build;
     public EmitterType type;
-    public boolean suspended;
-    public boolean nullified;
-    protected int counter;
+    public boolean suspended, nullified;
+    protected float counter;
 
     public static HashMap<Block, EmitterType> emitterTypes = new HashMap<>();
 
@@ -34,12 +33,11 @@ public class Emitter implements Position{
     public boolean update(){
         if(build == null || !build.isAdded() || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild))return false;
 
-        if(!suspended && ++counter >= type.interval){
+        // one method will be faster, results should be similar
+        if(!suspended && (counter += Time.delta) >= type.interval){
             counter = 0;
-            // two methods so upgrading will work
-            if(build.tile.creep >= 10.35f && type.level != 3){
-                build.tile.creep = Math.min(build.tile.creep + type.amt, (type.upgradeThreshold + maxTileCreep));
-            }else build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt, maxTileCreep));
+            build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt,
+            (build.tile.creep >= 10.35f && type.level != 3) ? (type.upgradeThreshold + maxTileCreep) : maxTileCreep));
         }
 
         return true;
@@ -49,7 +47,14 @@ public class Emitter implements Position{
     public void fixedUpdate(){
         if(build == null)return;
 
-        suspended = build.nullifyTimeout > 0f; //this doesn't have to be updated every tick
+        // emitters shouldn't emit when covered in anticreep
+        build.tile.getLinkedTiles(tmp -> {
+            if(!tmp.creeperable){
+                build.nullifyTimeout = suspendTimeout;
+            }
+        });
+
+        suspended = build.nullifyTimeout > 0f; // this doesn't have to be updated every tick
         nullified = suspended && build.tile.creep <= maxTileCreep;
         if(nullified){
             Call.label("[red]*[] SUSPENDED [red]*[]", 1f, build.x, build.y);

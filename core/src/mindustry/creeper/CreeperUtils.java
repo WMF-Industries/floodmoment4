@@ -41,7 +41,7 @@ public class CreeperUtils{
         splashDamage = 33f;
     }};
      */
-
+    //TODO: Better implementation - rely on FloodCompat for looks
     public static BulletType sporeType = UnitTypes.arkyid.weapons.get(6).bullet;
 
     public static float sporeMaxRangeMultiplier = 27.5f;
@@ -106,6 +106,7 @@ public class CreeperUtils{
     "[white]\uF682[]", "[scarlet]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",
     "[white]\uF6AD[]", "[scarlet]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
     "[white]\uF7FA[]", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
+    "[white]\uF88B[]", "[scarlet]Flood Mass Drivers[]\n[accent]Mass Drivers[] collect and transport creep over long distances, if not used for regular item transport.",
     "[white]\uF898[]", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] absorb [#e056f0]the flood[].\nUnlike unit shields, \uF898 need [accent]coolant and power to regenerate[] & [accent]explode[] if overloaded / destroyed.\n[red]Reclaiming them gives no resources![]",
     "[white]\uF7F5[]", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood, additionally their carrying capacity is set to 20.\nUse them to transport items over flood.",
     };
@@ -164,6 +165,14 @@ public class CreeperUtils{
     }
 
     public static void init(){
+        // for FloodCompat
+        netServer.addPacketHandler("flood", (player, version) -> {
+            Call.clientPacketReliable(player.con, "flood", "1");
+            if(Strings.parseFloat(version) < 0.1f) player.sendMessage("[scarlet]Your FloodCompat is outdated.\nConsider updating for the newest features!");
+            // TODO: Consider using FloodCompat to reduce the amount of calls
+            // Mark players using FloodCompat/Foos, and maybe notify others about the mod
+        });
+
         SaveVersion.addCustomChunk("flood-data", new CreeperSaveIO());
         sporeType.isCreeper = true;
 
@@ -266,6 +275,7 @@ public class CreeperUtils{
             if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
 
+            state.rules.modeName = state.rules.pvp ? "Flood PvP" : "Flood";
             hasLoaded = true;
             resetDistanceCache(); // run after loading since it returns if not loaded
         });

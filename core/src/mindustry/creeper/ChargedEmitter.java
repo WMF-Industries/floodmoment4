@@ -13,13 +13,9 @@ import static mindustry.creeper.CreeperUtils.*;
 public class ChargedEmitter implements Position{
     public ChargedEmitterType type;
     public Building build;
-
-    public int counter;
     public int throttle;
-    public float buildup;
-    public float overflow;
-    public boolean emitting;
-    boolean immune;
+    public float buildup, counter, overflow;
+    public boolean emitting, immune;
     public StringBuilder sb = new StringBuilder();
 
     public static HashMap<Block, ChargedEmitterType> chargedEmitterTypes = new HashMap<>();
@@ -40,7 +36,7 @@ public class ChargedEmitter implements Position{
         }else immune = false;
 
         if(emitting){
-            if(++counter >= type.interval){
+            if((counter += Time.delta) >= type.interval){
                 counter = 0;
                 build.tile.getLinkedTiles(t -> t.creep += type.amt);
             }
