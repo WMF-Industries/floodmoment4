@@ -2458,7 +2458,6 @@ public class UnitTypes{
                     lifetime = 60f;
                     shootEffect = Fx.shootSmall;
                     smokeEffect = Fx.shootSmallSmoke;
-                    buildingDamageMultiplier = 0.01f;
                 }};
             }});
         }};
@@ -2499,7 +2498,6 @@ public class UnitTypes{
                     lifetime = 60f;
                     shootEffect = Fx.shootSmall;
                     smokeEffect = Fx.shootSmallSmoke;
-                    buildingDamageMultiplier = 0.01f;
                 }};
             }});
         }};
@@ -2543,7 +2541,6 @@ public class UnitTypes{
                     lifetime = 70f;
                     shootEffect = Fx.shootSmall;
                     smokeEffect = Fx.shootSmallSmoke;
-                    buildingDamageMultiplier = 0.01f;
                     homingPower = 0.04f;
                 }};
             }});
