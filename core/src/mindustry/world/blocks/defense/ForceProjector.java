@@ -19,6 +19,7 @@ import mindustry.graphics.*;
 import mindustry.logic.*;
 import mindustry.ui.*;
 import mindustry.world.*;
+import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
 
@@ -67,6 +68,7 @@ public class ForceProjector extends Block{
         && tile.team() == creeperTeam)) && !paramEntity.broken
         && paramEntity.enabled && inForceField(tile)){
             if(paramEntity.team != creeperTeam){
+                if(tile.block() instanceof CoreBlock) paramEntity.kill(); // it's weird when they easily suspend emitters...
                 paramEntity.hit = 1f;
                 paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
                 if(tile.build != null && tile.build.team == creeperTeam){
@@ -261,8 +263,9 @@ public class ForceProjector extends Block{
             if(coolantConsumer != null && (coolantConsumer.efficiency(this) > 0 || !enabled) && healthLeft < shieldHealth){
                 coolantConsumer.update(this);
                 if(liquids.currentAmount() > 0.01f){
-//                    liquids.remove(liquids.current(), 0.5f); // TODO: ???
-                    healthLeft = Math.min(healthLeft + ((regen * liquids.current().heatCapacity) * delta()), shieldHealth);
+                    // liquids.remove(liquids.current(), 0.5f); // TODO: ???
+                    healthLeft = Math.min((healthLeft + ((regen * liquids.current().heatCapacity) * delta()) * (enabled ? 1 : 0.1f)), shieldHealth);
+                                                                                                        // do not heal as fast when disabled
                 }
             }
 
