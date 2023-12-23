@@ -495,7 +495,7 @@ public class UnitTypes{
                 cooldownTime = 200f;
 
                 bullet = new ContinuousLaserBulletType(){{
-                    damage = 35f;
+                    damage = 20f; // i was asked to nerf velas so here we go
                     length = 180f;
                     hitEffect = Fx.hitMeltHeal;
                     drawSize = 420f;
@@ -532,7 +532,13 @@ public class UnitTypes{
                     maxRange = 120f;
                 }};
             }});
-        }};
+        }
+            @Override
+            public void update(Unit unit) {
+                unit.buildSpeedMultiplier = (unit.isShooting() || unit.isFlying()) ? 0 : 1;
+                super.update(unit); // i was asked to nerf velas so here we go
+            }
+        };
 
         corvus = new UnitType("corvus"){{
             hitSize = 29f;

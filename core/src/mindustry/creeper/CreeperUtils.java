@@ -22,6 +22,8 @@ public class CreeperUtils{
     public static final float updateInterval = 2/60f; // Base update interval in seconds
     public static final float baseTransferRate = 0.25f; // Base transfer rate NOTE: keep below 0.25f
     public static final float creeperDamage = 0.2f; // Base creeper damage
+    // Base damage increase added every second a building is being damaged by flood, resets after 5 seconds without damage
+    public static final float creeperDamageScaling = 0.01f; // This is really just a hacky way of fighting with mender spam
     public static final float creeperEvaporationUponDamagePercent = 0.98f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
     public static final float maxTileCreep = 10.5f;
@@ -474,7 +476,12 @@ public class CreeperUtils{
                 Call.effect(Fx.bubble, tile.build.x, tile.build.y, 0, creeperTeam.color);
             }
 
-            tile.build.damage(creeperTeam, creeperDamage * tile.creep);
+            // updates the damage scaling of flood, resets damageTime if there's a 300 tick gap
+            if((tile.block().damageTime += Time.delta) - tile.block().lastDamageTime >= 300) tile.block().damageTime = tile.block().lastDamageTime = 0;
+
+            tile.build.damage(creeperTeam, (creeperDamage + Mathf.round(
+            (creeperDamageScaling * (tile.block().damageTime / 60)), 0.1f)) * tile.creep);
+            tile.block().lastDamageTime = tile.block().damageTime;
             tile.creep *= creeperEvaporationUponDamagePercent;
         }
     }
