@@ -479,7 +479,7 @@ public class CreeperUtils{
             // updates the damage scaling of flood, resets damageTime if there's a 300 tick gap
             if((tile.block().damageTime += Time.delta) - tile.block().lastDamageTime >= 300) tile.block().damageTime = tile.block().lastDamageTime = 0;
 
-            float buildupDamage = (tile.team() == state.rules.defaultTeam) ? Mathf.round(
+            float buildupDamage = (tile.team().data().players.size > 0) ? Mathf.round(
             (creeperDamageScaling * (tile.block().damageTime / 60)), 0.1f) : 0;
             tile.build.damage(creeperTeam, (creeperDamage + buildupDamage) * tile.creep);
             tile.creep *= creeperEvaporationUponDamagePercent;
