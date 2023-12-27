@@ -78,7 +78,7 @@ public class CreeperUtils{
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
     public static int tutorialID, pvpTutorialID;
-    public static boolean canGameover, stateUpdate;
+    public static boolean canGameover, stateUpdate, loadedSave;
     private static final int maxProtectionRadius = 10 * tilesize;
     private static int timePassed, pulseOffset;
     private static int nullifiedCount = pulseOffset = timePassed = 0;
@@ -251,6 +251,10 @@ public class CreeperUtils{
             hasLoaded = false;
         });
 
+        Events.on(EventType.SaveLoadEvent.class, e -> {
+            loadedSave = true;
+        });
+
         Events.on(EventType.WorldLoadEvent.class, e -> {
             for(Tile t : world.tiles.array) t.creeperable = false;
             chargedEmitters.clear();
@@ -266,13 +270,9 @@ public class CreeperUtils{
             }
 
             for(Building build : Groups.build){
-                if(build.team != creeperTeam || !build.tile.creeperable) continue;
-
-                for(int i = 1; i < creeperBlocks.size; i++){
-                    if(build.block == creeperBlocks.get(i)){
-                        float creep = i;
-                        build.tile.getLinkedTiles(t -> t.creep = Math.min(creep, maxTileCreep));
-                    }
+                if(build.team == creeperTeam && !loadedSave){
+                    build.tile.getLinkedTiles(t -> t.creep =
+                    Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
                 }
 
                 tryAddEmitter(build);
