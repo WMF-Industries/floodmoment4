@@ -114,7 +114,7 @@ public class ContinuousTurret extends Turret{
                             if(++timeSuspended < 5)Call.label("\uE87C[red]Confirming Suspension[]\uE87C", 1, x, y);
                         }
 
-                        if(targetPos.epsilonEquals(targetEmitter.getX(), targetEmitter.getY()) && Angles.within(rotation, angleTo(targetEmitter), 2.5f) && timeSuspended >= 5 && isShooting() && hasAmmo()){
+                        if(targetPos.epsilonEquals(targetEmitter.getX(), targetEmitter.getY(), 1f) && Angles.within(rotation, angleTo(targetEmitter), 2.5f) && timeSuspended >= 5 && isShooting() && hasAmmo()){
                             ++nullifyTime;
                             Call.label(Strings.format("[accent]\uE810[@]@%", getTrafficlightColor((double) Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1) / 100), Mathf.round(nullifyTime / (erekirNullifyTime / 100), 1)), 1, x, y);
                             Call.effect(Fx.healBlockFull, targetEmitter.getX(), targetEmitter.getY(), targetEmitter.build.block.size, creeperTeam.color);
