@@ -192,7 +192,10 @@ public class CreeperUtils{
         creeperBlocks.put(10, Blocks.carbideWall);
 
         // this is purely for damage multiplication
-        creeperBlocks.put(12, Blocks.thoriumReactor);
+        creeperBlocks.put(12, Blocks.radar);
+        creeperBlocks.put(13, Blocks.shockwaveTower);
+        creeperBlocks.put(14, Blocks.massDriver);
+        creeperBlocks.put(15, Blocks.thoriumReactor);
 
         creeperBlocks.put(20, Blocks.coreShard);
         creeperBlocks.put(25, Blocks.coreFoundation);
@@ -263,6 +266,15 @@ public class CreeperUtils{
             }
 
             for(Building build : Groups.build){
+                if(build.team != creeperTeam || !build.tile.creeperable) continue;
+
+                for(int i = 1; i < creeperBlocks.size; i++){
+                    if(build.block == creeperBlocks.get(i)){
+                        float creep = i;
+                        build.tile.getLinkedTiles(t -> t.creep = Math.min(creep, maxTileCreep));
+                    }
+                }
+
                 tryAddEmitter(build);
             }
 
