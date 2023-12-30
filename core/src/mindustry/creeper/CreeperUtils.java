@@ -267,10 +267,9 @@ public class CreeperUtils{
                 }
             }
 
-            for(Building build : Groups.build){
-                if(build.team == creeperTeam && !loadedSave){ // Add creeper to creep blocks placed by mapmakers
-                    build.tile.getLinkedTiles(t -> t.creep = Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
-                }
+            for(Building build : creeperTeam.data().buildings){
+                // Add creeper to creep blocks placed by mapmakers
+                if(!loadedSave) build.tile.getLinkedTiles(t -> t.creep = Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
 
                 tryAddEmitter(build);
             }
