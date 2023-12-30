@@ -308,7 +308,7 @@ public class NetServer implements ApplicationListener{
     }
 
     private void registerCommands(){
-        clientCommands.<Player>register("tutorial", "", "Start the interactive tutorial", (args, player) -> {
+        clientCommands.<Player>register("tutorial", "", "Start the interactive tutorial", (args, player) -> { // TODO: Why are we calling menuChoose instead of menu?
             Call.menuChoose(player, state.rules.pvp ? pvpTutorialID : tutorialID, 0);
         });
 

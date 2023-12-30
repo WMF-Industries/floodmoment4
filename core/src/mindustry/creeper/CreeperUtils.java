@@ -217,7 +217,7 @@ public class CreeperUtils{
         ChargedEmitter.init();
 
         int menuID = 0;
-        for(int i = tutEntries.length; --i >= 0; ){
+        for(int i = tutEntries.length; --i >= 0;){ // TODO: Clean this nonsense up
             final int j = i;
             int current = menuID;
             menuID = Menus.registerMenu((player, selection) -> {
@@ -228,12 +228,12 @@ public class CreeperUtils{
         }
 
         int pvpMenuID = 0;
-        for(int pi = pvpTutEntries.length; --pi >= 0; ){
+        for(int pi = pvpTutEntries.length; --pi >= 0;){
             final int pj = pi;
             int current = pvpMenuID;
             pvpMenuID = Menus.registerMenu((player, selection) -> {
                 if(selection == 1) return;
-                if(pj == tutEntries.length / 2) return;
+                if(pj == pvpTutEntries.length / 2) return;
                 Call.menu(player.con, current, pvpTutEntries[2 * pj], pvpTutEntries[2 * pj + 1], pj == pvpTutEntries.length / 2 - 1 ? tutFinal : tutContinue);
             });
         }
@@ -245,14 +245,12 @@ public class CreeperUtils{
             Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
         });
 
+        Events.on(EventType.SaveLoadEvent.class, e -> loadedSave = true);
+
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
             shields.clear();
             stateUpdate = canGameover = true;
             hasLoaded = false;
-        });
-
-        Events.on(EventType.SaveLoadEvent.class, e -> {
-            loadedSave = true;
         });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -270,9 +268,8 @@ public class CreeperUtils{
             }
 
             for(Building build : Groups.build){
-                if(build.team == creeperTeam && !loadedSave){
-                    build.tile.getLinkedTiles(t -> t.creep =
-                    Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
+                if(build.team == creeperTeam && !loadedSave){ // Add creeper to creep blocks placed by mapmakers
+                    build.tile.getLinkedTiles(t -> t.creep = Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
                 }
 
                 tryAddEmitter(build);
