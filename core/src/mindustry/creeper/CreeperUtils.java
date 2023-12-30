@@ -289,6 +289,7 @@ public class CreeperUtils{
             state.rules.modeName = state.rules.pvp ? "Flood PvP" : "Flood";
             hasLoaded = true;
             resetDistanceCache(); // run after loading since it returns if not loaded
+            loadedSave = false;
         });
 
         Timer.schedule(() -> {
@@ -323,7 +324,6 @@ public class CreeperUtils{
                     if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0 && canGameover){
                         // gameover
                         state.gameOver = true;
-                        loadedSave = false;
                         Events.fire(new EventType.GameOverEvent(state.rules.defaultTeam));
                     }
                     // failed to win, core got unsuspended

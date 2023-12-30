@@ -21,8 +21,6 @@ import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static mindustry.Vars.*;
 
 public class MassDriver extends Block{
@@ -40,7 +38,7 @@ public class MassDriver extends Block{
     public Effect receiveEffect = Fx.mineBig;
     public Sound shootSound = Sounds.shootBig;
     public float shake = 3f;
-    float update;
+    float teleportTimer;
     public @Load("@-base") TextureRegion baseRegion;
 
     public MassDriver(String name){
@@ -154,7 +152,7 @@ public class MassDriver extends Block{
             //dump when idle or accepting
             if(state == DriverState.idle || state == DriverState.accepting){
                 if(team == CreeperUtils.creeperTeam && items.has(Items.dormantCyst)){
-                    if(tile.creep <= (CreeperUtils.maxTileCreep - 0.1f) && (update += Time.delta) >= 15){
+                    if(tile.creep <= (CreeperUtils.maxTileCreep - 0.1f) && (teleportTimer += Time.delta) >= 15){
                         int itemsStored = items.get(Items.dormantCyst);
                         // gets the max amount of items that this can use right now, 1 item = 0.1f creep
                         int maxItemsUsed = Mathf.round(10 * (CreeperUtils.maxTileCreep - Mathf.round(tile.creep, 0.1f)));
@@ -165,7 +163,7 @@ public class MassDriver extends Block{
                             (tile.creep + ((float) itemsStored / 10)), CreeperUtils.maxTileCreep);
                         });
                         items.remove(Items.dormantCyst, Math.min(itemsStored, maxItemsUsed));
-                        update = 0;
+                        teleportTimer = 0;
                     }
                 }else dumpAccumulate(); // don't try to dump when used as creeper transport
             }
