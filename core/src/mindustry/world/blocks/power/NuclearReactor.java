@@ -137,19 +137,17 @@ public class NuclearReactor extends PowerGenerator{
                     float angle = Angles.angle(x, y, targetx, targety);
 
                     Call.createBullet(sporeType, creeperTeam, x, y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, Math.min(sporeMaxRangeMultiplier, (distance * sporeType.lifetime) / (sporeType.speed * sporeSpeedMultiplier) / 8200f));
+                    heat = 0;
+                    items.clear();
 
                     Tile t = tile;
-
                     double multifireChance;
                     if(sporeScaleThreat){
                         multifireChance = sporeBaseMultifireChance * t.creep;
                         t.getLinkedTiles(l -> l.creep -= sporeCreepUse);
                     }else multifireChance = 0;
 
-                    Timer.schedule(() -> {
-                        t.setNet(Blocks.thoriumReactor, creeperTeam, 0);
-                        if(Mathf.chance(multifireChance)) Call.setItem(t.build, Items.thorium, itemCapacity);
-                    }, 0.1f);
+                    if(Mathf.chance(multifireChance)) Call.setItem(t.build, Items.thorium, itemCapacity);
 
                     return; // do not kill so it won't clear flood
                 }
