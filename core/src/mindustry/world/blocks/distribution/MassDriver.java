@@ -40,6 +40,7 @@ public class MassDriver extends Block{
     public Effect receiveEffect = Fx.mineBig;
     public Sound shootSound = Sounds.shootBig;
     public float shake = 3f;
+    float update;
     public @Load("@-base") TextureRegion baseRegion;
 
     public MassDriver(String name){
@@ -123,7 +124,6 @@ public class MassDriver extends Block{
         public void updateTile(){
             Building link = world.build(this.link);
             boolean hasLink = linkValid();
-            float update = 0;
 
             if(hasLink){
                 this.link = link.pos();
@@ -154,7 +154,7 @@ public class MassDriver extends Block{
             //dump when idle or accepting
             if(state == DriverState.idle || state == DriverState.accepting){
                 if(team == CreeperUtils.creeperTeam && items.has(Items.dormantCyst)){
-                    if(tile.creep <= (CreeperUtils.maxTileCreep - 0.1f) && (update += Time.delta) > 15){
+                    if(tile.creep <= (CreeperUtils.maxTileCreep - 0.1f) && (update += Time.delta) >= 15){
                         int itemsStored = items.get(Items.dormantCyst);
                         // gets the max amount of items that this can use right now, 1 item = 0.1f creep
                         int maxItemsUsed = Mathf.round(10 * (CreeperUtils.maxTileCreep - Mathf.round(tile.creep, 0.1f)));
