@@ -496,7 +496,6 @@ public class CreeperUtils{
             float buildupDamage = (tile.team().data().players.size > 0) ? Mathf.round(
             (creeperDamageScaling * (tile.damageTime / 60)), 0.1f) : 0;
             tile.build.damage(creeperTeam, (creeperDamage + buildupDamage) * tile.creep);
-            if(tile.build != null) Call.label(Strings.format("@\n@\n@", buildupDamage, tile.damageTime, creeperDamage + buildupDamage * tile.creep), 1f/60f, tile.build.x, tile.build.y);
             tile.creep *= creeperEvaporationUponDamagePercent;
             tile.lastDamageTime = tile.damageTime;
         }
