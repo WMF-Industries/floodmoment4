@@ -2034,6 +2034,7 @@ public class Blocks{
             itemCapacity = 120;
             reload = 200f;
             range = 440f;
+            health = 1250;
             consumePower(1.75f);
         }};
 
