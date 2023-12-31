@@ -267,8 +267,9 @@ public class CreeperUtils{
                 }
             }
 
+            loadedSave = state.stats.buildingsBuilt > 0;
+
             for(Building build : creeperTeam.data().buildings){
-                // Add creeper to creep blocks placed by mapmakers
                 if(!loadedSave) build.tile.getLinkedTiles(t -> t.creep = Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
 
                 tryAddEmitter(build);
@@ -286,9 +287,9 @@ public class CreeperUtils{
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
 
             state.rules.modeName = state.rules.pvp ? "Flood PvP" : "Flood";
+
             hasLoaded = true;
             resetDistanceCache(); // run after loading since it returns if not loaded
-            loadedSave = false;
         });
 
         Timer.schedule(() -> {
@@ -345,20 +346,24 @@ public class CreeperUtils{
         // don't update anything if game is paused
         if(!state.isPlaying() || state.isPaused()) return;
 
-        if(stateUpdate && (!state.rules.pvp || ++timePassed >= preparationPeriod)){
-            if(state.rules.enemyCoreBuildRadius > maxProtectionRadius)  // flood should allow to nullify emitters
-                state.rules.enemyCoreBuildRadius = maxProtectionRadius;
-            if(state.rules.pvp){
-                Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
-            }else{ // do not set for pvp, since it waits 15 minutes
-                // set flood banned blocks TODO: small walls are too spammable, should we ban them?
-                state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
-                // set flood revealed blocks TODO: include impact / lustre?
-                state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
-                state.rules.hideBannedBlocks = true;
-            }
+        // runs only at the first fixedUpdate, apply settings and stuff here
+        if(stateUpdate){
+            state.rules.hideBannedBlocks = true;
+            stateUpdate = false;
 
-            stateUpdate = state.rules.polygonCoreProtection = false;
+            state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
+            // TODO: include impact / lustre?
+            state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
+
+            if(state.rules.enemyCoreBuildRadius > maxProtectionRadius)
+                state.rules.enemyCoreBuildRadius = maxProtectionRadius;
+
+            if(state.rules.pvp){
+                Timer.schedule(() -> {
+                    state.rules.polygonCoreProtection = false;
+                    Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
+                }, preparationPeriod);
+            }
         }
 
         int newcount = 0;
@@ -486,13 +491,14 @@ public class CreeperUtils{
             }
 
             // updates the damage scaling of flood, resets damageTime if there's a 300 tick gap
-            if((tile.block().damageTime += Time.delta) - tile.block().lastDamageTime >= 300) tile.block().damageTime = tile.block().lastDamageTime = 0;
+            if((tile.damageTime += Time.delta) - tile.lastDamageTime >= 300) tile.damageTime = tile.lastDamageTime = 0;
 
             float buildupDamage = (tile.team().data().players.size > 0) ? Mathf.round(
-            (creeperDamageScaling * (tile.block().damageTime / 60)), 0.1f) : 0;
+            (creeperDamageScaling * (tile.damageTime / 60)), 0.1f) : 0;
             tile.build.damage(creeperTeam, (creeperDamage + buildupDamage) * tile.creep);
+            if(tile.build != null) Call.label(Strings.format("@\n@\n@", buildupDamage, tile.damageTime, creeperDamage + buildupDamage * tile.creep), 1f/60f, tile.build.x, tile.build.y);
             tile.creep *= creeperEvaporationUponDamagePercent;
-            tile.block().lastDamageTime = tile.block().damageTime;
+            tile.lastDamageTime = tile.damageTime;
         }
     }
 

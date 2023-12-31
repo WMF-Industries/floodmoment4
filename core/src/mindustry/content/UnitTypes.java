@@ -3914,7 +3914,7 @@ public class UnitTypes{
                     spawnUnit = new MissileUnitType("quell-missile"){{
                         targetAir = false;
                         speed = 4.3f;
-                        maxRange = 6f;
+                        maxRange = 2f;
                         lifetime = 60f * 1.4f;
                         outlineColor = Pal.darkOutline;
                         engineColor = trailColor = Pal.sapBulletBack;
@@ -4027,7 +4027,7 @@ public class UnitTypes{
                     spawnUnit = new MissileUnitType("disrupt-missile"){{
                         targetAir = false;
                         speed = 4.6f;
-                        maxRange = 5f;
+                        maxRange = 2f;
                         outlineColor = Pal.darkOutline;
                         health = 70;
                         homingDelay = 10f;
