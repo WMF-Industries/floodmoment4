@@ -10,6 +10,7 @@ import mindustry.entities.bullet.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.io.*;
+import mindustry.net.Administration;
 import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
@@ -77,7 +78,7 @@ public class CreeperUtils{
 
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
-    public static int tutorialID, pvpTutorialID;
+    public static int tutorialID, pvpTutorialID, messageTimer;
     public static boolean canGameover, stateUpdate, loadedSave;
     private static final int maxProtectionRadius = 10 * tilesize;
     private static int timePassed, pulseOffset;
@@ -172,7 +173,9 @@ public class CreeperUtils{
             Call.clientPacketReliable(player.con, "flood", "1");
             if(Strings.parseFloat(version) < 0.1f) player.sendMessage("[scarlet]Your FloodCompat is outdated.\nConsider updating for the newest features!");
             // TODO: Consider using FloodCompat to reduce the amount of calls
-            // Mark players using FloodCompat/Foos, and maybe notify others about the mod
+            if(Strings.parseFloat(version) != 0){
+                player.hasCompat = true;
+            }
         });
 
         SaveVersion.addCustomChunk("flood-data", new CreeperSaveIO());
@@ -283,6 +286,7 @@ public class CreeperUtils{
 
             emitterDst = new int[world.width()][world.height()];
 
+            messageTimer = 0;
             if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
 
@@ -390,6 +394,18 @@ public class CreeperUtils{
             Call.label("[" + getTrafficlightColor(percentage) + "]" + (int)(percentage * 100) + "%" + (shield.phaseHeat > 0.1f ? " [#f4ba6e]\uE86B +" + ((int)((1f - CreeperUtils.shieldBoostProtectionMultiplier) * 100f)) + "%" : ""), 1f, shield.x, shield.y);
         }
         nullifiedCount = newcount;
+
+        // notifies players about flood compat / foo's client every 15 minutes
+        if(++messageTimer > 900){
+            messageTimer = 0;
+            Groups.player.forEach(p -> {
+                if(!p.hasCompat)
+                    p.sendMessage("[accent]Hi there, did you know we have a mod to [gold]improve your experience?[]" +
+                            "\nThe mod provides [gold]better compatibility & reduces desyncs[] while being fully vanilla compatible!" +
+                            "\nDownload [blue]FloodCompat[] from the in-game mod browser and enjoy your adventures on io flood!" +
+                            "\nAlternatively, you can get Foos Client, as it includes FloodCompat as well as other QoL features by default!");
+            });
+        }
     }
 
     public static void updateCreeper(){

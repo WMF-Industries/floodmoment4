@@ -1873,8 +1873,7 @@ public class Blocks{
             consumeLiquid(Liquids.hydrogen, 1f / 60f);
             consumeItem(Items.phaseFabric).boost();
 
-            healPercent = 2f / 60f;
-            healAmount = 5f;
+            healPercent = 4f / 60f;
 
             Color col = Color.valueOf("8ca9e8");
 
