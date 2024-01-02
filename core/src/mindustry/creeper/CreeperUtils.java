@@ -170,8 +170,7 @@ public class CreeperUtils{
         // for FloodCompat
         netServer.addPacketHandler("flood", (player, version) -> {
             Call.clientPacketReliable(player.con, "flood", "1");
-            if(Strings.parseFloat(version) < 0.1f) player.sendMessage("[scarlet]Your FloodCompat is outdated.\nConsider updating for the newest features!");
-            // TODO: Consider using FloodCompat to reduce the amount of calls
+            /* if(Strings.parseFloat(version) < 0.1f) player.sendMessage("[scarlet]Your FloodCompat is outdated.\nConsider updating for the newest features!"); TODO: This is broken and triggers for every floodcompat user smh*/
             if(Strings.parseFloat(version) != 0){
                 player.hasCompat = true;
             }
@@ -505,13 +504,13 @@ public class CreeperUtils{
             }
 
             // updates the damage scaling of flood, resets damageTime if there's a 300 tick gap
-            if((tile.damageTime += Time.delta) - tile.lastDamageTime >= 300) tile.damageTime = tile.lastDamageTime = 0;
+            tile.getLinkedTiles(t -> t.damageTime = (Time.time - tile.lastDamageTime < 300) ? (t.damageTime + Time.delta) : 0);
 
             float buildupDamage = (tile.team().data().players.size > 0) ? Mathf.round(
             (creeperDamageScaling * (tile.damageTime / 60)), 0.1f) : 0;
             tile.build.damage(creeperTeam, (creeperDamage + buildupDamage) * tile.creep);
             tile.creep *= creeperEvaporationUponDamagePercent;
-            tile.lastDamageTime = tile.damageTime;
+            tile.getLinkedTiles(t -> t.lastDamageTime = Time.time);
         }
     }
 
