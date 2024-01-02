@@ -10,7 +10,6 @@ import mindustry.entities.bullet.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.io.*;
-import mindustry.net.Administration;
 import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
@@ -248,8 +247,6 @@ public class CreeperUtils{
             Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
         });
 
-        Events.on(EventType.SaveLoadEvent.class, e -> loadedSave = true);
-
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
             shields.clear();
             stateUpdate = canGameover = true;
@@ -273,7 +270,8 @@ public class CreeperUtils{
             loadedSave = state.stats.buildingsBuilt > 0;
 
             for(Building build : creeperTeam.data().buildings){
-                if(!loadedSave) build.tile.getLinkedTiles(t -> t.creep = Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
+                if(!loadedSave && (build.block != Blocks.coreShard && build.block != Blocks.coreFoundation))
+                    build.tile.getLinkedTiles(t -> t.creep = Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
 
                 tryAddEmitter(build);
             }
