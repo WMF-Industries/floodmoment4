@@ -160,9 +160,11 @@ public class CreeperUtils{
         if(Emitter.emitterTypes.containsKey(build.block)){
             creeperEmitters.add(new Emitter(build));
             CreeperUtils.resetDistanceCache();
+            verifyUpgrade(build);
         }else if(ChargedEmitter.chargedEmitterTypes.containsKey(build.block)){
             chargedEmitters.add(new ChargedEmitter(build));
             CreeperUtils.resetDistanceCache();
+            verifyUpgrade(build);
         }
     }
 
@@ -244,6 +246,12 @@ public class CreeperUtils{
         Events.on(EventType.PlayerJoin.class, e -> {
             if(e.player.getInfo().timesJoined > 1) return;
             Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
+        });
+
+        Events.on(EventType.CoreChangeEvent.class, e -> {
+            if(e.core.team == creeperTeam){
+                verifyUpgrade(e.core);
+            }
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
@@ -547,5 +555,23 @@ public class CreeperUtils{
         }
 
         return source.build != null && source.build.team != creeperTeam;
+    }
+
+    public static void verifyUpgrade(Building build){
+        boolean canUpgrade = true;
+        Emitter thisEmitter = creeperEmitters.find(em -> em.getX() == build.x && em.getY() == build.y);
+        ChargedEmitter thisCharged = chargedEmitters.find(em -> em.getX() == build.x && em.getY() == build.y);
+        int tx = build.tileX() - 1, ty = build.tileY() - 1, o = build.block.sizeOffset + 1, max = build.block.size + 2;
+        for(int dx = 0; dx < max; dx++){
+            for(int dy = 0; dy < max; dy++){
+                Tile other = world.tile(tx + dx + o, ty + dy + o);
+                if(other.block() != null && other.block().isStatic()){
+                    canUpgrade = false;
+                    break;
+                }
+            }
+        }
+        if(thisEmitter != null) thisEmitter.canUpgrade = canUpgrade;
+        if(thisCharged != null) thisCharged.canUpgrade = canUpgrade;
     }
 }

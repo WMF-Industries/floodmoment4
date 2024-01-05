@@ -26,6 +26,7 @@ import mindustry.world.blocks.logic.LogicDisplay.*;
 import mindustry.world.blocks.logic.MemoryBlock.*;
 import mindustry.world.blocks.logic.MessageBlock.*;
 import mindustry.world.blocks.payloads.*;
+import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.meta.*;
 
 import static mindustry.Vars.*;
@@ -1347,10 +1348,12 @@ public class LExecutor{
                             if(t == null) t = Team.derelict;
 
                             if(tile.block() != b || tile.team() != t){
-                                tile.setNet(b, t, Mathf.clamp(exec.numi(rotation), 0, 3));
                                 /* this is slow but ensures that whatever is placed using setblock
                                 will affect the way flood expands, like setting blocks to air */
                                 tile.getLinkedTiles(tmp -> tmp.creeperable = (!b.isStatic() || b.isAir()));
+                                // killing emitters, fastest way to clear them
+                                if(tile.block() instanceof CoreBlock) tile.build.kill();
+                                tile.setNet(b, t, Mathf.clamp(exec.numi(rotation), 0, 3));
                             }
                         }
                     }

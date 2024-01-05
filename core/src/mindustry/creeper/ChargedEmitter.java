@@ -15,7 +15,7 @@ public class ChargedEmitter implements Position{
     public Building build;
     public int throttle;
     public float buildup, counter, overflow;
-    public boolean emitting, immune;
+    public boolean emitting, immune, canUpgrade;
     public StringBuilder sb = new StringBuilder();
 
     public static HashMap<Block, ChargedEmitterType> chargedEmitterTypes = new HashMap<>();
@@ -49,6 +49,7 @@ public class ChargedEmitter implements Position{
         }else if((buildup += type.chargePulse) > type.chargeCap){
             emitting = true;
         }
+
         return true;
     }
 
@@ -59,7 +60,7 @@ public class ChargedEmitter implements Position{
         }
         if(overflow > 0){
             if(sb.length() != 0) sb.append("\n    ");
-            sb.append(Strings.format("[green]@[] - [stat]@%[]", type.upgradable() ? "\ue804" : "\ue813", (int)(overflow * 100 / type.chargeCap)));
+            sb.append(Strings.format("[green]@[] - [stat]@%[]", type.upgradable() && canUpgrade ? "\ue804" : "\ue813", (int)(overflow * 100 / type.chargeCap)));
         }
         if(emitting){
             Call.effect(Fx.launch, build.x, build.y, build.block.size, creeperTeam.color);
@@ -70,7 +71,7 @@ public class ChargedEmitter implements Position{
         if(sb.length() != 0){
             Call.label(sb.toString(), 1f, build.x, build.y);
         }
-        if(type.upgradable() && type.chargeCap > 0 && build != null && build.tile != null && overflow >= type.chargeCap){
+        if(type.upgradable() && canUpgrade && type.chargeCap > 0 && build != null && build.tile != null && overflow >= type.chargeCap){
             ChargedEmitterType next = type.getNext();
             if(next != null){
                 build.tile.setNet(next.block, creeperTeam, 0);

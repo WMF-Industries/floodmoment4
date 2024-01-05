@@ -15,7 +15,7 @@ import static mindustry.creeper.CreeperUtils.*;
 public class Emitter implements Position{
     public Building build;
     public EmitterType type;
-    public boolean suspended, nullified;
+    public boolean suspended, nullified, canUpgrade;
     protected float counter;
 
     public static HashMap<Block, EmitterType> emitterTypes = new HashMap<>();
@@ -37,7 +37,7 @@ public class Emitter implements Position{
         if(!suspended && (counter += Time.delta) >= type.interval){
             counter = 0;
             build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt,
-            (build.tile.creep >= 10.35f && type.level != 3) ? (type.upgradeThreshold + maxTileCreep) : maxTileCreep));
+            (build.tile.creep >= 10.35f && (type.level != 3 && canUpgrade)) ? (type.upgradeThreshold + maxTileCreep) : maxTileCreep));
         }
 
         return true;

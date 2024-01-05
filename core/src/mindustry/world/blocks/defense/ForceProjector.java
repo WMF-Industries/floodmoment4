@@ -63,11 +63,9 @@ public class ForceProjector extends Block{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(tile != null && ((tile.creep >= 1f && tile.creeperable)
-        || (creeperLevels.containsKey(tile.block())
-        && tile.team() == creeperTeam)) && !paramEntity.broken
-        && paramEntity.enabled && inForceField(tile)){
-            if(paramEntity.team != creeperTeam){
+        if(tile != null && tile.build != null && tile.team() == creeperTeam
+        && inForceField(tile) && !paramEntity.broken && paramEntity.enabled){
+            /*if(paramEntity.team != creeperTeam){
                 if(tile.block() instanceof CoreBlock) paramEntity.kill(); // it's weird when they easily suspend emitters...
                 paramEntity.hit = 1f;
                 paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
@@ -84,6 +82,23 @@ public class ForceProjector extends Block{
                 refresh = 0;
                 effect = false;
                 Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, paramEntity.team.color);
+            }*/
+            if(paramEntity.team != creeperTeam){
+                if(tile.block() instanceof CoreBlock) paramEntity.kill();
+                paramEntity.hit = 1f;
+                paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
+                tile.build.damage(paramEntity.team, (float) Blocks.scrapWall.health / Mathf.round(tile.creep));
+                effect = true;
+            }else if(tile.build.damaged() || tile.build.fakeHealth < tile.block().floodHealth){
+                tile.build.heal();
+                tile.build.fakeHealth = tile.block().floodHealth;
+                effect = true;
+            }
+
+            if(effect && ++refresh > 15){
+                refresh = 0;
+                Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 0, paramEntity.team.color);
+                effect = false;
             }
         }
     };
