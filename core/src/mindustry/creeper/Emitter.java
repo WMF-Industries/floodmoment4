@@ -33,11 +33,12 @@ public class Emitter implements Position{
     public boolean update(){
         if(build == null || !build.isAdded() || build.health <= 1f || !(build instanceof CoreBlock.CoreBuild))return false;
 
-        // one method will be faster, results should be similar
+        // i am a fucking moron, reverted back to old
         if(!suspended && (counter += Time.delta) >= type.interval){
             counter = 0;
-            build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt,
-            (build.tile.creep >= 10.35f && (type.level != 3 && canUpgrade)) ? (type.upgradeThreshold + maxTileCreep) : maxTileCreep));
+            if(build.tile.creep >= 10.35f && type.level != 3 && canUpgrade){
+                build.tile.creep = Math.min(build.tile.creep + type.amt, (type.upgradeThreshold + maxTileCreep));
+            }else build.tile.getLinkedTiles(t -> t.creep = Math.min(t.creep + type.amt, maxTileCreep));
         }
 
         return true;
