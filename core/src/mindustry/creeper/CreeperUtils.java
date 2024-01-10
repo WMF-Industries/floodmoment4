@@ -22,8 +22,8 @@ public class CreeperUtils{
     public static final float updateInterval = 2/60f; // Base update interval in seconds
     public static final float baseTransferRate = 0.25f; // Base transfer rate NOTE: keep below 0.25f
     public static final float creeperDamage = 0.2f; // Base creeper damage
-    // Base damage increase added every second a building is being damaged by flood, resets after 5 seconds without damage
-    public static final float creeperDamageScaling = 0.01f; // This is really just a hacky way of fighting with mender spam
+    // Base damage increase added every second a building is being damaged by flood, resets after 5 seconds without damage or on building death
+    public static final float creeperDamageScaling = 0.0025f; // This is really just a hacky way of fighting with mender spam
     public static final float creeperEvaporationUponDamagePercent = 0.98f; // Creeper percentage that will remain upon damaging something
     public static final float creeperUnitDamage = 2f;
     public static final float maxTileCreep = 10.5f;
@@ -77,7 +77,7 @@ public class CreeperUtils{
 
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
-    public static int tutorialID, pvpTutorialID, messageTimer;
+    public static int tutorialID, pvpTutorialID, floodStatID, messageTimer;
     public static boolean canGameover, stateUpdate, loadedSave;
     private static final int maxProtectionRadius = 10 * tilesize;
     private static int timePassed, pulseOffset;
@@ -98,25 +98,39 @@ public class CreeperUtils{
     public static final String[][] tutFinal = {{"[#49e87c]\uE829 Finish[]"}};
     public static final String[][] tutStart = {{"[#49e87c]\uE875 Take the tutorial[]"}, {"[#e85e49]⚠ Skip (not recommended)[]"}};
     public static final String[] tutEntries = {
-    "[accent]\uE875[] Tutorial 1/6", "In [#e056f0]\uE83B the flood[] there are [scarlet]no units[] to defeat.\nInstead, your goal is to suspend all [accent]emitters[], which are simply [accent]enemy cores, launchpads and accelerators.[]",
-    "[accent]\uE875[] Tutorial 2/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Emitters[] spawn [#e056f0]\uE83B the flood[], which when in proximity to friendly buildings or units, damages them.",
-    "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for short periods.\nWhen active or surrounded by lots of flood, they are immune to damage.",
-    "[accent]\uE875[] Tutorial 4/6", "You can [accent]suspend emitters[] by constantly damaging them, and destroy [accent]charged emitters[] to remove them.",
-    "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building and activating an \uF871 [accent]Impact Reactor[] / \uF689 [accent]Lustre[] nearby.",
-    "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[].\nYou can stop the upgrade by damaging them.",
-    "[white]\uF872[]", "[scarlet]Spore Launchers[]\n[accent]Thorium Reactors[] fire long distance artillery that releases [accent]a huge amount of flood[] on impact.\nYou can defend against this with \uF80E [accent]Segments[white] & \uF898 []Force Projectors[].",
-    "[white]\uF682[]", "[scarlet]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",
-    "[white]\uF6AD[]", "[scarlet]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
-    "[white]\uF7FA[]", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
-    "[white]\uF88B[]", "[scarlet]Flood Mass Drivers[]\n[accent]Mass Drivers[] collect and transport creep over long distances, if not used for regular item transport.",
-    "[white]\uF898[]", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] absorb [#e056f0]the flood[].\nUnlike unit shields, \uF898 need [accent]coolant and power to regenerate[] & [accent]explode[] if overloaded / destroyed.\n[red]Reclaiming them gives no resources![]",
-    "[white]\uF7F5[]", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood, additionally their carrying capacity is set to 20.\nUse them to transport items over flood.",
+        "[accent]\uE875[] Tutorial 1/6", "In [#e056f0]\uE83B the flood[] there are [scarlet]no units[] to defeat.\nInstead, your goal is to suspend all [accent]emitters[], which are simply [accent]enemy cores, launchpads and accelerators.[]",
+        "[accent]\uE875[] Tutorial 2/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Emitters[] spawn [#e056f0]\uE83B the flood[], which when in proximity to friendly buildings or units, damages them.",
+        "[accent]\uE875[] Tutorial 3/6", "[scarlet]⚠ Beware! ⚠[]\n[accent]Charged Emitters[] spawn [#e056f0]\uE83B the flood[] much faster, but they are only active for short periods.\nWhen active or surrounded by lots of flood, they are immune to damage.",
+        "[accent]\uE875[] Tutorial 4/6", "You can [accent]suspend emitters[] by constantly damaging them, and destroy [accent]charged emitters[] to remove them.",
+        "[accent]\uE875[] Tutorial 5/6", "If [accent]emitters[] are sufficiently suspended, you can [accent]nullify them[] by building and activating an \uF871 [accent]Impact Reactor[] / \uF689 [accent]Lustre[] nearby.",
+        "[accent]\uE875[] Tutorial 6/6", "If [accent]emitters[] are surrounded by the maximum creep, they will begin [stat]upgrading[].\nYou can stop the upgrade by damaging them.",
+        "[white]\uF872[] Content 1/8", "[scarlet]Spore Launchers[]\n[accent]Thorium Reactors[] fire long distance artillery that releases [accent]a huge amount of flood[] on impact.\nYou can defend against this with \uF80E [accent]Segments[white] & \uF898 []Force Projectors[].",
+        "[white]\uF682[] Content 2/8", "[scarlet]Flood Projector[]\n[accent]Shockwave Towers[] rapidly deposit flood at any nearby buildings, forcing a [accent]different approach[] than turret spam.\nRange is slightly larger than Ripples.",
+        "[white]\uF6AD[] Content 3/8", "[scarlet]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
+        "[white]\uF7FA[] Content 4/8", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
+        "[white]\uF88B[] Content 5/8", "[scarlet]Flood Mass Drivers[]\n[accent]Mass Drivers[] collect and transport creep over long distances, if not used for regular item transport.",
+        "[white]\uF898[] Content 6/8", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] absorb [#e056f0]the flood[].\nUnlike unit shields, \uF898 need [accent]coolant and power to regenerate[] & [accent]explode[] if overloaded / destroyed.\n[red]Reclaiming them gives no resources![]",
+        "[white]\uF7F5[] Content 7/8", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood.\nUse them to transport items over flood.",
+        "[white]\uF7FA[] Content 8/8", "[lime]Flood Anticreep[]\n[accent]Crawlers & Scathes[] from the player team spread anticreep upon attacking the flood!"
     };
     public static final String[] pvpTutEntries = {
-    "[accent]\uE875[] Tutorial 1/3", "In [#e056f0]\uE83B flood pvp[], your goal is to defeat your enemy as well as defend yourself from [#e056f0]the flood[].\nSuspending emitters does not end the game.",
-    "[accent]\uE875[] Tutorial 2/3", "After the game starts, [accent]Polygonal Core Protection[] is enabled for [accent]15 minutes[]\nUse the given protection period to prepare your defenses!",
-    "[accent]\uE875[] Tutorial 3/3", "Content wise, flood pvp is nearly identical to standard flood.\nThe strategies used on a standard flood server might prove to also be effective here.",
-    "[white]\uF7F7[]", "[lime]PvP Creep[]\n\uF7F7 & \uF7DE explode when in contact with enemy team's units & buildings and release tons of [#e056f0]the flood[].\nThis ability is disabled once all emitters are nullified.",
+        "[accent]\uE875[] Tutorial 1/3", "In [#e056f0]\uE83B flood pvp[], your goal is to defeat your enemy as well as defend yourself from [#e056f0]the flood[].\nSuspending emitters does not end the game.",
+        "[accent]\uE875[] Tutorial 2/3", "After the game starts, [accent]Polygonal Core Protection[] is enabled for [accent]15 minutes[]\nUse the given protection period to prepare your defenses!",
+        "[accent]\uE875[] Tutorial 3/3", "Content wise, flood pvp is nearly identical to standard flood.\nThe strategies used on a standard flood server might prove to also be effective here.",
+        "[white]\uF7F7[] Content 1/1", "[lime]PvP Creep[]\n\uF7F7 & \uF7DE explode when in contact with enemy team's units & buildings and release tons of [#e056f0]the flood[].\nThis ability is disabled once all emitters are nullified.",
+    };
+    public static final String[] floodStats = {
+        "[accent]\uE87C[] Stats [BETA]", "Many blocks on flood were modified to fit in, or be balanced.\nThis part covers global values of modified blocks!",
+        "[accent]\uE871[] Global Stats 1/4", "\uF858 [Damage: \uF832 66 -> 10, \uF831 105 -> 20] [Pierce: True -> False]\n\uF85C [Damage: 140 -> 10] [Pierce: True -> False]\n\uF85B [Damage: 20 -> 4]" +
+        "\n\uF688 [Damage: 1500 -> 700] [Splash Damage: 160 -> 70]\n[Building Multiplier: -80% -> -70%]\n\uF801 [Damage: 18 -> 360] [Range: 30 -> 28.75]",
+        "[accent]\uE86B[] Global Stats 2/4", "\uF8A0\uF8AC\uF8A8 [Solid: True -> False]\n\uF8A6 [Deflect Chance: 10 -> 0]\n\uF8A4, \uF693 [Lightning Chance: 5% -> 0%]\n\uF6EE, \uF6F3, \uF6BB [Insulated & Absorbs Lasers: False -> True]",
+        "[purple]\uE833[][accent]\uE86D[] Global Stats 3/4", "\uF7F6 [Health: 70 -> 275] [Range: 13 -> 17.5]\n\uF7F5 [Health: 340 -> 440] [Speed: 12.37 -> 12.75]\n\uF7F4 [Health: 700 -> 1400] [Speed: 12.75 -> 13.5]\n\uF7EB\uF7EA\uF7E9 [Building Damage: 1% -> 100%]" +
+        "\n\uF7FA [Health: 200 -> 100] [Speed: 7.5 -> 11.25]\n\uF7F9 [Speed: 4.5 -> 3.75]\n\uF7F8 [Speed: 4.05 -> 3] [Damage: 23 & 18 -> 25 & 20] [Heal On Hit: True -> False]\n\uF7F7 [Speed: 4.5 -> 3.75] [Heal On Hit: True -> False]" +
+        "\n\uF7C1 [Damage: 360 -> 240] [Build While Flying/Shooting: True -> False]\n\uF7ED\uF7FE\uF7F7 [Bullets Collide: False -> True]\n\uF7FA\uF7F8\uF7F7 [Target Air: True -> False]\n\uF7FC\uF7EC [Abilities: Shield Regen Ability -> null]\n\uF7C2 [Shield Health: 7000 -> 15000]",
+        "[orange]\uE833[][accent]\uE86D[] Global Stats 4/4", "\uF69E [Bullets Collide: False -> True]",
+        "[accent]\uE87C[] Stats [BETA]", "You've reached the end of the global part!\nThis next part covers values of modified blocks that only affect the flood team!",
+        "[accent]\uE83B[] Flood Stats", "\uF8A0 [Health: 50]\n\uF8AC [Health: 75], \uF8A8 [Health: 100], \uF8A6 [Health: 125]\n\uF8A4 [Health: 150], \uF693 [Health: 175], \uF8AA [Health: 200]\n\uF6EE [Health: 225], \uF6F3 [Health: 250], \uF6BB [Health: 300]" +
+        "\n\uF6AD [Damage: 600] [Range: 34]\n\uF682 [Damage: 50 * Target Size] [Range: 37.5]"
     };
 
     private static float updateTimer;
@@ -241,8 +255,21 @@ public class CreeperUtils{
             });
         }
 
+        int statMenuID = 0;
+        for(int pi = floodStats.length; --pi >= 0;){
+            final int pj = pi;
+            int current = statMenuID;
+            statMenuID = Menus.registerMenu((player, selection) -> {
+                if(selection == 1) return;
+                if(pj == floodStats.length / 2) return;
+                Call.menu(player.con, current, floodStats[2 * pj], floodStats[2 * pj + 1], pj == floodStats.length / 2 - 1 ? tutFinal : tutContinue);
+            });
+        }
+
         tutorialID = menuID;
         pvpTutorialID = pvpMenuID;
+        floodStatID = statMenuID;
+
         Events.on(EventType.PlayerJoin.class, e -> {
             if(e.player.getInfo().timesJoined > 1) return;
             Call.menu(e.player.con, state.rules.pvp ? pvpTutorialID : tutorialID, "[accent]Welcome![]", "Looks like it's your first time playing..", tutStart);
@@ -277,6 +304,8 @@ public class CreeperUtils{
             loadedSave = state.stats.buildingsBuilt > 0;
 
             for(Building build : creeperTeam.data().buildings){
+                build.heal();
+
                 if(!loadedSave && (build.block != Blocks.coreShard && build.block != Blocks.coreFoundation))
                     build.tile.getLinkedTiles(t -> t.creep = Math.min(creeperLevels.get(build.block, 0), maxTileCreep));
 
@@ -322,7 +351,9 @@ public class CreeperUtils{
         }, 0, 2.495f);
 
         Events.on(EventType.BlockDestroyEvent.class, e -> {
-            e.tile.getLinkedTiles(t -> t.creep = 0); // clear flood on all the tiles this block spans
+            e.tile.getLinkedTiles(t -> {
+                t.creep = t.damageTime = 0;
+            }); // clear flood on all the tiles this block spans
         });
 
         Timer.schedule(() -> {
@@ -400,15 +431,15 @@ public class CreeperUtils{
         }
         nullifiedCount = newcount;
 
-        // notifies players about flood compat / foo's client every 15 minutes
-        if(++messageTimer > 900){
+        // notifies players about FloodCompat / Foos Client every 30 minutes
+        if(++messageTimer > 1800){
             messageTimer = 0;
             Groups.player.forEach(p -> {
                 if(!p.hasCompat)
-                    p.sendMessage("[accent]Hi there, did you know we have a mod to [gold]improve your experience?[]" +
-                            "\nThe mod provides [gold]better compatibility & reduces desyncs[] while being fully vanilla compatible!" +
-                            "\nDownload [blue]FloodCompat[] from the in-game mod browser and enjoy your adventures on io flood!" +
-                            "\nAlternatively, you can get Foos Client, as it includes FloodCompat as well as other QoL features by default!");
+                    p.sendMessage("[lightgray]Hi there, did you know we have a mod to [accent]improve your experience?[]" +
+                            "\nThe mod provides [accent]better compatibility & reduces desyncs[] while being fully vanilla compatible!" +
+                            "\nDownload [cyan]FloodCompat[] from the in-game mod browser and enjoy your adventures on io flood!" +
+                            "\n[accent]Alternatively, you can get Foos Client, which has FloodCompat and other QoL features built-in!");
             });
         }
     }
@@ -561,13 +592,15 @@ public class CreeperUtils{
         boolean canUpgrade = true;
         Emitter thisEmitter = creeperEmitters.find(em -> em.getX() == build.x && em.getY() == build.y);
         ChargedEmitter thisCharged = chargedEmitters.find(em -> em.getX() == build.x && em.getY() == build.y);
-        int tx = build.tileX() - 1, ty = build.tileY() - 1, o = build.block.sizeOffset + 1, max = build.block.size + 2;
-        for(int dx = 0; dx < max; dx++){
-            for(int dy = 0; dy < max; dy++){
-                Tile other = world.tile(tx + dx + o, ty + dy + o);
-                if(other.block() != null && other.block().isStatic()){
-                    canUpgrade = false;
-                    break;
+        if(build.block() != Blocks.interplanetaryAccelerator){ // interplanetary accel upgrades into a smaller block, why would we check?
+            int tx = build.tileX() - 1, ty = build.tileY() - 1, o = build.block.sizeOffset + 1, max = build.block.size + 2;
+            for (int dx = 0; dx < max; dx++) {
+                for (int dy = 0; dy < max; dy++) {
+                    Tile other = world.tile(tx + dx + o, ty + dy + o);
+                    if (!other.creeperable) {
+                        canUpgrade = false;
+                        break;
+                    }
                 }
             }
         }

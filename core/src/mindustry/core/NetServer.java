@@ -312,6 +312,10 @@ public class NetServer implements ApplicationListener{
             Call.menuChoose(player, state.rules.pvp ? pvpTutorialID : tutorialID, 0);
         });
 
+        clientCommands.<Player>register("floodstats", "", "Show stats of things modified by flood", (args, player) -> {
+            Call.menuChoose(player, floodStatID, 0);
+        });
+
         // [#656566]⚠
 
         clientCommands.<Player>register("spore", "", "Create a spore at your location.", (args, player) -> {
