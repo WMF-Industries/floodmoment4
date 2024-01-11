@@ -1621,7 +1621,7 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
         boolean wasDead = health <= 0;
 
         if (doFakeHealth) {
-            fakeHealth -= other.damage() * other.type().buildingDamageMultiplier * CreeperUtils.creeperBlockDamageMultiplier;
+            fakeHealth -= other.damage() * CreeperUtils.creeperBlockDamageMultiplier;
 
             if (fakeHealth <= 0f) {
                 kill();
