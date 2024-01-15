@@ -4078,6 +4078,7 @@ public class Blocks{
                 trailLength = 10;
                 hitEffect = despawnEffect = Fx.hitBulletColor;
                 buildingDamageMultiplier = 0.3f;
+                floodDamageMultiplier = 0.8f;
             }},
             Items.tungsten, new BasicBulletType(8f, 95){{
                 width = 13f;
@@ -4097,6 +4098,7 @@ public class Blocks{
                 hitEffect = despawnEffect = Fx.hitBulletColor;
                 rangeChange = 40f;
                 buildingDamageMultiplier = 0.3f;
+                floodDamageMultiplier = 0.8f;
             }}
             );
 
@@ -4141,6 +4143,7 @@ public class Blocks{
                 trailLength = 3;
                 hitEffect = despawnEffect = Fx.hitSquaresColor;
                 buildingDamageMultiplier = 0.2f;
+                floodDamageMultiplier = 0.5f;
             }}
             );
 
@@ -4239,6 +4242,7 @@ public class Blocks{
                 knockback = 1f;
                 pierceCap = 2;
                 buildingDamageMultiplier = 0.3f;
+                floodDamageMultiplier = 0.45f;
 
                 colors = new Color[]{Color.valueOf("eb7abe").a(0.55f), Color.valueOf("e189f5").a(0.7f), Color.valueOf("907ef7").a(0.8f), Color.valueOf("91a4ff"), Color.white};
             }},
@@ -4249,6 +4253,7 @@ public class Blocks{
                 knockback = 2f;
                 pierceCap = 3;
                 buildingDamageMultiplier = 0.3f;
+                floodDamageMultiplier = 0.45f;
 
                 colors = new Color[]{Color.valueOf("465ab8").a(0.55f), Color.valueOf("66a6d2").a(0.7f), Color.valueOf("89e8b6").a(0.8f), Color.valueOf("cafcbe"), Color.white};
                 flareColor = Color.valueOf("89e8b6");
@@ -4491,6 +4496,7 @@ public class Blocks{
                         lifetime = 10f;
                     }};
                     buildingDamageMultiplier = 0.3f;
+                    floodDamageMultiplier = 0.75f;
                     homingPower = 0.2f;
                 }};
 
@@ -4504,6 +4510,8 @@ public class Blocks{
                 fragVelocityMin = 0.5f;
                 fragVelocityMax = 1.5f;
                 fragLifeMin = 0.5f;
+
+                floodDamageMultiplier = 0.8f;
             }};
 
             drawer = new DrawTurret("reinforced-"){{
@@ -4556,7 +4564,7 @@ public class Blocks{
 
             shootType = new PointLaserBulletType(){{
                 damage = 200f;
-                buildingDamageMultiplier = 0.3f;
+                buildingDamageMultiplier = floodDamageMultiplier = 0.3f;
                 hitColor = Color.valueOf("fda981");
             }};
 
@@ -4663,6 +4671,7 @@ public class Blocks{
 
                             collidesAir = false;
                             buildingDamageMultiplier = 0.3f;
+                            floodDamageMultiplier = 0.75f;
 
                             anticreepBubble = 20;
                             anticreepBubbleTime = 45f;
@@ -4672,6 +4681,7 @@ public class Blocks{
                             fragBullets = 7;
                             fragBullet = new ArtilleryBulletType(3.4f, 32){{
                                 buildingDamageMultiplier = 0.3f;
+                                floodDamageMultiplier = 0.5f;
                                 drag = 0.02f;
                                 hitEffect = Fx.massiveExplosion;
                                 despawnEffect = Fx.scatheSlash;
@@ -4807,6 +4817,7 @@ public class Blocks{
                 trailLength = 9;
                 hitEffect = Fx.hitBulletColor;
                 buildingDamageMultiplier = 0.3f;
+                floodDamageMultiplier = 0.7f;
 
                 despawnEffect = new MultiEffect(Fx.hitBulletColor, new WaveEffect(){{
                     sizeTo = 30f;

@@ -172,14 +172,14 @@ public class UnitTypes{
                 shake = 2f;
                 ejectEffect = Fx.casing2;
                 shootSound = Sounds.artillery;
-                bullet = new ArtilleryBulletType(2f, 20, "shell"){{
+                bullet = new ArtilleryBulletType(2f, 40, "shell"){{
                     hitEffect = Fx.blastExplosion;
                     knockback = 0.8f;
                     lifetime = 120f;
                     width = height = 14f;
                     collides = true;
                     collidesTiles = true;
-                    splashDamageRadius = 35f;
+                    splashDamageRadius = 60f;
                     splashDamage = 80f;
                     backColor = Pal.bulletYellowBack;
                     frontColor = Pal.bulletYellow;
@@ -201,7 +201,7 @@ public class UnitTypes{
             singleTarget = true;
             drownTimeMultiplier = 4f;
 
-            BulletType smallBullet = new BasicBulletType(3f, 10){{
+            BulletType smallBullet = new BasicBulletType(3f, 25){{
                 width = 7f;
                 height = 9f;
                 lifetime = 50f;
@@ -224,6 +224,8 @@ public class UnitTypes{
                 shoot.shotDelay = 4f;
 
                 bullet = new BasicBulletType(7f, 50){{
+                    pierce = true;
+                    pierceCap = 3;
                     width = 11f;
                     height = 20f;
                     lifetime = 25f;
@@ -280,7 +282,7 @@ public class UnitTypes{
                 ejectEffect = Fx.casing4;
                 shootSound = Sounds.bang;
 
-                bullet = new BasicBulletType(13f, 80){{
+                bullet = new BasicBulletType(13f, 120){{
                     pierce = true;
                     pierceCap = 10;
                     width = 14f;
@@ -297,7 +299,7 @@ public class UnitTypes{
                     fragLifeMin = 0f;
                     fragRandomSpread = 30f;
 
-                    fragBullet = new BasicBulletType(9f, 20){{
+                    fragBullet = new BasicBulletType(9f, 30){{
                         width = 10f;
                         height = 10f;
                         pierce = true;
@@ -871,7 +873,7 @@ public class UnitTypes{
                     splashDamageRadius = 70f;
                     splashDamage = 65f;
                     pierceBuilding = true;
-                    pierceCap = 5;
+                    pierceCap = 7;
                     backColor = Pal.sapBulletBack;
                     frontColor = lightningColor = Pal.sapBullet;
                     lightning = 3;
@@ -1025,6 +1027,8 @@ public class UnitTypes{
                         lightRadius = 30f;
                         lightColor = Pal.sap;
                         lightOpacity = 0.5f;
+                        pierce = true;
+                        pierceCap = 2;
 
                         status = StatusEffects.sapped;
                         statusDuration = 60f * 10;
@@ -1537,10 +1541,9 @@ public class UnitTypes{
                     collides = false;
 
                     healPercent = 15f;
-                    splashDamage = 220f;
-                    splashDamageRadius = 80f;
-                    pierceBuilding = true;
-                    pierceCap = 9;
+                    damage = 100;
+                    splashDamage = 250f;
+                    splashDamageRadius = 100f;
                 }};
             }});
         }};
