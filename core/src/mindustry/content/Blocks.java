@@ -1822,7 +1822,7 @@ public class Blocks{
             size = 3;
             phaseRadiusBoost = 80f;
             radius = 101.7f;
-            shieldHealth = 2500f;
+            shieldHealth = 750f;
             cooldownNormal = 1.5f;
             cooldownLiquid = 1.2f;
             cooldownBrokenBase = 0.35f;

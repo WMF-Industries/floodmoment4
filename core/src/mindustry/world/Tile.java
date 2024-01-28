@@ -35,10 +35,8 @@ public class Tile implements Position, QuadTreeObject, Displayable{
     protected Floor overlay;
     protected boolean changing = false;
 
-    public float creep;
-    public boolean creeperable;
-    public float damageTime = 0;
-    public float lastDamageTime = 0;
+    public float creep, damageTime, lastDamageTime;
+    public boolean creeperable, repelled;
 
     public Tile(int x, int y){
         this.x = (short)x;

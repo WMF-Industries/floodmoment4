@@ -6,6 +6,7 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.struct.ObjectSet;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.*;
@@ -19,7 +20,6 @@ import mindustry.graphics.*;
 import mindustry.logic.*;
 import mindustry.ui.*;
 import mindustry.world.*;
-import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
 
@@ -36,7 +36,6 @@ public class ForceProjector extends Block{
     public int sides = 6;
     public float shieldRotation = 0f;
     public float shieldHealth = 700f;
-    public float regen = 1.8f;
     public float cooldownNormal = 1.75f;
     public float cooldownLiquid = 1.5f;
     public float cooldownBrokenBase = 0.35f;
@@ -51,8 +50,6 @@ public class ForceProjector extends Block{
 
     protected static ForceBuild paramEntity;
     protected static Effect paramEffect;
-    static boolean effect;
-    static int refresh;
     protected static final Cons<Bullet> shieldConsumer = bullet -> {
         if(bullet.team != paramEntity.team && bullet.type.absorbable && Intersector.isInRegularPolygon(((ForceProjector)(paramEntity.block)).sides, paramEntity.x, paramEntity.y, paramEntity.realRadius(), ((ForceProjector)(paramEntity.block)).shieldRotation, bullet.x, bullet.y)){
             bullet.absorb();
@@ -63,43 +60,9 @@ public class ForceProjector extends Block{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(tile != null && tile.build != null && tile.team() == creeperTeam
-        && inForceField(tile) && !paramEntity.broken && paramEntity.enabled){
-            /*if(paramEntity.team != creeperTeam){
-                if(tile.block() instanceof CoreBlock) paramEntity.kill(); // it's weird when they easily suspend emitters...
-                paramEntity.hit = 1f;
-                paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
-                if(tile.build != null && tile.build.team == creeperTeam){
-                    tile.build.damage(paramEntity.team, Blocks.scrapWall.health);
-                    effect = true;
-                }
-            }else if(tile.build != null && tile.build.team == creeperTeam && tile.build.damaged()){
-                effect = true;
-                tile.build.heal(Blocks.scrapWall.health);
-            }
-
-            if(effect && ++refresh >= 15){
-                refresh = 0;
-                effect = false;
-                Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 1, paramEntity.team.color);
-            }*/
-            if(paramEntity.team != creeperTeam){
-                if(tile.block() instanceof CoreBlock) paramEntity.kill();
-                paramEntity.hit = 1f;
-                paramEntity.healthLeft -= creeperDamage * buildShieldDamageMultiplier * (tile.creep / 2f) * Math.max(shieldBoostProtectionMultiplier, 1f - paramEntity.phaseHeat) + ((closestEmitterDist(tile) < 5 * tilesize) ? 2 : 0);
-                tile.build.damage(paramEntity.team, (float) Blocks.scrapWall.health / Mathf.round(tile.creep));
-                effect = true;
-            }else if(tile.build.damaged() || tile.build.fakeHealth < tile.block().floodHealth){
-                tile.build.heal();
-                tile.build.fakeHealth = tile.block().floodHealth;
-                effect = true;
-            }
-
-            if(effect && ++refresh > 15){
-                refresh = 0;
-                Call.effect(Fx.absorb, tile.worldx(), tile.worldy(), 0, paramEntity.team.color);
-                effect = false;
-            }
+        if(tile != null && tile.team() != creeperTeam && inForceField(tile) && !paramEntity.affectedTiles.contains(tile)){
+            paramEntity.affectedTiles.add(tile);
+            tile.repelled = true;
         }
     };
 
@@ -118,7 +81,6 @@ public class ForceProjector extends Block{
         envEnabled |= Env.space;
         ambientSound = Sounds.shield;
         ambientSoundVolume = 0.08f;
-        sync = true;
 
         if(consumeCoolant){
             consume(coolantConsumer = new ConsumeCoolant(coolantConsumption)).boost().update(false);
@@ -172,18 +134,13 @@ public class ForceProjector extends Block{
     }
 
     public class ForceBuild extends Building implements Ranged{
+        ObjectSet<Tile> affectedTiles = new ObjectSet<>();
         public boolean broken = true;
-        public float buildup, radscl, hit, warmup, phaseHeat, healthLeft;
+        public float buildup, radscl, hit, warmup, phaseHeat, refresh;
 
         @Override
         public float range(){
             return realRadius();
-        }
-
-        @Override
-        public void created(){
-            healthLeft = shieldHealth;
-            shields.add(this);
         }
 
         @Override
@@ -195,8 +152,19 @@ public class ForceProjector extends Block{
         public void onRemoved(){
             float radius = realRadius();
             if(!broken && radius > 1f) Fx.forceShrink.at(x, y, radius, team.color);
+            clearBuffer();
             super.onRemoved();
-            dead = true;
+        }
+
+        @Override
+        public void onDestroyed(){
+            clearBuffer();
+            super.onDestroyed();
+        }
+
+        public void clearBuffer(){
+            affectedTiles.each(t -> t.repelled = false);
+            affectedTiles.clear();
         }
 
         @Override
@@ -260,6 +228,15 @@ public class ForceProjector extends Block{
             }
 
             deflectBullets();
+
+            if((refresh += Time.delta) >= 60) affectedTiles.each(t -> t.repelled = inForceField(t));
+
+            tile.getLinkedTiles(t -> {
+                if(t.creep > 0){
+                    kill();
+                    clearBuffer();
+                }
+            });
         }
 
         public void deflectBullets(){
@@ -270,24 +247,12 @@ public class ForceProjector extends Block{
                 paramEffect = absorbEffect;
                 Groups.bullet.intersect(x - realRadius, y - realRadius, realRadius * 2f, realRadius * 2f, shieldConsumer);
 
-                Geometry.circle(tile.x, tile.y, (((int)realRadius / Vars.tilesize) * 3), (cx, cy) -> {
-                    if(inForceField(tile)) creeperConsumer.get(Vars.world.tile(cx, cy));
-                });
-            }
-
-            if(coolantConsumer != null && (coolantConsumer.efficiency(this) > 0 || !enabled) && healthLeft < shieldHealth){
-                coolantConsumer.update(this);
-                if(liquids.currentAmount() > 0.01f){
-                    // liquids.remove(liquids.current(), 0.5f); // TODO: ???
-                    healthLeft = Math.min((healthLeft + ((regen * liquids.current().heatCapacity) * delta()) * (enabled ? 1 : 0.1f)), shieldHealth);
-                                                                                                        // do not heal as fast when disabled
+                if(paramEntity.team != creeperTeam) {
+                    Geometry.circle(tile.x, tile.y, (((int) realRadius / Vars.tilesize) * 3), (cx, cy) -> {
+                        if (inForceField(tile)) creeperConsumer.get(Vars.world.tile(cx, cy));
+                    });
                 }
             }
-
-            if(healthLeft <= 0f){
-                Core.app.post(this::kill);
-            }
-
         }
 
         public float realRadius(){
@@ -296,8 +261,8 @@ public class ForceProjector extends Block{
 
         @Override
         public double sense(LAccess sensor){
-            if(sensor == LAccess.heat) return shieldHealth - healthLeft; // Clients sense buildup which should be equivalent
-            if(sensor == LAccess.shield) return healthLeft; // Equivalent to the client which senses "broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - buildup, 0)"
+            if(sensor == LAccess.heat) return buildup;
+            if(sensor == LAccess.shield) return broken ? 0f : Math.max(shieldHealth + phaseShieldBoost * phaseHeat - buildup, 0);
             return super.sense(sensor);
         }
 
@@ -347,8 +312,7 @@ public class ForceProjector extends Block{
         public void write(Writes write){
             super.write(write);
             write.bool(broken);
-            // instead of syncing buildup, we sync healthLeft scaled up to match what buildup would otherwise be (entity.buildup / (shieldHealth + phaseShieldBoost * entity.phaseHeat)
-            write.f(((shieldHealth - healthLeft) / shieldHealth) * (shieldHealth + phaseShieldBoost * phaseHeat));
+            write.f(buildup);
             write.f(radscl);
             write.f(warmup);
             write.f(phaseHeat);

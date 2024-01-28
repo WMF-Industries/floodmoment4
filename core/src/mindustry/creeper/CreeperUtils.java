@@ -90,7 +90,6 @@ public class CreeperUtils{
 
     public static Seq<Emitter> creeperEmitters = new Seq<>();
     public static Seq<ChargedEmitter> chargedEmitters = new Seq<>();
-    public static Seq<ForceProjector.ForceBuild> shields = new Seq<>();
 
     public static Timer.Task fixedRunner;
 
@@ -109,7 +108,7 @@ public class CreeperUtils{
         "[white]\uF6AD[] Content 3/8", "[scarlet]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
         "[white]\uF7FA[] Content 4/8", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
         "[white]\uF88B[] Content 5/8", "[scarlet]Flood Mass Drivers[]\n[accent]Mass Drivers[] collect and transport creep over long distances, if not used for regular item transport.",
-        "[white]\uF898[] Content 6/8", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] absorb [#e056f0]the flood[].\nUnlike unit shields, \uF898 need [accent]coolant and power to regenerate[] & [accent]explode[] if overloaded / destroyed.\n[red]Reclaiming them gives no resources![]",
+        "[white]\uF898[] Content 6/8", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] affect [#e056f0]the flood[].\nUnlike unit shields, \uF898 do not absorb flood, instead they slow down the spreading by a lot!",
         "[white]\uF7F5[] Content 7/8", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood.\nUse them to transport items over flood.",
         "[white]\uF7FA[] Content 8/8", "[lime]Flood Anticreep[]\n[accent]Crawlers & Scathes[] from the player team spread anticreep upon attacking the flood!"
     };
@@ -276,13 +275,10 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.CoreChangeEvent.class, e -> {
-            if(e.core.team == creeperTeam){
-                verifyUpgrade(e.core);
-            }
+            if(e.core.team == creeperTeam) verifyUpgrade(e.core);
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
-            shields.clear();
             stateUpdate = canGameover = true;
             hasLoaded = false;
         });
@@ -412,29 +408,13 @@ public class CreeperUtils{
             if(emitter.nullified)
                 newcount++;
         }
-        chargedEmitters.forEach(ChargedEmitter::fixedUpdate);
-
-        for(ForceProjector.ForceBuild shield : shields){
-            if(shield == null || shield.dead || shield.healthLeft <= 0f){
-                shields.remove(shield);
-                if(shield == null) continue;
-                Core.app.post(shield::kill);
-
-                float percentage = 1f - shield.healthLeft / ((ForceProjector)shield.block).shieldHealth;
-                depositCreeper(shield.tile, shieldCreeperDropRadius, shieldCreeperDropAmount * percentage);
-
-                continue;
-            }
-
-            double percentage = shield.healthLeft / ((ForceProjector)shield.block).shieldHealth;
-            Call.label("[" + getTrafficlightColor(percentage) + "]" + (int)(percentage * 100) + "%" + (shield.phaseHeat > 0.1f ? " [#f4ba6e]\uE86B +" + ((int)((1f - CreeperUtils.shieldBoostProtectionMultiplier) * 100f)) + "%" : ""), 1f, shield.x, shield.y);
-        }
         nullifiedCount = newcount;
+        chargedEmitters.forEach(ChargedEmitter::fixedUpdate);
 
         // notifies players about FloodCompat / Foos Client every 30 minutes
         if(++messageTimer > 1800){
             messageTimer = 0;
-            Groups.player.forEach(p -> {
+            Groups.player.each(p -> {
                 if(!p.hasCompat)
                     p.sendMessage("[lightgray]Hi there, did you know we have a mod to [accent]improve your experience?[]" +
                             "\nThe mod provides [accent]better compatibility & reduces desyncs[] while being fully vanilla compatible!" +
@@ -566,6 +546,15 @@ public class CreeperUtils{
         for(int i = 0; i <= 3; i++){
             Tile target = source.nearby(i);
             if(cannotTransfer(source, target)) continue;
+
+            // used for special spreading
+            if(target.repelled){
+                if(source.creep >= (target.creep + 2) || source.creep == maxTileCreep){
+                    target.creep += 1;
+                    source.creep -= 1;
+                }
+                continue;
+            }
 
             // creeper delta, cannot transfer more than 1/4 source creep or less than 0.001f. Target creep cannot exceed max creep
             float delta = Mathf.clamp((creepBefore - target.creep) * transferRate, 0, Math.min(source.creep * transferRate, maxTileCreep - target.creep));
