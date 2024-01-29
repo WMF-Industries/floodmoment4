@@ -60,7 +60,7 @@ public class ForceProjector extends Block{
     };
 
     private static final Cons<Tile> creeperConsumer = tile -> {
-        if(tile != null && tile.team() != creeperTeam && inForceField(tile) && !paramEntity.affectedTiles.contains(tile)){
+        if(tile != null && !tile.repelled && tile.team() != creeperTeam && inForceField(tile) && !paramEntity.affectedTiles.contains(tile)){
             paramEntity.affectedTiles.add(tile);
             tile.repelled = true;
         }
