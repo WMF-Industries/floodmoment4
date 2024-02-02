@@ -628,6 +628,7 @@ public class BulletType extends Content implements Cloneable{
         Timer.schedule(() -> {
             fxRunner.cancel();
             tiles.forEach((t) -> t.creeperable = true);
+            tiles.clear();
         }, anticreepBubbleTime);
     }
 

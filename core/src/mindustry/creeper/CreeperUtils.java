@@ -108,9 +108,9 @@ public class CreeperUtils{
         "[white]\uF6AD[] Content 3/8", "[scarlet]Flood Radar[]\n[accent]Radars[] focus on the closest unit, and after a short time of charging, [accent]shoot[] at that unit, forcing a [accent]different approach[] than unit spam.\nRange is slightly larger than Ripples.",
         "[white]\uF7FA[] Content 4/8", "[scarlet]Flood Creep[]\n[accent]Crawler tree units[] explode when in contact with buildings and release tons of [#e056f0]the flood[].",
         "[white]\uF88B[] Content 5/8", "[scarlet]Flood Mass Drivers[]\n[accent]Mass Drivers[] collect and transport creep over long distances, if not used for regular item transport.",
-        "[white]\uF898[] Content 6/8", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] affect [#e056f0]the flood[].\nUnlike unit shields, \uF898 do not absorb flood, instead they slow down the spreading by a lot!",
-        "[white]\uF7F5[] Content 7/8", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood.\nUse them to transport items over flood.",
-        "[white]\uF7FA[] Content 8/8", "[lime]Flood Anticreep[]\n[accent]Crawlers & Scathes[] from the player team spread anticreep upon attacking the flood!"
+        "[white]\uF898[] Content 6/8", "[lime]Flood Shields[]\n[accent]Force Projectors[] and [accent]unit shields[] affect [#e056f0]the flood[].\nUnlike unit shields, \uF898 do not absorb the flood, instead they slow down the spreading by a lot!",
+        "[white]\uF7F5[] Content 7/8", "[lime]Flood Horizons[]\n[accent]Horizons[] are disarmed and immune to the flood.\nUse them to transport items over the flood.",
+        "[white]\uF7FA[] Content 8/8", "[lime]Flood Anticreep[]\n[accent]Crawlers, Scathe Missiles & Shock Mines[] from the player team spread anticreep on contact with the flood!"
     };
     public static final String[] pvpTutEntries = {
         "[accent]\uE875[] Tutorial 1/3", "In [#e056f0]\uE83B flood pvp[], your goal is to defeat your enemy as well as defend yourself from [#e056f0]the flood[].\nSuspending emitters does not end the game.",

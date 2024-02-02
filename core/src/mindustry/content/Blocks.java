@@ -1778,7 +1778,7 @@ public class Blocks{
             requirements(Category.effect, with(Items.lead, 30, Items.copper, 25));
             consumePower(0.3f);
             size = 1;
-            reload = 800f;
+            reload = 200f;
             range = 40f;
             healPercent = 4f;
             phaseBoost = 4f;
@@ -1791,7 +1791,7 @@ public class Blocks{
             requirements(Category.effect, with(Items.lead, 100, Items.titanium, 25, Items.silicon, 40, Items.copper, 50));
             consumePower(1.5f);
             size = 2;
-            reload = 500f;
+            reload = 250f;
             range = 85f;
             healPercent = 11f;
             phaseBoost = 15f;

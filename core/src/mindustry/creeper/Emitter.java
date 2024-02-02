@@ -50,9 +50,7 @@ public class Emitter implements Position{
 
         // emitters shouldn't emit when covered in anticreep
         build.tile.getLinkedTiles(tmp -> {
-            if(!tmp.creeperable){
-                build.nullifyTimeout = suspendTimeout;
-            }
+            if(!tmp.creeperable) build.nullifyTimeout = suspendTimeout;
         });
 
         suspended = build.nullifyTimeout > 0f; // this doesn't have to be updated every tick
@@ -60,7 +58,7 @@ public class Emitter implements Position{
         if(nullified){
             Call.label("[red]*[] SUSPENDED [red]*[]", 1f, build.x, build.y);
             Call.effect(Fx.placeBlock, build.x, build.y, build.block.size, Color.yellow);
-        }else if(build.tile != null && type.level <= 2 && build.tile.creep > maxTileCreep) {
+        }else if(build.tile != null && type.level <= 2 && build.tile.creep > maxTileCreep){
             Call.label(Strings.format("[green]*[white] UPGRADING []@% *[]", (int) ((build.tile.creep - maxTileCreep) * 100 / (type.upgradeThreshold - maxTileCreep))), 1f, build.x, build.y);
             if(build.tile.creep >= type.upgradeThreshold){
                 // get next emitter level & upgrade

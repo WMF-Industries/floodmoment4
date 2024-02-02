@@ -105,7 +105,9 @@ abstract class BulletComp implements Timedc, Damagec, Hitboxc, Teamc, Posc, Draw
     @Replace
     @Override
     public boolean collides(Hitboxc other){
-        return (type.collides && team != CreeperUtils.creeperTeam) && (other instanceof Teamc t && t.team() != team)
+        return type.collides
+            && !(team == CreeperUtils.creeperTeam && type.isCreeper)
+            && (other instanceof Teamc t && t.team() != team)
             && !(other instanceof Flyingc f && !f.checkTarget(type.collidesAir, type.collidesGround))
             && !(type.pierce && hasCollided(other.id())); //prevent multiple collisions
     }
