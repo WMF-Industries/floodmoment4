@@ -40,7 +40,7 @@ abstract class PlayerComp implements UnitController, Entityc, Syncc, Timerc, Dra
     @SyncLocal float mouseX, mouseY;
     /** command the unit had before it was controlled. */
     @Nullable @NoSync UnitCommand lastCommand;
-    transient public boolean hasCompat = false;
+    transient public boolean hasCompat;
     boolean admin;
     String name = "frog";
     Color color = new Color();

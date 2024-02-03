@@ -45,7 +45,7 @@ android{
         androidTest.setRoot('tests')
     }
 
-    namespace "com.github.Anuken" // ????????
+    namespace "io.anuke.mindustry" // ????????
     publishing{ // WHY DOES ANDROID GRADLE PLUGIN SUCK
         singleVariant('java'){
             withSourcesJar()
@@ -141,15 +141,16 @@ dependencies{
     if(sdkFile.exists()) compileOnly files(sdkFile.absolutePath)
 }
 
-task copyAndroidNatives(){
-    configurations.natives.files.each{ jar ->
-        copy{
-            from zipTree(jar)
-            into file("libs/")
-            include "**"
-        }
-    }
-}
+// Having this makes building fail because jitpack sucks
+//task copyAndroidNatives(){
+//    configurations.natives.files.each{ jar ->
+//        copy{
+//            from zipTree(jar)
+//            into file("libs/")
+//            include "**"
+//        }
+//    }
+//}
 
 task run(type: Exec){
     commandLine "${findSdkDir()}/platform-tools/adb", 'shell', 'am', 'start', '-n', 'io.anuke.mindustry/mindustry.android.AndroidLauncher'
