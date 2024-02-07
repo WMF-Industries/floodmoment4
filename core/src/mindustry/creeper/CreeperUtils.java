@@ -31,35 +31,19 @@ public class CreeperUtils{
     public static final boolean useAiController = false; // Whether to use unit AI controller instead of RTS ai
 
 
-    /*
-    public static BulletType sporeType = new ArtilleryBulletType(3f, 20, "shell") {{
-        hitEffect = Fx.flakExplosion;
-        knockback = 0.8f;
-        lifetime = 80f;
-        width = height = 11f;
-        collidesTiles = false;
-        splashDamageRadius = 25f * 0.75f;
-        splashDamage = 33f;
-    }};
-     */
     //TODO: Better implementation - rely on FloodCompat for looks
     public static BulletType sporeType = UnitTypes.arkyid.weapons.get(UnitTypes.arkyid.weapons.size > 4 ? 6 : 3).bullet; // 6 and 7 when mirrored, 3 before mirroring
 
-    public static float sporeMaxRangeMultiplier = 27.5f;
+    public static float sporeMaxRange = 800f;
     public static float sporeAmount = 20f;
     public static float sporeRadius = 5f;
     public static float sporeSpeedMultiplier = 0.15f;
     public static float sporeHealthMultiplier = 10f;
-    public static float sporeTargetOffset = 256f;
     public static boolean sporeScaleThreat = true;
     public static double sporeBaseMultifireChance = 0.01d;
     public static float sporeCreepUse = 1.25f;
 
     public static float unitShieldDamageMultiplier = 1.5f;
-    public static float buildShieldDamageMultiplier = 0.75f;
-    public static float shieldBoostProtectionMultiplier = 0.5f;
-    public static float shieldCreeperDropAmount = 7f;
-    public static float shieldCreeperDropRadius = 4f;
 
     public static float nullifierRange = 16 * tilesize;
     public static float erekirNullifyTime = 45;
@@ -76,11 +60,11 @@ public class CreeperUtils{
 
     public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
-    public static int tutorialID, pvpTutorialID, floodStatID, messageTimer;
-    public static boolean canGameover, stateUpdate, loadedSave;
-    private static final int maxProtectionRadius = 10 * tilesize;
-    private static int timePassed, pulseOffset;
-    private static int nullifiedCount = pulseOffset = timePassed = 0;
+    private static final int maxProtectionRadius = 10 * tilesize; // Max core no build zone range
+
+    public static int tutorialID, pvpTutorialID, floodStatID, messageTimer, sporeLauncherCount;
+    public static boolean canGameover, loadedSave, hasLoaded;
+    private static int nullifiedCount, pulseOffset;
 
     public static final Team creeperTeam = Team.blue;
 
@@ -133,30 +117,29 @@ public class CreeperUtils{
 
     private static float updateTimer;
 
-    /** Whether the current map has loaded. We cant use world.isGenerating(); as that's set to false too soon */
-    private static boolean hasLoaded;
-
     public static String getTrafficlightColor(double value){
         return "#" + Integer.toHexString(java.awt.Color.HSBtoRGB((float)value / 3f, 1f, 1f)).substring(2);
     }
 
-    public static float[] targetSpore(){
-        float[] ret = {0, 0};
-        int iterations = 0;
-        Player player;
+    public static float[] targetSpore(float x, float y, float range){
+        float[] ret = {0, 0, 0};
+        int iterations = 0, maxIterations = Math.max(7500, 20000 - (sporeLauncherCount * 2500));
+        if(range <= 0) range = sporeMaxRange;
 
-        while(iterations++ < 10_000 && (player = Groups.player.random()) != null){
-            if(player.unit() == null || player.x == 0 && player.y == 0) continue;
-
-            Unit unit = player.unit();
-            ret[0] = unit.x + Mathf.range(sporeTargetOffset);
-            ret[1] = unit.y + Mathf.range(sporeTargetOffset);
+        while(iterations++ < maxIterations){
+            ret[0] = x + Mathf.range(range);
+            ret[1] = y + Mathf.range(range);
             Tile retTile = world.tileWorld(ret[0], ret[1]);
-
-            if(retTile != null && retTile.creeperable) break;
+            if(retTile != null){
+                float dist = retTile.dst(x, y);
+                ret[2] = dist / ((sporeType.speed * sporeType.lifetime) * sporeSpeedMultiplier); // gets the lifetime multiplier for the spore
+                if(retTile.creeperable && dist <= range){
+                    return ret;
+                }
+            }
         }
 
-        return world.tileWorld(ret[0], ret[1]) == null ? new float[]{0, 0} : ret;
+        return new float[] {x, y, 0.1f}; // shoot yourself NOW
     }
 
     public static void sporeCollision(Bullet bullet, float x, float y){
@@ -279,8 +262,27 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
-            stateUpdate = canGameover = true;
+            canGameover = state.rules.hideBannedBlocks = true;
             hasLoaded = false;
+
+            sporeLauncherCount = messageTimer = 0;
+
+            state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
+            state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
+
+            if(state.rules.enemyCoreBuildRadius > maxProtectionRadius)
+                state.rules.enemyCoreBuildRadius = maxProtectionRadius;
+
+            state.rules.modeName = state.rules.pvp ? "Flood PvP" : "Flood";
+
+            if(state.rules.pvp){
+                state.rules.polygonCoreProtection = true;
+
+                Timer.schedule(() -> {
+                    state.rules.polygonCoreProtection = false;
+                    Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
+                }, preparationPeriod);
+            }
         });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -308,19 +310,14 @@ public class CreeperUtils{
                 tryAddEmitter(build);
             }
 
-            if(state.rules.pvp) state.rules.polygonCoreProtection = true;
-
             Log.info(Structs.count(world.tiles.array, t -> t.creeperable) + " creeperable tiles");
             Log.info(creeperEmitters.size + " emitters");
             Log.info(chargedEmitters.size + " charged emitters");
 
             emitterDst = new int[world.width()][world.height()];
 
-            messageTimer = 0;
             if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
-
-            state.rules.modeName = state.rules.pvp ? "Flood PvP" : "Flood";
 
             hasLoaded = true;
             resetDistanceCache(); // run after loading since it returns if not loaded
@@ -381,26 +378,6 @@ public class CreeperUtils{
     public static void fixedUpdate(){
         // don't update anything if game is paused
         if(!state.isPlaying() || state.isPaused()) return;
-
-        // runs only at the first fixedUpdate, apply settings and stuff here
-        if(stateUpdate){
-            state.rules.hideBannedBlocks = true;
-            stateUpdate = false;
-
-            state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
-            // TODO: include impact / lustre?
-            state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
-
-            if(state.rules.enemyCoreBuildRadius > maxProtectionRadius)
-                state.rules.enemyCoreBuildRadius = maxProtectionRadius;
-
-            if(state.rules.pvp){
-                Timer.schedule(() -> {
-                    state.rules.polygonCoreProtection = false;
-                    Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
-                }, preparationPeriod);
-            }
-        }
 
         int newcount = 0;
         for(Emitter emitter : creeperEmitters){

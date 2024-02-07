@@ -318,7 +318,7 @@ public class NetServer implements ApplicationListener{
 
         // [#656566]⚠
 
-        clientCommands.<Player>register("spore", "", "Create a spore at your location.", (args, player) -> {
+        clientCommands.<Player>register("spore", "<range>", "Create a spore at your location.", (args, player) -> {
             if(!player.admin){
                 player.sendMessage("[#656566]⚠ Not enough permissions!");
                 return;
@@ -329,14 +329,13 @@ public class NetServer implements ApplicationListener{
             }
             Unit unit = player.unit();
 
-            float[] packed = targetSpore();
-            float targetx = packed[0];
-            float targety = packed[1];
+            float[] packed = targetSpore(unit.x, unit.y, (Float.parseFloat(args[0]) * tilesize));
+            float angle = Angles.angle(unit.x, unit.y, packed[0], packed[1]);
+            if(packed[2] == 0.1f){
+                player.sendMessage("[#656566]⚠ Couldn't find a valid target tile within range!");
+            }
 
-            float distance = player.unit().dst(targetx, targety);
-            float angle = Angles.angle(unit.x, unit.y, targetx, targety);
-
-            Call.createBullet(sporeType, creeperTeam, unit.x, unit.y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, Math.min(sporeMaxRangeMultiplier, (distance * sporeType.lifetime) / (sporeType.speed * sporeSpeedMultiplier) / 8200f));
+            Call.createBullet(sporeType, creeperTeam, unit.x, unit.y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, packed[2]);
         });
 
         clientCommands.<Player>register("deposit", "<radius> <amt>", "Deposit creeper on your location.", (args, player) -> {
@@ -351,25 +350,6 @@ public class NetServer implements ApplicationListener{
             Unit unit = player.unit();
 
             CreeperUtils.depositCreeper(unit.tileOn(), Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-        });
-
-        clientCommands.<Player>register("reload", "Reloads the emitters.", (args, player) -> {
-            if(!player.admin){
-                player.sendMessage("[#656566]⚠ Not enough permissions!");
-                return;
-            }
-
-            Call.infoToast("Reloading emitters!", 3);
-            canGameover = false;
-
-            chargedEmitters.clear();
-            creeperEmitters.clear();
-
-            for(Building build : Groups.build){
-                tryAddEmitter(build);
-            }
-
-            canGameover = true;
         });
 
         clientCommands.<Player>register("help", "[page]", "Lists all commands.", (args, player) -> {

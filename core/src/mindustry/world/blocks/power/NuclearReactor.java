@@ -129,14 +129,10 @@ public class NuclearReactor extends PowerGenerator{
             if(heat >= 0.999f){
                 Events.fire(Trigger.thoriumReactorOverheat);
                 if(team == creeperTeam){
-                    float[] packed = targetSpore();
-                    float targetx = packed[0];
-                    float targety = packed[1];
+                    float[] packed = targetSpore(x, y, -1);
+                    float angle = Angles.angle(x, y, packed[0], packed[1]);
 
-                    float distance = tile.dst(targetx, targety);
-                    float angle = Angles.angle(x, y, targetx, targety);
-
-                    Call.createBullet(sporeType, creeperTeam, x, y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, Math.min(sporeMaxRangeMultiplier, (distance * sporeType.lifetime) / (sporeType.speed * sporeSpeedMultiplier) / 8200f));
+                    Call.createBullet(sporeType, creeperTeam, x, y, angle, sporeHealthMultiplier, sporeSpeedMultiplier, packed[2]);
                     heat = 0;
                     items.clear();
 
@@ -154,6 +150,21 @@ public class NuclearReactor extends PowerGenerator{
 
                 kill();
             }
+        }
+
+        @Override
+        public void created(){
+            sporeLauncherCount += 1;
+        }
+
+        @Override
+        public void onDestroyed(){
+            sporeLauncherCount -= 1;
+        }
+
+        @Override
+        public void onRemoved(){
+            sporeLauncherCount -= 1;
         }
 
         @Override
