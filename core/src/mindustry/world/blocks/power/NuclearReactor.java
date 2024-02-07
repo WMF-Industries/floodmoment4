@@ -154,17 +154,17 @@ public class NuclearReactor extends PowerGenerator{
 
         @Override
         public void created(){
-            sporeLauncherCount += 1;
+            if(team == creeperTeam) sporeLauncherCount += 1;
         }
 
         @Override
         public void onDestroyed(){
-            sporeLauncherCount -= 1;
+            if(team == creeperTeam) sporeLauncherCount -= 1;
         }
 
         @Override
         public void onRemoved(){
-            sporeLauncherCount -= 1;
+            if(team == creeperTeam) sporeLauncherCount -= 1;
         }
 
         @Override
