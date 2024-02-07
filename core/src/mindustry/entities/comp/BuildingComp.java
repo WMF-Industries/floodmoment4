@@ -310,6 +310,7 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
     }
 
     public void addPlan(boolean checkPrevious, boolean ignoreConditions){
+        if(team == CreeperUtils.creeperTeam && block.creeperBlock) return; // do not queue creep blocks on the creeper team
         if(!ignoreConditions && (!block.rebuildable || (team == state.rules.defaultTeam && state.isCampaign() && !block.isVisible()))) return;
 
         Object overrideConfig = null;

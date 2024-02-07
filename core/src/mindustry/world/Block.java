@@ -39,6 +39,7 @@ import java.util.*;
 import static mindustry.Vars.*;
 
 public class Block extends UnlockableContent implements Senseable{
+    public boolean creeperBlock;
     /** If true, buildings have an ItemModule. */
     public boolean hasItems;
     /** If true, buildings have a LiquidModule. */

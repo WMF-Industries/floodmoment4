@@ -12,7 +12,6 @@ import mindustry.gen.*;
 import mindustry.io.*;
 import mindustry.ui.*;
 import mindustry.world.*;
-import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
 
 import static mindustry.Vars.*;
@@ -44,7 +43,7 @@ public class CreeperUtils{
     }};
      */
     //TODO: Better implementation - rely on FloodCompat for looks
-    public static BulletType sporeType = UnitTypes.arkyid.weapons.get(6).bullet;
+    public static BulletType sporeType = UnitTypes.arkyid.weapons.get(UnitTypes.arkyid.weapons.size > 4 ? 6 : 3).bullet; // 6 and 7 when mirrored, 3 before mirroring
 
     public static float sporeMaxRangeMultiplier = 27.5f;
     public static float sporeAmount = 20f;
@@ -226,6 +225,7 @@ public class CreeperUtils{
 
 
         for(var set : creeperBlocks.entries()){
+            set.value.creeperBlock = true; // used to avoid queuing broken creeper blocks on creeper team
            creeperLevels.put(set.value, set.key);
         }
 
