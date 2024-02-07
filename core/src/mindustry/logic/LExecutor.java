@@ -11,6 +11,7 @@ import mindustry.ai.types.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
 import mindustry.core.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.game.*;
@@ -307,8 +308,8 @@ public class LExecutor{
                                 res = indexer.findClosestOre(unit, item);
                             }
                         }
-                        case building -> {
-                            if (flag == BlockFlag.generator && exec.bool(enemy)) { // FINISHME: This ignores the existence of other enemy teams
+                        case building -> { // Why was there no filter for teams here...
+                            if (unit.team != CreeperUtils.creeperTeam && flag == BlockFlag.generator && exec.bool(enemy)) { // FINISHME: This ignores the existence of other enemy teams
                                 res = indexer.findClosestCreeper(unit.x, unit.y);
                             } else {
                                 Building b = Geometry.findClosest(unit.x, unit.y, exec.bool(enemy) ? indexer.getEnemy(unit.team, flag) : indexer.getFlagged(unit.team, flag));
