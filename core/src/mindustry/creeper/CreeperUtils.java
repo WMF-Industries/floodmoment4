@@ -58,12 +58,13 @@ public class CreeperUtils{
     public static float suspendDamage = 1500f; // Damage that needs to be applied for the core to be suspended
     public static float suspendTimeout = 180f; // The amount of ticks a core remains suspended (resets upon enough damage applied)
 
-    public static float nullificationPeriod = 10f; // How many seconds all cores have to be nullified (suspended) in order for the game to end
+    public static float nullificationPeriod = 300f; // How many ticks all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
     private static final int maxProtectionRadius = 10 * tilesize; // Max core no build zone range
 
     public static int tutorialID, pvpTutorialID, floodStatID, messageTimer, sporeLauncherCount;
     public static boolean canGameover, loadedSave, hasLoaded;
+    private static float checkRefresh, updateTimer;
     private static int nullifiedCount, pulseOffset;
 
     public static final Team creeperTeam = Team.blue;
@@ -115,8 +116,6 @@ public class CreeperUtils{
         "\n\uF6AD [Damage: 600] [Range: 34]\n\uF682 [Damage: 50 * Target Size] [Range: 37.5]"
     };
 
-    private static float updateTimer;
-
     public static String getTrafficlightColor(double value){
         return "#" + Integer.toHexString(java.awt.Color.HSBtoRGB((float)value / 3f, 1f, 1f)).substring(2);
     }
@@ -132,8 +131,8 @@ public class CreeperUtils{
             Tile retTile = world.tileWorld(ret[0], ret[1]);
             if(retTile != null){
                 float dist = retTile.dst(x, y);
-                ret[2] = dist / ((sporeType.speed * sporeType.lifetime) * sporeSpeedMultiplier); // gets the lifetime multiplier for the spore
                 if(retTile.creeperable && dist <= range){
+                    ret[2] = dist / ((sporeType.speed * sporeType.lifetime) * sporeSpeedMultiplier); // gets the lifetime multiplier for the spore
                     return ret;
                 }
             }
@@ -258,14 +257,14 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.CoreChangeEvent.class, e -> {
-            if(e.core.team == creeperTeam) verifyUpgrade(e.core);
+            if(e.core != null && e.core.team == creeperTeam) verifyUpgrade(e.core);
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
             canGameover = state.rules.hideBannedBlocks = true;
             hasLoaded = false;
 
-            sporeLauncherCount = messageTimer = 0;
+            checkRefresh = sporeLauncherCount = messageTimer = pulseOffset = 0;
 
             state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
             state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
@@ -348,21 +347,6 @@ public class CreeperUtils{
                 t.creep = t.damageTime = 0;
             }); // clear flood on all the tiles this block spans
         });
-
-        Timer.schedule(() -> {
-            if (!state.isGame() || state.rules.pvp) return;
-            // check for gameover
-            if(nullifiedCount == creeperEmitters.size){
-                Timer.schedule(() -> {
-                    if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0 && canGameover){
-                        // gameover
-                        state.gameOver = true;
-                        Events.fire(new EventType.GameOverEvent(state.rules.defaultTeam));
-                    }
-                    // failed to win, core got unsuspended
-                }, nullificationPeriod);
-            }
-        }, 0, 10);
     }
 
     public static void depositCreeper(Tile tile, float radius, float amount){
@@ -387,6 +371,16 @@ public class CreeperUtils{
         }
         nullifiedCount = newcount;
         chargedEmitters.forEach(ChargedEmitter::fixedUpdate);
+
+        if(state.isGame() && !state.rules.pvp){
+            // check for gameover
+            if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0 && canGameover){
+                if((checkRefresh += Time.delta) >= nullificationPeriod){
+                    state.gameOver = true;
+                    Events.fire(new EventType.GameOverEvent(state.rules.defaultTeam));
+                }
+            }else checkRefresh = 0;
+        }
 
         // notifies players about FloodCompat / Foos Client every 30 minutes
         if(++messageTimer > 1800){
