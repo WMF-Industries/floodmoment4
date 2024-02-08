@@ -265,6 +265,21 @@ public class CreeperUtils{
             hasLoaded = false;
 
             checkRefresh = sporeLauncherCount = messageTimer = pulseOffset = 0;
+        });
+
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            for(Tile t : world.tiles.array) t.creeperable = false;
+            chargedEmitters.clear();
+            creeperEmitters.clear();
+
+            for(Tile tile : world.tiles){
+                if(!tile.floor().isDeep()
+                && tile.floor().placeableOn
+                && (tile.breakable() || tile.block().isAir() || tile.block() instanceof TreeBlock)
+                && !(tile.block() instanceof StaticWall || tile.block() instanceof Cliff)){
+                    tile.creeperable = true;
+                }
+            }
 
             state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
             state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
@@ -281,21 +296,6 @@ public class CreeperUtils{
                     state.rules.polygonCoreProtection = false;
                     Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
                 }, preparationPeriod);
-            }
-        });
-
-        Events.on(EventType.WorldLoadEvent.class, e -> {
-            for(Tile t : world.tiles.array) t.creeperable = false;
-            chargedEmitters.clear();
-            creeperEmitters.clear();
-
-            for(Tile tile : world.tiles){
-                if(!tile.floor().isDeep()
-                && tile.floor().placeableOn
-                && (tile.breakable() || tile.block().isAir() || tile.block() instanceof TreeBlock)
-                && !(tile.block() instanceof StaticWall || tile.block() instanceof Cliff)){
-                    tile.creeperable = true;
-                }
             }
 
             loadedSave = state.stats.buildingsBuilt > 0;
