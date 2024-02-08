@@ -35,18 +35,41 @@ public class ShockMine extends Block{
         super(name);
         update = false;
         destructible = true;
+        instakill = true;
         solid = false;
         targetable = false;
     }
 
     public class ShockMineBuild extends Building{
         @Override
-        public void updateTile(){
-            super.updateTile();
-            if(tile.creep > 0){
-                release();
-                kill();
-            }
+        public void onDestroyed(){
+            super.onDestroyed();
+            var color = team.color;
+            Seq<Tile> tiles = new Seq<>();
+            Geometry.circle(tileX(), tileY(), 2, (cx, cy) ->{
+                Tile t = world.tile(cx, cy);
+                if(t != null && t.creeperable){
+                    t.creeperable = false;
+                    tiles.add(t);
+                }
+            });
+
+            var start_time = Time.millis();
+
+            var fxRunner = Timer.schedule(() ->{
+                tiles.each(t -> {
+                    Timer.schedule(() -> {
+                        var size_multiplier = 1 - (Time.millis() - start_time) / 1000f / 3f; // Moves from 1 to 0 with time
+                        Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.01f, 1.5f * size_multiplier), color);
+                    }, Mathf.random(0.5f));
+                });
+            }, 0, 0.5f);
+
+            Timer.schedule(() ->{
+                fxRunner.cancel();
+                tiles.forEach((t) -> t.creeperable = true);
+                tiles.clear();
+            }, 3f);
         }
 
         @Override
@@ -84,35 +107,6 @@ public class ShockMine extends Block{
                     bullet.create(this, x, y, (360f / shots) * i + Mathf.random(inaccuracy));
                 }
             }
-        }
-
-        public void release(){
-            var color = team.color;
-            Seq<Tile> tiles = new Seq<>();
-            Geometry.circle(tileX(), tileY(), 2, (cx, cy) ->{
-                Tile t = world.tile(cx, cy);
-                if(t != null && t.creeperable){
-                    t.creeperable = false;
-                    tiles.add(t);
-                }
-            });
-
-            var start_time = Time.millis();
-
-            var fxRunner = Timer.schedule(() ->{
-                tiles.each(t -> {
-                    Timer.schedule(() -> {
-                        var size_multiplier = 1 - (Time.millis() - start_time) / 1000f / 3f; // Moves from 1 to 0 with time
-                        Call.effect(Fx.lightBlock, t.getX(), t.getY(), Mathf.random(0.01f, 1.5f * size_multiplier), color);
-                    }, Mathf.random(0.5f));
-                });
-            }, 0, 0.5f);
-
-            Timer.schedule(() ->{
-                fxRunner.cancel();
-                tiles.forEach((t) -> t.creeperable = true);
-                tiles.clear();
-            }, 3f);
         }
     }
 }

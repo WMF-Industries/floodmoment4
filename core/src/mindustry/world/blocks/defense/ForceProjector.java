@@ -78,6 +78,7 @@ public class ForceProjector extends Block{
         hasPower = true;
         hasLiquids = true;
         hasItems = true;
+        instakill = true;
         envEnabled |= Env.space;
         ambientSound = Sounds.shield;
         ambientSoundVolume = 0.08f;
@@ -230,13 +231,6 @@ public class ForceProjector extends Block{
             deflectBullets();
 
             if((refresh += Time.delta) >= 60) affectedTiles.each(t -> t.repelled = inForceField(t));
-
-            tile.getLinkedTiles(t -> {
-                if(t.creep > 0){
-                    kill();
-                    clearBuffer();
-                }
-            });
         }
 
         public void deflectBullets(){
