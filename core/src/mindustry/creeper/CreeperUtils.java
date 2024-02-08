@@ -63,7 +63,7 @@ public class CreeperUtils{
     private static final int maxProtectionRadius = 10 * tilesize; // Max core no build zone range
 
     public static int tutorialID, pvpTutorialID, floodStatID, messageTimer, sporeLauncherCount;
-    public static boolean canGameover, loadedSave, hasLoaded;
+    public static boolean loadedSave, hasLoaded;
     private static float checkRefresh, updateTimer;
     private static int nullifiedCount, pulseOffset;
 
@@ -261,7 +261,7 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
-            canGameover = state.rules.hideBannedBlocks = true;
+            state.rules.hideBannedBlocks = true;
             hasLoaded = false;
 
             checkRefresh = sporeLauncherCount = messageTimer = pulseOffset = 0;
@@ -374,10 +374,11 @@ public class CreeperUtils{
 
         if(state.isGame() && !state.rules.pvp){
             // check for gameover
-            if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0 && canGameover){
+            if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0){
                 if((checkRefresh += Time.delta) >= nullificationPeriod){
                     state.gameOver = true;
                     Events.fire(new EventType.GameOverEvent(state.rules.defaultTeam));
+                    return;
                 }
             }else checkRefresh = 0;
         }
