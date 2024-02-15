@@ -3077,6 +3077,7 @@ public class Blocks{
                     height = 9f;
                     lifetime = 60f;
                     ammoMultiplier = 2;
+                    floodDamageMultiplier = 1.5f;
                 }},
                 Items.graphite, new BasicBulletType(3.5f, 18){{
                     width = 9f;
@@ -3084,6 +3085,7 @@ public class Blocks{
                     reloadMultiplier = 0.6f;
                     ammoMultiplier = 4;
                     lifetime = 60f;
+                    floodDamageMultiplier = 2f;
                 }},
                 Items.silicon, new BasicBulletType(3f, 12){{
                     width = 7f;
@@ -3092,6 +3094,7 @@ public class Blocks{
                     reloadMultiplier = 1.5f;
                     ammoMultiplier = 5;
                     lifetime = 60f;
+                    floodDamageMultiplier = 1.75f;
                 }}
             );
 
@@ -3218,6 +3221,7 @@ public class Blocks{
                     status = StatusEffects.burning;
                     keepVelocity = false;
                     hittable = false;
+                    floodDamageMultiplier = 1.5f;
                 }},
                 Items.pyratite, new BulletType(4f, 60f){{
                     ammoMultiplier = 6f;
@@ -3231,6 +3235,7 @@ public class Blocks{
                     despawnEffect = Fx.none;
                     status = StatusEffects.burning;
                     hittable = false;
+                    floodDamageMultiplier = 1.25f;
                 }}
             );
             recoil = 0f;
@@ -3256,6 +3261,7 @@ public class Blocks{
                     collidesTiles = false;
                     splashDamageRadius = 25f * 0.75f;
                     splashDamage = 33f;
+                    splashDamagePierce = true;
                 }},
                 Items.silicon, new ArtilleryBulletType(3f, 20){{
                     knockback = 0.8f;
@@ -3264,6 +3270,7 @@ public class Blocks{
                     collidesTiles = false;
                     splashDamageRadius = 25f * 0.75f;
                     splashDamage = 33f;
+                    splashDamagePierce = true;
                     reloadMultiplier = 1.2f;
                     ammoMultiplier = 3f;
                     homingPower = 0.08f;
@@ -3277,6 +3284,7 @@ public class Blocks{
                     collidesTiles = false;
                     splashDamageRadius = 25f * 0.75f;
                     splashDamage = 45f;
+                    splashDamagePierce = true;
                     status = StatusEffects.burning;
                     statusDuration = 60f * 12f;
                     frontColor = Pal.lightishOrange;
@@ -3432,6 +3440,7 @@ public class Blocks{
                     shrinkY = 0f;
                     splashDamageRadius = 30f;
                     splashDamage = 30f * 1.5f;
+                    splashDamagePierce = true;
                     ammoMultiplier = 5f;
                     hitEffect = Fx.blastExplosion;
                     despawnEffect = Fx.blastExplosion;
@@ -3448,6 +3457,7 @@ public class Blocks{
                     homingPower = 0.08f;
                     splashDamageRadius = 20f;
                     splashDamage = 30f * 1.5f;
+                    splashDamagePierce = true;
                     makeFire = true;
                     ammoMultiplier = 5f;
                     hitEffect = Fx.blastExplosion;
@@ -3459,6 +3469,7 @@ public class Blocks{
                     shrinkY = 0f;
                     splashDamageRadius = 25f;
                     splashDamage = 25f * 1.4f;
+                    splashDamagePierce = true;
                     hitEffect = Fx.blastExplosion;
                     despawnEffect = Fx.blastExplosion;
                     ammoMultiplier = 4f;
@@ -3500,6 +3511,7 @@ public class Blocks{
                     height = 9f;
                     lifetime = 60f;
                     ammoMultiplier = 2;
+                    floodDamageMultiplier = 2f;
                 }},
                 Items.graphite, new BasicBulletType(3.5f, 20){{
                     width = 9f;
@@ -3507,6 +3519,7 @@ public class Blocks{
                     reloadMultiplier = 0.6f;
                     ammoMultiplier = 4;
                     lifetime = 60f;
+                    floodDamageMultiplier = 3f;
                 }},
                 Items.pyratite, new BasicBulletType(3.2f, 18){{
                     width = 10f;
@@ -3520,6 +3533,7 @@ public class Blocks{
 
                     splashDamage = 12f;
                     splashDamageRadius = 22f;
+                    splashDamagePierce = true;
 
                     makeFire = true;
                     lifetime = 60f;
@@ -3531,6 +3545,7 @@ public class Blocks{
                     reloadMultiplier = 1.5f;
                     ammoMultiplier = 5;
                     lifetime = 60f;
+                    floodDamageMultiplier = 2.5f;
                 }},
                 Items.thorium, new BasicBulletType(4f, 29, "bullet"){{
                     width = 10f;
@@ -3539,6 +3554,7 @@ public class Blocks{
                     smokeEffect = Fx.shootBigSmoke;
                     ammoMultiplier = 4;
                     lifetime = 60f;
+                    floodDamageMultiplier = 2f;
                 }}
             );
 
@@ -3702,6 +3718,7 @@ public class Blocks{
                     collidesTiles = false;
                     splashDamageRadius = 25f * 0.75f;
                     splashDamage = 33f;
+                    splashDamagePierce = true;
                 }},
                 Items.silicon, new ArtilleryBulletType(3f, 20){{
                     knockback = 0.8f;
@@ -3714,6 +3731,7 @@ public class Blocks{
                     ammoMultiplier = 3f;
                     homingPower = 0.08f;
                     homingRange = 50f;
+                    floodDamageMultiplier = 3;
                 }},
                 Items.pyratite, new ArtilleryBulletType(3f, 24){{
                     hitEffect = Fx.blastExplosion;
@@ -3730,6 +3748,7 @@ public class Blocks{
                     makeFire = true;
                     trailEffect = Fx.incendTrail;
                     ammoMultiplier = 4f;
+                    splashDamagePierce = true;
                 }},
                 Items.blastCompound, new ArtilleryBulletType(2f, 20, "shell"){{
                     hitEffect = Fx.blastExplosion;
@@ -3742,6 +3761,7 @@ public class Blocks{
                     splashDamage = 55f;
                     backColor = Pal.missileYellowBack;
                     frontColor = Pal.missileYellow;
+                    splashDamagePierce = true;
 
                     status = StatusEffects.blasted;
                 }},
@@ -3753,6 +3773,7 @@ public class Blocks{
                     collidesTiles = false;
                     splashDamageRadius = 35f * 0.75f;
                     splashDamage = 45f;
+                    splashDamagePierce = true;
                     fragBullet = new BasicBulletType(2.5f, 10, "bullet"){{
                         width = 10f;
                         height = 12f;
@@ -3762,6 +3783,7 @@ public class Blocks{
                         frontColor = Pal.plastaniumFront;
                         despawnEffect = Fx.none;
                         collidesAir = false;
+                        floodDamageMultiplier = 1.25f;
                     }};
                     fragBullets = 10;
                     backColor = Pal.plastaniumBack;
@@ -3819,6 +3841,7 @@ public class Blocks{
                     splashDamage = 45f;
                     splashDamageRadius = 60f;
                     collidesGround = true;
+                    splashDamagePierce = true;
 
                     status = StatusEffects.blasted;
                     statusDuration = 60f;
@@ -3975,6 +3998,7 @@ public class Blocks{
                     ammoMultiplier = 4;
                     reloadMultiplier = 1.7f;
                     knockback = 0.3f;
+                    floodDamageMultiplier = 2f;
                 }},
                 Items.thorium, new BasicBulletType(8f, 80){{
                     hitSize = 5;
@@ -3984,6 +4008,7 @@ public class Blocks{
                     pierceCap = 2;
                     pierceBuilding = true;
                     knockback = 0.7f;
+                    floodDamageMultiplier = 1.5f;
                 }},
                 Items.pyratite, new BasicBulletType(7f, 70){{
                     hitSize = 5;
@@ -4001,6 +4026,7 @@ public class Blocks{
                     ammoMultiplier = 3;
                     splashDamage = 20f;
                     splashDamageRadius = 25f;
+                    splashDamagePierce = true;
                 }}
             );
             reload = 7f;
