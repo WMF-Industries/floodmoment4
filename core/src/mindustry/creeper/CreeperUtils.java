@@ -295,8 +295,11 @@ public class CreeperUtils{
                 Timer.schedule(() -> {
                     state.rules.polygonCoreProtection = false;
                     Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
+                    Call.setRules(state.rules);
                 }, preparationPeriod);
             }
+
+            Call.setRules(state.rules);
 
             loadedSave = state.stats.buildingsBuilt > 0;
 
@@ -374,7 +377,7 @@ public class CreeperUtils{
 
         if(state.isGame() && !state.rules.pvp){
             // check for gameover
-            if(nullifiedCount == creeperEmitters.size && chargedEmitters.size <= 0){
+            if(nullifiedCount >= creeperEmitters.size && chargedEmitters.size <= 0){
                 if((checkRefresh += Time.delta) >= nullificationPeriod){
                     state.gameOver = true;
                     Events.fire(new EventType.GameOverEvent(state.rules.defaultTeam));
@@ -521,9 +524,11 @@ public class CreeperUtils{
 
             // used for special spreading
             if(target.repelled){
-                if(source.creep >= (target.creep + 2) || source.creep == maxTileCreep){
-                    target.creep += 1;
-                    source.creep -= 1;
+                float offset = target.creep - Mathf.round(target.creep, 1);
+                if(offset < 0.001f) offset = 0;
+                if(source.creep >= (target.creep + (2 - offset)) || source.creep == maxTileCreep){
+                    target.creep += (1 - offset);
+                    source.creep -= (1 - offset);
                 }
                 continue;
             }
@@ -555,10 +560,10 @@ public class CreeperUtils{
         ChargedEmitter thisCharged = chargedEmitters.find(em -> em.getX() == build.x && em.getY() == build.y);
         if(build.block() != Blocks.interplanetaryAccelerator){ // interplanetary accel upgrades into a smaller block, why would we check?
             int tx = build.tileX() - 1, ty = build.tileY() - 1, o = build.block.sizeOffset + 1, max = build.block.size + 2;
-            for (int dx = 0; dx < max; dx++) {
-                for (int dy = 0; dy < max; dy++) {
+            for(int dx = 0; dx < max; dx++){
+                for(int dy = 0; dy < max; dy++){
                     Tile other = world.tile(tx + dx + o, ty + dy + o);
-                    if (!other.creeperable) {
+                    if(!other.creeperable){
                         canUpgrade = false;
                         break;
                     }
