@@ -58,7 +58,7 @@ public class CreeperUtils{
     public static float suspendDamage = 1500f; // Damage that needs to be applied for the core to be suspended
     public static float suspendTimeout = 180f; // The amount of ticks a core remains suspended (resets upon enough damage applied)
 
-    public static float nullificationPeriod = 5; // How many seconds all cores have to be nullified (suspended) in order for the game to end
+    public static int nullificationPeriod = 5; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
     private static final int maxProtectionRadius = 10 * tilesize; // Max core no build zone range
 
@@ -413,15 +413,15 @@ public class CreeperUtils{
         for(Emitter emitter : creeperEmitters){
             emitter.fixedUpdate();
             if(emitter.nullified)
-                newcount++;
+                ++newcount;
         }
         nullifiedCount = newcount;
         chargedEmitters.forEach(ChargedEmitter::fixedUpdate);
 
-        if(state.isGame() && !state.rules.pvp){
+        if(!state.rules.pvp){
             // check for gameover
             if(nullifiedCount >= creeperEmitters.size && chargedEmitters.size <= 0){
-                if(checkRefresh++ > nullificationPeriod){
+                if(checkRefresh++ >= nullificationPeriod){
                     state.gameOver = true;
                     Events.fire(new EventType.GameOverEvent(state.rules.defaultTeam));
                     return;
@@ -435,9 +435,9 @@ public class CreeperUtils{
             Groups.player.each(p -> {
                 if(!p.hasCompat)
                     p.sendMessage("[lightgray]Hi there, did you know we have a mod to [accent]improve your experience?[]" +
-                            "\nThe mod provides [accent]better compatibility & reduces desyncs[] while being fully vanilla compatible!" +
-                            "\nDownload [cyan]FloodCompat[] from the in-game mod browser and enjoy your adventures on io flood!" +
-                            "\n[accent]Alternatively, you can get Foos Client, which has FloodCompat and other QoL features built-in!");
+                    "\nThe mod provides [accent]better compatibility & reduces desyncs[] while being fully vanilla compatible!" +
+                    "\nDownload [cyan]FloodCompat[] from the in-game mod browser and enjoy your adventures on io flood!" +
+                    "\n[accent]Alternatively, you can get Foos Client, which has FloodCompat and other QoL features built-in!");
             });
         }
     }
