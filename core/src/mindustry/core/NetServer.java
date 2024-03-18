@@ -318,7 +318,7 @@ public class NetServer implements ApplicationListener{
 
         // [#656566]⚠
 
-        clientCommands.<Player>register("spore", "<range>", "Create a spore at your location.", (args, player) -> {
+        clientCommands.<Player>register("spore", "[range]", "Create a spore at your location.", (args, player) -> {
             if(!player.admin){
                 player.sendMessage("[#656566]⚠ Not enough permissions!");
                 return;

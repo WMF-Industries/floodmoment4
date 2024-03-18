@@ -122,7 +122,10 @@ public class Map implements Comparable<Map>, Publishable{
 
             result.modeName = result.pvp ? "Flood PvP" : "Flood";
 
-            if(result.pvp) result.polygonCoreProtection = true;
+            if(result.pvp){
+                CreeperUtils.timeLeft = CreeperUtils.preparationPeriod;
+                result.polygonCoreProtection = true;
+            }
 
             return result;
         }catch(Exception e){

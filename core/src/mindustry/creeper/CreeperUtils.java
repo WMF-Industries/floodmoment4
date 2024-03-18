@@ -59,10 +59,10 @@ public class CreeperUtils{
     public static float suspendTimeout = 180f; // The amount of ticks a core remains suspended (resets upon enough damage applied)
 
     public static int nullificationPeriod = 5; // How many seconds all cores have to be nullified (suspended) in order for the game to end
-    public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
+    public static int preparationPeriod = 900; // How many seconds of preparation time pvp should have (core zones active)
     public static final int maxProtectionRadius = 10 * tilesize; // Max core no build zone range
 
-    public static int tutorialID, pvpTutorialID, floodStatID, messageTimer, sporeLauncherCount;
+    public static int tutorialID, pvpTutorialID, floodStatID, messageTimer, sporeLauncherCount, timeLeft;
     public static boolean loadedSave, hasLoaded;
     private static float updateTimer;
     private static int nullifiedCount, checkRefresh, pulseOffset;
@@ -75,7 +75,7 @@ public class CreeperUtils{
     public static Seq<Emitter> creeperEmitters = new Seq<>();
     public static Seq<ChargedEmitter> chargedEmitters = new Seq<>();
 
-    public static Timer.Task fixedRunner, pvpUpdater;
+    public static Timer.Task fixedRunner;
 
     public static final String[][] tutContinue = {{"[#49e87c]\uE829 Continue[]"}};
     public static final String[][] tutFinal = {{"[#49e87c]\uE829 Finish[]"}};
@@ -280,7 +280,6 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
-            if(pvpUpdater != null) pvpUpdater.cancel();
             if(fixedRunner != null) fixedRunner.cancel();
 
             hasLoaded = false;
@@ -302,15 +301,6 @@ public class CreeperUtils{
                 && !(tile.block() instanceof StaticWall || tile.block() instanceof Cliff)){
                     tile.creeperable = true;
                 }
-            }
-
-            if(state.rules.pvp){
-                Call.infoToast("Preparation Period Begun!\nProtection Disabling In 15 Minutes.", 10);
-                pvpUpdater = Timer.schedule(() -> {
-                    state.rules.polygonCoreProtection = false;
-                    Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
-                    Call.setRules(state.rules);
-                }, preparationPeriod);
             }
 
             loadedSave = state.stats.buildingsBuilt > 0;
@@ -352,9 +342,23 @@ public class CreeperUtils{
                         chargedEmitters.size, chargedEmitters.size > 1 ? "s" : ""
                 ));
             }
-            Call.infoPopup(sb.toString(), 2.5f, 20, 50, 20, 500, 0);
+            if(state.rules.pvp){
+                if(timeLeft > 0){
+                    if(sb.length() != 0) sb.append("\n");
+                    int sec = timeLeft % 60, min = timeLeft / 60;
+                    sb.append(Strings.format("[lime]\uE84D Preparation Time[] - [accent]@@:@@[]",
+                            min > 9 ? "" : "0", min, sec > 9 ? "" : "0", sec));
+                    if(!state.isPaused()) --timeLeft;
+                }else if(timeLeft == 0){
+                    state.rules.polygonCoreProtection = false;
+                    Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
+                    Call.setRules(state.rules);
+                    --timeLeft;
+                }
+            }
+            Call.infoPopup(sb.toString(), 1f, 20, 50, 20, 500, 0);
             sb.setLength(0);
-        }, 0, 2.495f);
+        }, 0, 1f);
 
         Events.on(EventType.BlockDestroyEvent.class, e -> {
             e.tile.getLinkedTiles(t -> {
