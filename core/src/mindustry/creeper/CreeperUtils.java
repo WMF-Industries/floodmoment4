@@ -280,8 +280,8 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
-            pvpUpdater.cancel();
-            fixedRunner.cancel();
+            if(pvpUpdater != null) pvpUpdater.cancel();
+            if(fixedRunner != null) fixedRunner.cancel();
 
             hasLoaded = false;
 
