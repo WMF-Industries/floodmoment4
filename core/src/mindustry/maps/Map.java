@@ -7,8 +7,10 @@ import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
 import mindustry.content.*;
+import mindustry.creeper.CreeperUtils;
 import mindustry.game.EventType.*;
 import mindustry.game.*;
+import mindustry.gen.Call;
 import mindustry.io.*;
 import mindustry.maps.filters.*;
 import mindustry.mod.Mods.*;
@@ -108,6 +110,20 @@ public class Map implements Comparable<Map>, Publishable{
                 result.planet = Planets.erekir;
             }
             if(result.spawns.isEmpty()) result.spawns = Vars.waves.get();
+
+            result.hideBannedBlocks = true;
+
+            result.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
+            result.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall,
+            Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
+
+            if(result.enemyCoreBuildRadius > CreeperUtils.maxProtectionRadius)
+                result.enemyCoreBuildRadius = CreeperUtils.maxProtectionRadius;
+
+            result.modeName = result.pvp ? "Flood PvP" : "Flood";
+
+            if(result.pvp) result.polygonCoreProtection = true;
+
             return result;
         }catch(Exception e){
             //error reading rules. ignore?

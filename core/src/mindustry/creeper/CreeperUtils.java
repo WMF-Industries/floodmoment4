@@ -60,7 +60,7 @@ public class CreeperUtils{
 
     public static int nullificationPeriod = 5; // How many seconds all cores have to be nullified (suspended) in order for the game to end
     public static float preparationPeriod = 900f; // How many seconds of preparation time pvp should have (core zones active)
-    private static final int maxProtectionRadius = 10 * tilesize; // Max core no build zone range
+    public static final int maxProtectionRadius = 10 * tilesize; // Max core no build zone range
 
     public static int tutorialID, pvpTutorialID, floodStatID, messageTimer, sporeLauncherCount;
     public static boolean loadedSave, hasLoaded;
@@ -75,7 +75,7 @@ public class CreeperUtils{
     public static Seq<Emitter> creeperEmitters = new Seq<>();
     public static Seq<ChargedEmitter> chargedEmitters = new Seq<>();
 
-    public static Timer.Task fixedRunner;
+    public static Timer.Task fixedRunner, pvpUpdater;
 
     public static final String[][] tutContinue = {{"[#49e87c]\uE829 Continue[]"}};
     public static final String[][] tutFinal = {{"[#49e87c]\uE829 Finish[]"}};
@@ -118,7 +118,6 @@ public class CreeperUtils{
     static Seq<String> uuidLog = new Seq<>();
     static ObjectIntMap<String> leaveMap = new ObjectIntMap<>();
     static ObjectFloatMap<String> mapKeeper = new ObjectFloatMap<>();
-    static int tries;
 
     public static String getTrafficlightColor(double value){
         return "#" + Integer.toHexString(java.awt.Color.HSBtoRGB((float)value / 3f, 1f, 1f)).substring(2);
@@ -281,14 +280,15 @@ public class CreeperUtils{
         });
 
         Events.on(EventType.WorldLoadBeginEvent.class, e -> {
-            state.rules.hideBannedBlocks = true;
+            pvpUpdater.cancel();
+            fixedRunner.cancel();
+
             hasLoaded = false;
 
             checkRefresh = sporeLauncherCount = messageTimer = pulseOffset = 0;
         });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
-            tries = 0;
             uuidLog.each(CreeperUtils::clearMaps);
 
             for(Tile t : world.tiles.array) t.creeperable = false;
@@ -302,6 +302,15 @@ public class CreeperUtils{
                 && !(tile.block() instanceof StaticWall || tile.block() instanceof Cliff)){
                     tile.creeperable = true;
                 }
+            }
+
+            if(state.rules.pvp){
+                Call.infoToast("Preparation Period Begun!\nProtection Disabling In 15 Minutes.", 10);
+                pvpUpdater = Timer.schedule(() -> {
+                    state.rules.polygonCoreProtection = false;
+                    Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
+                    Call.setRules(state.rules);
+                }, preparationPeriod);
             }
 
             loadedSave = state.stats.buildingsBuilt > 0;
@@ -321,13 +330,10 @@ public class CreeperUtils{
 
             emitterDst = new int[world.width()][world.height()];
 
-            if(fixedRunner != null) fixedRunner.cancel();
             fixedRunner = Timer.schedule(CreeperUtils::fixedUpdate, 0, 1);
 
             hasLoaded = true;
             resetDistanceCache(); // run after loading since it returns if not loaded
-
-            Timer.schedule(CreeperUtils::setRules, 7.5f);
         });
 
         Timer.schedule(() -> {
@@ -370,41 +376,6 @@ public class CreeperUtils{
         leaveMap.remove(str);
         mapKeeper.remove(str, 0);
         uuidLog.remove(str);
-    }
-
-    private static void setRules(){
-        ++tries;
-        state.rules.bannedBlocks.addAll(Blocks.lancer, Blocks.arc);
-        state.rules.revealedBlocks.addAll(Blocks.coreShard, Blocks.scrapWall,
-        Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
-
-        if(state.rules.enemyCoreBuildRadius > maxProtectionRadius)
-            state.rules.enemyCoreBuildRadius = maxProtectionRadius;
-
-        state.rules.modeName = state.rules.pvp ? "Flood PvP" : "Flood";
-
-        if(state.rules.pvp){
-            state.rules.polygonCoreProtection = true;
-
-            Timer.schedule(() -> {
-                state.rules.polygonCoreProtection = false;
-                Call.infoToast("Preparation Period Over!\nPolygonal Core Protection Disabled.", 10);
-                Call.setRules(state.rules);
-            }, preparationPeriod);
-        }
-
-        Call.setRules(state.rules);
-
-        if(tries >= 5){
-            Log.warn("Failed To Apply Rules");
-            return;
-        }
-
-        Timer.schedule(() -> {
-            if(!state.rules.bannedBlocks.contains(Blocks.lancer)
-            || !state.rules.bannedBlocks.contains(Blocks.arc)
-            || !state.rules.revealedBlocks.contains(Blocks.coreShard)) setRules();
-        }, 0.5f);
     }
 
     public static void depositCreeper(Tile tile, float radius, float amount){
