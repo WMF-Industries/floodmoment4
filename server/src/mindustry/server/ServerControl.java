@@ -394,6 +394,7 @@ public class ServerControl implements ApplicationListener{
                 logic.play();
 
                 info("Map loaded.");
+                Events.fire(new CreeperUtils.MapLoadEvent());
 
                 netServer.openServer();
 

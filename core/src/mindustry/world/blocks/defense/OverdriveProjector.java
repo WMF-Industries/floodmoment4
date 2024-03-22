@@ -8,6 +8,8 @@ import arc.math.geom.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.annotations.Annotations.*;
+import mindustry.content.*;
+import mindustry.entities.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.logic.*;
@@ -108,11 +110,18 @@ public class OverdriveProjector extends Block{
 
                 charge = 0f;
                 indexer.eachBlock(this, realRange, other -> other.block.canOverdrive, other -> other.applyBoost(realBoost(), reload + 1f));
+
+                Units.nearby(team, x, y, realRange, u -> {
+                    float time = 10 * realBoost();
+                    u.apply(StatusEffects.overclock, time);
+                });
             }
 
             if(timer(timerUse, useTime) && efficiency > 0){
                 consume();
             }
+
+
         }
 
         public float realBoost(){

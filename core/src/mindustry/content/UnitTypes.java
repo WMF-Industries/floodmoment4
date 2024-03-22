@@ -862,18 +862,16 @@ public class UnitTypes{
                 shadow = 8f;
                 recoil = 3f;
 
-                bullet = new ArtilleryBulletType(2f, 12){{
+                bullet = new ArtilleryBulletType(2f, 3){{
+                    // reverted collisions & nerfed (vs emitters)
                     hitEffect = Fx.sapExplosion;
                     knockback = 0.8f;
                     lifetime = 70f;
                     width = height = 19f;
-                    collides = true;
                     collidesTiles = true;
                     ammoMultiplier = 4f;
                     splashDamageRadius = 70f;
-                    splashDamage = 65f;
-                    pierceBuilding = true;
-                    pierceCap = 7;
+                    splashDamage = 15f;
                     backColor = Pal.sapBulletBack;
                     frontColor = lightningColor = Pal.sapBullet;
                     lightning = 3;
@@ -883,6 +881,7 @@ public class UnitTypes{
 
                     status = StatusEffects.sapped;
                     statusDuration = 60f * 10;
+                    floodDamageMultiplier = 4.5f;
                 }};
             }});
         }
